@@ -1,0 +1,3 @@
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_0_2/RelValZpTT_1500_13/GEN-SIM-RECO/100X_upgrade2018_realistic_v10-v1/10000/342A6BD3-140F-E811-A73A-0025905B8582.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_0_2/RelValZpTT_1500_13/GEN-SIM-RECO/100X_upgrade2018_realistic_v10-v1/10000/CC9C942E-120F-E811-9139-0CC47A4C8EBA.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_0_2/RelValZpTT_1500_13/GEN-SIM-RECO/100X_upgrade2018_realistic_v10-v1/10000/EC21743A-130F-E811-9F5B-0025905A6090.root

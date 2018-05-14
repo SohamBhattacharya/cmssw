@@ -1,0 +1,9 @@
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_1_0_pre1/RelValZpTT_1500_13/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/1604F57C-8612-E811-A40C-0025905B8576.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_1_0_pre1/RelValZpTT_1500_13/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/5271F94C-C712-E811-B3ED-0CC47A4D7658.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_1_0_pre1/RelValZpTT_1500_13/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/9E251EF7-C512-E811-9A41-0025905B85DE.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_1_0_pre1/RelValZpTT_1500_13/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/A0BE7D78-8612-E811-944F-0CC47A7C34A6.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_1_0_pre1/RelValZpTT_1500_13/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/C421BE79-8612-E811-8105-0CC47A4D7670.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_1_0_pre1/RelValZpTT_1500_13/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/CC6E627B-8612-E811-A4BD-0025905B8568.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_1_0_pre1/RelValZpTT_1500_13/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/DCFE149B-CD12-E811-97A6-0CC47A7C3422.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_1_0_pre1/RelValZpTT_1500_13/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/EEB305F5-C512-E811-A111-0CC47A78A3D8.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_1_0_pre1/RelValZpTT_1500_13/GEN-SIM-RECO/PU25ns_100X_upgrade2018_realistic_v10-v1/10000/F2DF86DE-C112-E811-85D2-0CC47A4D7692.root

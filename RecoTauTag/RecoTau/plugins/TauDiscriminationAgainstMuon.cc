@@ -8,6 +8,7 @@
 
 #include "RecoTauTag/RecoTau/interface/TauDiscriminationProducerBase.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
@@ -22,63 +23,75 @@ namespace {
 using namespace reco;
 
 template<class TauType, class TauDiscriminator>
-class TauDiscriminationAgainstMuon final : public TauDiscriminationProducerBase<TauType, TauDiscriminator>
+class TauDiscriminationAgainstMuon final : public TauDiscriminationProducerBase<TauType, TauDiscriminator>//, public edm::EDConsumerBase
 {
- public:
-  // setup framework types for this tautype
-  typedef std::vector<TauType>    TauCollection; 
-  typedef edm::Ref<TauCollection> TauRef;    
-
-  explicit TauDiscriminationAgainstMuon(const edm::ParameterSet&);
-  ~TauDiscriminationAgainstMuon() override {} 
-
-  // called at the beginning of every event
-  void beginEvent(const edm::Event&, const edm::EventSetup&) override;
-
-  double discriminate(const TauRef&) const override;
-
- private:  
-  bool evaluateMuonVeto(const reco::Muon&) const;
-
-  edm::InputTag muonSource_;
-  edm::Handle<reco::MuonCollection> muons_;
-  double dRmatch_;
-
-  enum { kNoSegMatch, kTwoDCut, kMerePresence, kCombined };
-  int discriminatorOption_;
-
-  double coeffCaloComp_;
-  double coeffSegmComp_;
-  double muonCompCut_;
+    public:
+    // setup framework types for this tautype
+    typedef std::vector<TauType>    TauCollection; 
+    typedef edm::Ref<TauCollection> TauRef;    
+    
+    explicit TauDiscriminationAgainstMuon(const edm::ParameterSet&);
+    ~TauDiscriminationAgainstMuon() override {} 
+    
+    // called at the beginning of every event
+    void beginEvent(const edm::Event&, const edm::EventSetup&) override;
+    
+    double discriminate(const TauRef&) const override;
+    
+    
+    private: 
+     
+    bool evaluateMuonVeto(const reco::Muon&) const;
+    
+    //edm::InputTag muonSource_;
+    edm::InputTag muonSourceLabel;
+    edm::EDGetTokenT <reco::MuonCollection> muonSourceToken;
+    
+    edm::Handle<reco::MuonCollection> muons_;
+    
+    double dRmatch_;
+    
+    enum { kNoSegMatch, kTwoDCut, kMerePresence, kCombined };
+    int discriminatorOption_;
+    
+    double coeffCaloComp_;
+    double coeffSegmComp_;
+    double muonCompCut_;
 };
 
 template<class TauType, class TauDiscriminator>
 TauDiscriminationAgainstMuon<TauType, TauDiscriminator>::TauDiscriminationAgainstMuon(const edm::ParameterSet& cfg)
-  : TauDiscriminationProducerBase<TauType, TauDiscriminator>(cfg) 
+  : TauDiscriminationProducerBase<TauType, TauDiscriminator>(cfg)
 {
-  //if ( cfg.exists("muonSource") ) muonSource_ = cfg.getParameter<edm::InputTag>("muonSource");
-  muonSource_ = cfg.getParameter<edm::InputTag>("muonSource");
-  dRmatch_ = ( cfg.exists("dRmatch") ) ? cfg.getParameter<double>("dRmatch") : 0.5;
-
-  std::string discriminatorOption_string = cfg.getParameter<std::string>("discriminatorOption");  
-  if      ( discriminatorOption_string == "noSegMatch"   ) discriminatorOption_ = kNoSegMatch;
-  else if ( discriminatorOption_string == "twoDCut"      ) discriminatorOption_ = kTwoDCut;
-  else if ( discriminatorOption_string == "merePresence" ) discriminatorOption_ = kMerePresence;
-  else if ( discriminatorOption_string == "combined"     ) discriminatorOption_ = kCombined;
-  else {
-    throw edm::Exception(edm::errors::UnimplementedFeature) << " Invalid Discriminator Option! Please check cfi file \n";
-  }
-
-  coeffCaloComp_ = cfg.getParameter<double>("caloCompCoefficient");
-  coeffSegmComp_ = cfg.getParameter<double>("segmCompCoefficient");
-  muonCompCut_ = cfg.getParameter<double>("muonCompCut");
+    //using TauDiscriminationProducerBase<TauType, TauDiscriminator>::consumes;
+    
+    //if ( cfg.exists("muonSource") ) muonSource_ = cfg.getParameter<edm::InputTag>("muonSource");
+    
+    //muonSource_ = cfg.getParameter<edm::InputTag>("muonSource");
+    muonSourceLabel = cfg.getParameter<edm::InputTag>("muonSource");
+    muonSourceToken = edm::stream::EDProducer<>::consumes<reco::MuonCollection>(edm::InputTag(muonSourceLabel));
+    
+    dRmatch_ = ( cfg.exists("dRmatch") ) ? cfg.getParameter<double>("dRmatch") : 0.5;
+    
+    std::string discriminatorOption_string = cfg.getParameter<std::string>("discriminatorOption");  
+    if      ( discriminatorOption_string == "noSegMatch"   ) discriminatorOption_ = kNoSegMatch;
+    else if ( discriminatorOption_string == "twoDCut"      ) discriminatorOption_ = kTwoDCut;
+    else if ( discriminatorOption_string == "merePresence" ) discriminatorOption_ = kMerePresence;
+    else if ( discriminatorOption_string == "combined"     ) discriminatorOption_ = kCombined;
+    else {
+        throw edm::Exception(edm::errors::UnimplementedFeature) << " Invalid Discriminator Option! Please check cfi file \n";
+    }
+    
+    coeffCaloComp_ = cfg.getParameter<double>("caloCompCoefficient");
+    coeffSegmComp_ = cfg.getParameter<double>("segmCompCoefficient");
+    muonCompCut_ = cfg.getParameter<double>("muonCompCut");
 }
 
 template<class TauType, class TauDiscriminator>
 void TauDiscriminationAgainstMuon<TauType, TauDiscriminator>::beginEvent(const edm::Event& evt, const edm::EventSetup& evtSetup)
 {
-  evt.getByLabel(muonSource_, muons_);	
-}		
+    evt.getByLabel(muonSourceLabel, muons_);
+}
 
 template<class TauType, class TauDiscriminator>
 bool TauDiscriminationAgainstMuon<TauType, TauDiscriminator>::evaluateMuonVeto(const reco::Muon& muon) const 

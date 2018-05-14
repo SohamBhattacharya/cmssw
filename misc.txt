@@ -1,0 +1,1 @@
+watch "grep -i record logs/ConfFile_cfg.log | tail -n 1"

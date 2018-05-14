@@ -1,7 +1,9 @@
 #ifndef RecoTauTag_RecoTau_CaloRecoTauAlgorithm_H
 #define RecoTauTag_RecoTau_CaloRecoTauAlgorithm_H
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/EgammaReco/interface/BasicCluster.h" 
@@ -28,53 +30,71 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 
-class  CaloRecoTauAlgorithm  {
- public:
-  CaloRecoTauAlgorithm();  
-  CaloRecoTauAlgorithm(const edm::ParameterSet& iConfig);
-  ~CaloRecoTauAlgorithm(){}
-  void setTransientTrackBuilder(const TransientTrackBuilder*);
-  void setMagneticField(const MagneticField*);
-  reco::CaloTau buildCaloTau(edm::Event&,const edm::EventSetup&,const reco::CaloTauTagInfoRef&,const reco::Vertex&); 
-  std::vector<DetId> mySelectedDetId_;
- private:
-  std::vector<CaloTowerDetId> getCaloTowerneighbourDetIds(const CaloSubdetectorGeometry*, const CaloTowerTopology&, CaloTowerDetId);
-  const TransientTrackBuilder* TransientTrackBuilder_;
-  const MagneticField* MagneticField_;
-  double LeadTrack_minPt_;
-  double Track_minPt_;
-  double IsolationTrack_minPt_;
-  unsigned int IsolationTrack_minHits_;
-  bool UseTrackLeadTrackDZconstraint_;
-  double TrackLeadTrack_maxDZ_;
-  double ECALRecHit_minEt_;
-  std::string MatchingConeMetric_;
-  std::string MatchingConeSizeFormula_;
-  double MatchingConeSize_min_;
-  double MatchingConeSize_max_;
-  std::string TrackerSignalConeMetric_;
-  std::string TrackerSignalConeSizeFormula_;
-  double TrackerSignalConeSize_min_;
-  double TrackerSignalConeSize_max_;
-  std::string TrackerIsolConeMetric_;
-  std::string TrackerIsolConeSizeFormula_;
-  double TrackerIsolConeSize_min_;
-  double TrackerIsolConeSize_max_;
-  std::string ECALSignalConeMetric_;
-  std::string ECALSignalConeSizeFormula_;
-  double ECALSignalConeSize_min_;
-  double ECALSignalConeSize_max_;
-  std::string ECALIsolConeMetric_;
-  std::string ECALIsolConeSizeFormula_;
-  double ECALIsolConeSize_min_;
-  double ECALIsolConeSize_max_;
-  double AreaMetric_recoElements_maxabsEta_;
-  const double chargedpi_mass_; //PDG Particle Physics Booklet, 2004
-
-  TFormula myTrackerSignalConeSizeTFormula,myTrackerIsolConeSizeTFormula, myECALSignalConeSizeTFormula, myECALIsolConeSizeTFormula,myMatchingConeSizeTFormula; 
-  
-edm::InputTag EBRecHitsLabel_,EERecHitsLabel_,ESRecHitsLabel_; 
+class CaloRecoTauAlgorithm// :
+    //public edm::ConsumesCollector
+    //public edm::EDConsumerBase
+{
+    public:
+    
+    CaloRecoTauAlgorithm();  
+    CaloRecoTauAlgorithm(const edm::ParameterSet& iConfig, edm::ConsumesCollector &&iC);
+    ~CaloRecoTauAlgorithm(){}
+    void setTransientTrackBuilder(const TransientTrackBuilder*);
+    void setMagneticField(const MagneticField*);
+    reco::CaloTau buildCaloTau(edm::Event&,const edm::EventSetup&,const reco::CaloTauTagInfoRef&,const reco::Vertex&); 
+    std::vector<DetId> mySelectedDetId_;
+    
+    
+    private:
+    
+    std::vector<CaloTowerDetId> getCaloTowerneighbourDetIds(const CaloSubdetectorGeometry*, const CaloTowerTopology&, CaloTowerDetId);
+    const TransientTrackBuilder* TransientTrackBuilder_;
+    const MagneticField* MagneticField_;
+    double LeadTrack_minPt_;
+    double Track_minPt_;
+    double IsolationTrack_minPt_;
+    unsigned int IsolationTrack_minHits_;
+    bool UseTrackLeadTrackDZconstraint_;
+    double TrackLeadTrack_maxDZ_;
+    double ECALRecHit_minEt_;
+    std::string MatchingConeMetric_;
+    std::string MatchingConeSizeFormula_;
+    double MatchingConeSize_min_;
+    double MatchingConeSize_max_;
+    std::string TrackerSignalConeMetric_;
+    std::string TrackerSignalConeSizeFormula_;
+    double TrackerSignalConeSize_min_;
+    double TrackerSignalConeSize_max_;
+    std::string TrackerIsolConeMetric_;
+    std::string TrackerIsolConeSizeFormula_;
+    double TrackerIsolConeSize_min_;
+    double TrackerIsolConeSize_max_;
+    std::string ECALSignalConeMetric_;
+    std::string ECALSignalConeSizeFormula_;
+    double ECALSignalConeSize_min_;
+    double ECALSignalConeSize_max_;
+    std::string ECALIsolConeMetric_;
+    std::string ECALIsolConeSizeFormula_;
+    double ECALIsolConeSize_min_;
+    double ECALIsolConeSize_max_;
+    double AreaMetric_recoElements_maxabsEta_;
+    const double chargedpi_mass_; //PDG Particle Physics Booklet, 2004
+    
+    TFormula myTrackerSignalConeSizeTFormula,myTrackerIsolConeSizeTFormula, myECALSignalConeSizeTFormula, myECALIsolConeSizeTFormula,myMatchingConeSizeTFormula; 
+    
+    //edm::InputTag EBRecHitsLabel_;
+    edm::InputTag EBRecHitsLabel;
+    edm::EDGetTokenT <EBRecHitCollection> EBRecHitsToken;
+    
+    //edm::InputTag EERecHitsLabel_;
+    edm::InputTag EERecHitsLabel;
+    edm::EDGetTokenT <EERecHitCollection> EERecHitsToken;
+    
+    //edm::InputTag ESRecHitsLabel_;
+    edm::InputTag ESRecHitsLabel;
+    edm::EDGetTokenT <ESRecHitCollection> ESRecHitsToken;
 
 };
+
 #endif 
 

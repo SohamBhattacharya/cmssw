@@ -1,0 +1,6 @@
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_0_2/RelValZpTT_1500_13/GEN-SIM-DIGI-RAW/100X_upgrade2018_realistic_v10-v1/10000/186AEAE5-090F-E811-BA9D-0025905A6068.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_0_2/RelValZpTT_1500_13/GEN-SIM-DIGI-RAW/100X_upgrade2018_realistic_v10-v1/10000/1E1713E7-090F-E811-AB3B-0025905A60E0.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_0_2/RelValZpTT_1500_13/GEN-SIM-DIGI-RAW/100X_upgrade2018_realistic_v10-v1/10000/549D3F12-0A0F-E811-9FF2-0025905B8582.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_0_2/RelValZpTT_1500_13/GEN-SIM-DIGI-RAW/100X_upgrade2018_realistic_v10-v1/10000/8EEF5F34-090F-E811-8965-0CC47A7C3422.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_0_2/RelValZpTT_1500_13/GEN-SIM-DIGI-RAW/100X_upgrade2018_realistic_v10-v1/10000/EEAAE686-0A0F-E811-98D1-0CC47A4D7604.root
+root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_0_2/RelValZpTT_1500_13/GEN-SIM-DIGI-RAW/100X_upgrade2018_realistic_v10-v1/10000/F2AFE786-0A0F-E811-8E9F-0CC47A4C8E96.root

@@ -14,13 +14,13 @@ from RecoTauTag.RecoTau.CaloRecoTauDiscriminationAgainstElectron_cfi import *
 from RecoTauTag.RecoTau.CaloRecoTauDiscriminationAgainstMuon_cfi import *
  
 tautagging = cms.Sequence(
-    caloRecoTauTagInfoProducer*
-    caloRecoTauProducer*
-    caloRecoTauDiscriminationByLeadingTrackFinding*
-    caloRecoTauDiscriminationByLeadingTrackPtCut*                          
-    caloRecoTauDiscriminationByTrackIsolation*
-    caloRecoTauDiscriminationByECALIsolation*
-    caloRecoTauDiscriminationByIsolation*    
+    caloRecoTauTagInfoProducer *
+    caloRecoTauProducer *
+    caloRecoTauDiscriminationByLeadingTrackFinding *
+    caloRecoTauDiscriminationByLeadingTrackPtCut *
+    caloRecoTauDiscriminationByTrackIsolation *
+    caloRecoTauDiscriminationByECALIsolation *
+    caloRecoTauDiscriminationByIsolation *
     caloRecoTauDiscriminationAgainstElectron *
     caloRecoTauDiscriminationAgainstMuon
 )
