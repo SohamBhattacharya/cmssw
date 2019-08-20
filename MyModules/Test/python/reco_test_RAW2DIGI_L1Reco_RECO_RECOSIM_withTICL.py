@@ -175,7 +175,9 @@ process.FEVTDEBUGHLTEventContent.outputCommands.extend([
 ])
 
 
-process.load("MyModules.Test.ecalDrivenGsfElectronsFromTICL_cff")
+from MyModules.Test.ecalDrivenGsfElectronsFromTICL_cff import ecalDrivenGsfElectronsFromTICL_customizeProcess
+process = ecalDrivenGsfElectronsFromTICL_customizeProcess(process)
+
 
 # Schedule definition
 process.schedule = cms.Schedule(
