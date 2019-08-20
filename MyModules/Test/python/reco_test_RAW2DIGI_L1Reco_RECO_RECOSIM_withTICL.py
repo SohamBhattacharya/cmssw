@@ -157,20 +157,6 @@ from RecoHGCal.TICL.ticl_iterations import TICL_iterations_withReco
 #process = TICL_iterations_withReco(process)
 
 
-#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_ecalDrivenGsfElectrons*_*_*"])
-#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_*FromTICL*_*_*"])
-
-#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_*particleFlowRecHitHGC*_*_*"])
-#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_*mixedTripletStepSeeds*_*_*"])
-
-
-#process.FEVTDEBUGHLTEventContent.outputCommands = cms.untracked.vstring("keep *")
-
-#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *"])
-
-#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_*_*_*"])
-
-
 process.FEVTDEBUGHLTEventContent.outputCommands.extend([
     "keep *_*particleFlowRecHitHGC*_*_*",
     "keep *_hgcalDigis_*_*",
