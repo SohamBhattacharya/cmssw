@@ -96,7 +96,7 @@ if (not options.isCRAB) :
             options.inputFiles[iFile] = "file:%s" %(fileName)
 
 
-print options.maxEvents
+#print options.maxEvents
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
 )
@@ -129,6 +129,7 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
     ),
     fileName = cms.untracked.string(options.outputFile),
     outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
+    #outputCommands = cms.untracked.vstring("keep *"),
     splitLevel = cms.untracked.int32(0)
 )
 
@@ -156,55 +157,36 @@ from RecoHGCal.TICL.ticl_iterations import TICL_iterations_withReco
 #process = TICL_iterations_withReco(process)
 
 
-#process.load("RecoParticleFlow.PFClusterProducer.particleFlowRecHitHGC_cfi")
-#process.load("RecoParticleFlow.PFClusterProducer.particleFlowClusterHGC_cfi")
-#process.load("RecoEcal.EgammaClusterProducers.particleFlowSuperClusteringSequence_cff")
-#process.load("RecoEgamma.EgammaElectronProducers.ecalDrivenElectronSeeds_cfi")
-#process.load("RecoParticleFlow.PFTracking.mergedElectronSeeds_cfi")
-#process.load("TrackingTools.GsfTracking.CkfElectronCandidateMaker_cff")
-#process.load("TrackingTools.GsfTracking.GsfElectronGsfFit_cff")
-#process.load("RecoEgamma.EgammaElectronProducers.gsfElectronCores_cfi")
-#process.load("RecoEgamma.EgammaElectronProducers.gsfElectrons_cfi")
-
-
-#process.particleFlowClusterHGCalFromTICL         = process.particleFlowClusterHGCalFromMultiCl.clone()
-#process.particleFlowSuperClusterHGCalFromTICL    = process.particleFlowSuperClusterHGCalFromMultiCl.clone()
-#process.ecalDrivenElectronSeedsFromTICL          = process.ecalDrivenElectronSeedsFromMultiCl.clone()
-#process.electronMergedSeedsFromTICL              = process.electronMergedSeedsFromMultiCl.clone()
-#process.electronCkfTrackCandidatesFromTICL       = process.electronCkfTrackCandidatesFromMultiCl.clone()
-#process.electronGsfTracksFromTICL                = process.electronGsfTracksFromMultiCl.clone()
-#process.ecalDrivenGsfElectronCoresFromTICL       = process.ecalDrivenGsfElectronCoresFromMultiCl.clone()
-#process.ecalDrivenGsfElectronsFromTICL           = process.ecalDrivenGsfElectronsFromMultiCl.clone()
-
-
-##process.particleFlowClusterHGCalFromTICL.recHitsSource = cms.InputTag("particleFlowRecHitHGC", "Cleaned", "RECO")
-#process.particleFlowClusterHGCalFromTICL.initialClusteringStep.clusterSrc = cms.InputTag("MultiClustersFromTracksters", "MultiClustersFromTracksterByCA", "RECO")
-#process.particleFlowSuperClusterHGCalFromTICL.PFClusters = cms.InputTag("particleFlowClusterHGCalFromTICL")
-#process.particleFlowSuperClusterHGCalFromTICL.use_preshower = cms.bool(False)
-##process.particleFlowSuperClusterHGCalFromTICL.ESAssociation = cms.InputTag("particleFlowClusterECAL", "", "RECO")
-#process.ecalDrivenElectronSeedsFromTICL.endcapSuperClusters = "particleFlowSuperClusterHGCalFromTICL"
-#process.electronMergedSeedsFromTICL.EcalBasedSeeds = "ecalDrivenElectronSeedsFromTICL"
-#process.electronCkfTrackCandidatesFromTICL.src = "electronMergedSeedsFromTICL"
-#process.electronGsfTracksFromTICL.src = "electronCkfTrackCandidatesFromTICL"
-#process.ecalDrivenGsfElectronCoresFromTICL.gsfTracks = "electronGsfTracksFromTICL"
-#process.ecalDrivenGsfElectronsFromTICL.gsfElectronCoresTag = "ecalDrivenGsfElectronCoresFromTICL"
-#process.ecalDrivenGsfElectronsFromTICL.ecalDrivenEcalEnergyFromClassBasedParameterization = cms.bool(False)
-#process.ecalDrivenGsfElectronsFromTICL.ecalDrivenEcalErrorFromClassBasedParameterization = cms.bool(False)
-
-#process.ecalDrivenGsfElectronsFromTICL_step = cms.Path(
-#    process.particleFlowClusterHGCalFromTICL *
-#    process.particleFlowSuperClusterHGCalFromTICL *
-#    process.ecalDrivenElectronSeedsFromTICL *
-#    process.electronMergedSeedsFromTICL *
-#    process.electronCkfTrackCandidatesFromTICL *
-#    process.electronGsfTracksFromTICL *
-#    process.ecalDrivenGsfElectronCoresFromTICL *
-#    process.ecalDrivenGsfElectronsFromTICL
-#)
-
-
-process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_ecalDrivenGsfElectrons*_*_*"])
+#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_ecalDrivenGsfElectrons*_*_*"])
 #process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_*FromTICL*_*_*"])
+
+#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_*particleFlowRecHitHGC*_*_*"])
+#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_*mixedTripletStepSeeds*_*_*"])
+
+
+#process.FEVTDEBUGHLTEventContent.outputCommands = cms.untracked.vstring("keep *")
+
+#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *"])
+
+#process.FEVTDEBUGHLTEventContent.outputCommands.extend(["keep *_*_*_*"])
+
+
+process.FEVTDEBUGHLTEventContent.outputCommands.extend([
+    "keep *_*particleFlowRecHitHGC*_*_*",
+    "keep *_hgcalDigis_*_*",
+    "keep *_particleFlowClusterECAL_*_*",
+    "keep *_siPhase2Clusters_*_*",
+    "keep *_siStripDigis_*_*",
+    "keep *_siPixelClusters_*_*",
+    "keep *_siPixelClustersCache_*_*", 
+    "keep *_siPixelClusterShapeCache_*_*",
+    "keep *_siPixelRecHits*_*_*",
+    "keep *_trackerDrivenElectronSeeds_*_*",
+    "keep *_pfTrackElec_*_*",
+    
+    "keep *_ecalDrivenGsfElectrons*_*_*",
+    "keep *_*FromTICL*_*_*",
+])
 
 
 process.load("MyModules.Test.ecalDrivenGsfElectronsFromTICL_cff")
@@ -224,14 +206,14 @@ process.schedule = cms.Schedule(
 TICL_iterations_withReco(process)
 
 # Debug
-#if (options.debugFile) :
-#    
-#    process.out = cms.OutputModule("PoolOutputModule",
-#        fileName = cms.untracked.string("debug.root")
-#    )
-#    
-#    process.output_step = cms.EndPath(process.out)
-#    process.schedule.extend([process.output_step])
+if (options.debugFile) :
+    
+    process.out = cms.OutputModule("PoolOutputModule",
+        fileName = cms.untracked.string("debug.root")
+    )
+    
+    process.output_step = cms.EndPath(process.out)
+    process.schedule.extend([process.output_step])
 
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
@@ -248,7 +230,7 @@ from FWCore.Modules.logErrorHarvester_cff import customiseLogErrorHarvesterUsing
 process = customiseLogErrorHarvesterUsingOutputCommands(process)
 
 # Add early deletion of temporary data products to reduce peak memory need
-from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
-process = customiseEarlyDelete(process)
+#from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+#process = customiseEarlyDelete(process)
 # End adding early deletion
 
