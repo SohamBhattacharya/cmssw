@@ -185,7 +185,6 @@ process.schedule = cms.Schedule(
     process.L1Reco_step,
     process.reconstruction_step,
     process.recosim_step,
-    #process.TICL,
     process.ecalDrivenGsfElectronsFromTICL_step,
     process.endjob_step,
     process.FEVTDEBUGHLToutput_step

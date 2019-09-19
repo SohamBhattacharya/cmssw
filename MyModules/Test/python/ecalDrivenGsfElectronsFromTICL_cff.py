@@ -9,6 +9,7 @@ from TrackingTools.GsfTracking.CkfElectronCandidateMaker_cff import *
 from TrackingTools.GsfTracking.GsfElectronGsfFit_cff import *
 from RecoEgamma.EgammaElectronProducers.gsfElectronCores_cfi import *
 from RecoEgamma.EgammaElectronProducers.gsfElectrons_cfi import *
+from RecoEgamma.EgammaElectronProducers.ecalDrivenGsfElectronCoresFromMultiCl_cff import *
 
 
 def ecalDrivenGsfElectronsFromTICL_customizeProcess(process, onReco = False) :
@@ -25,8 +26,8 @@ def ecalDrivenGsfElectronsFromTICL_customizeProcess(process, onReco = False) :
     process.ecalDrivenGsfElectronsFromTICL           = ecalDrivenGsfElectronsFromMultiCl.clone()
     
     
-    process.particleFlowClusterHGCalFromTICL.initialClusteringStep.clusterSrc = cms.InputTag("MultiClustersFromTracksters", "MultiClustersFromTracksterByCA", "RECO")
-    #process.particleFlowClusterHGCalFromTICL.recHitsSource = cms.InputTag("particleFlowRecHitHGC", "Cleaned", "RECO")
+    #process.particleFlowClusterHGCalFromTICL.initialClusteringStep.clusterSrc = cms.InputTag("MultiClustersFromTracksters", "MultiClustersFromTracksterByCA", "RECO")
+    process.particleFlowClusterHGCalFromTICL.initialClusteringStep.clusterSrc = cms.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", "RECO")
     process.particleFlowSuperClusterHGCalFromTICL.PFClusters = cms.InputTag("particleFlowClusterHGCalFromTICL")
     process.particleFlowSuperClusterHGCalFromTICL.use_preshower = cms.bool(False)
     process.ecalDrivenElectronSeedsFromTICL.endcapSuperClusters = "particleFlowSuperClusterHGCalFromTICL"
