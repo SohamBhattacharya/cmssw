@@ -29,7 +29,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 import FWCore.ParameterSet.VarParsing as VarParsing
 options = VarParsing.VarParsing("analysis")
 
-options.outputFile = "output_GEN-SIM-RECO.root"
+#options.outputFile = "output_GEN-SIM-RECO.root"
 
 options.register("sourceFile",
     "", # Default value
@@ -53,6 +53,10 @@ options.register("debugFile",
 )
 
 options.parseArguments()
+
+if (not len(options.outputFile)) :
+    
+    options.outputFile = "output_GEN-SIM-RECO.root"
 
 if (options.isCRAB) :
     
