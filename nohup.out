@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_11_0_0_pre9/external/slc7_amd64_gcc820/bin/../../../../../../../slc7_amd64_gcc820/external/python/2.7.15-pafccj/lib/python2.7/site.py", line 539, in <module>
+    main()
+  File "/cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_11_0_0_pre9/external/slc7_amd64_gcc820/bin/../../../../../../../slc7_amd64_gcc820/external/python/2.7.15-pafccj/lib/python2.7/site.py", line 530, in main
+    execsitecustomize()
+  File "/cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_11_0_0_pre9/external/slc7_amd64_gcc820/bin/../../../../../../../slc7_amd64_gcc820/external/python/2.7.15-pafccj/lib/python2.7/site.py", line 489, in execsitecustomize
+    import sitecustomize
+  File "/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/python/2.7.15-pafccj/lib/python2.7/sitecustomize.py", line 5, in <module>
+    site.addsitedir(p)
+  File "/cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_11_0_0_pre9/external/slc7_amd64_gcc820/bin/../../../../../../../slc7_amd64_gcc820/external/python/2.7.15-pafccj/lib/python2.7/site.py", line 190, in addsitedir
+    addpackage(sitedir, name, known_paths)
+  File "/cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_11_0_0_pre9/external/slc7_amd64_gcc820/bin/../../../../../../../slc7_amd64_gcc820/external/python/2.7.15-pafccj/lib/python2.7/site.py", line 156, in addpackage
+    if not dircase in known_paths and os.path.exists(dir):
+  File "/cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_11_0_0_pre9/external/slc7_amd64_gcc820/bin/../../../../../../../slc7_amd64_gcc820/external/python/2.7.15-pafccj/lib/python2.7/genericpath.py", line 26, in exists
+    os.stat(path)
+KeyboardInterrupt

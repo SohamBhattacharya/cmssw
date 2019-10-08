@@ -222,22 +222,63 @@ void ElectronSeedProducer::produce(edm::Event& e, const edm::EventSetup& iSetup)
     e.getByToken(superClusters_[i], clusters);
     SuperClusterRefVector clusterRefs;
     std::vector<float> hoe1s, hoe2s;
+    
+    //if(i == 1)
+    //{
+    //    printf("ElectronSeedProducer: clusters.size() %d, clusterRefs.size() %d \n", (int) clusters->size(), (int) clusterRefs.size());
+    //}
+    
     filterClusters(*theBeamSpot, clusters, /*mhbhe_,*/ clusterRefs, hoe1s, hoe2s, e, iSetup);
+    
+    //if(i == 1)
+    //{
+    //    printf("ElectronSeedProducer: clusters.size() %d, clusterRefs.size() %d \n", (int) clusters->size(), (int) clusterRefs.size());
+    //}
+    
     if ((fromTrackerSeeds_) && (prefilteredSeeds_)) {
       filterSeeds(e, iSetup, clusterRefs);
     }
     matcher_->run(e, iSetup, clusterRefs, hoe1s, hoe2s, theInitialSeedColls, *seeds);
+    
+    //if(i == 1)
+    //{
+    //    for(int iClus = 0; iClus < (int) clusterRefs.size(); iClus++)
+    //    {
+    //        printf(
+    //            "\t"
+    //            "ElectronSeedProducer: SC %d/%d, E %0.2f, eta %+0.2f "
+    //            "\n",
+    //            iClus+1, (int) clusterRefs.size(),
+    //            clusterRefs.at(iClus)->energy(),
+    //            clusterRefs.at(iClus)->eta()
+    //        );
+    //    }
+    //}
+    
   }
 
   // store the accumulated result
   std::unique_ptr<ElectronSeedCollection> pSeeds(seeds);
   ElectronSeedCollection::iterator is;
+  
+  int count = 0;
+  
   for (is = pSeeds->begin(); is != pSeeds->end(); is++) {
+    
+    //printf("ElectronSeedProducer: seed %d/%d \n", count+1, (int) pSeeds->size());
+    
     edm::RefToBase<CaloCluster> caloCluster = is->caloCluster();
     SuperClusterRef superCluster = caloCluster.castTo<SuperClusterRef>();
     LogDebug("ElectronSeedProducer") << "new seed with " << (*is).nHits() << " hits"
                                      << ", charge " << (*is).getCharge() << " and cluster energy "
                                      << superCluster->energy() << " PID " << superCluster.id();
+    
+    //std::cout << "new seed with " << (*is).nHits() << " hits"
+    //    << ", charge " << (*is).getCharge() << ", cluster energy " << superCluster->energy()
+    //    << ", cluster eta " << superCluster->eta()
+    //    << ", PID " << superCluster.id() << "\n";
+    
+    count++;
   }
   e.put(std::move(pSeeds));
   if (fromTrackerSeeds_ && prefilteredSeeds_)

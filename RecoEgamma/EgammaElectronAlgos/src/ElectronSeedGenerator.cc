@@ -281,7 +281,11 @@ void ElectronSeedGenerator::run(edm::Event &e,
   for (unsigned int i = 0; i < sclRefs.size(); ++i) {
     // Find the seeds
     recHits_.clear();
-
+    
+    //printf("ElectronSeedGenerator: SC %d/%d, size %d (%d), E %0.2f, eta %+0.2f \n",
+    //    i+1, (int) sclRefs.size(), (int) sclRefs.at(i)->size(), (int) sclRefs.at(i)->hitsAndFractions().size(), sclRefs.at(i)->energy(), sclRefs.at(i)->eta()
+    //);
+    
     LogDebug("ElectronSeedGenerator") << "new cluster, calling seedsFromThisCluster";
     seedsFromThisCluster(sclRefs[i], hoe1s[i], hoe2s[i], out, tTopo);
   }
@@ -368,10 +372,15 @@ void ElectronSeedGenerator::seedsFromThisCluster(edm::Ref<reco::SuperClusterColl
       std::vector<SeedWithInfo> elePixelSeeds =
           myMatchEle->compatibleSeeds(*theInitialSeedCollV, clusterPos, vertexPos, clusterEnergy, -1.);
       seedsFromTrajectorySeeds(elePixelSeeds, caloCluster, hoe1, hoe2, out, false);
+      
+      //printf("\t seedsFromThisCluster electron: elePixelSeeds.size() %d, out.size() %d \n", (int) elePixelSeeds.size(), (int) out.size());
+      
       // try positron
       std::vector<SeedWithInfo> posPixelSeeds =
           myMatchPos->compatibleSeeds(*theInitialSeedCollV, clusterPos, vertexPos, clusterEnergy, 1.);
       seedsFromTrajectorySeeds(posPixelSeeds, caloCluster, hoe1, hoe2, out, true);
+      
+      //printf("\t seedsFromThisCluster positron: posPixelSeeds.size() %d, out.size() %d \n", (int) posPixelSeeds.size(), (int) out.size());
     }
 
   } else  // here we use the reco vertices
