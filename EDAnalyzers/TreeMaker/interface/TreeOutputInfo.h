@@ -242,6 +242,11 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_phi;
         
         std::vector <double> v_gsfEleFromTICL_superClus_nearestCellDist;
+        std::vector <double> v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n;
+        std::vector <double> v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n;
+        
+        std::vector <double> v_gsfEleFromTICL_R7;
+        std::vector <double> v_gsfEleFromTICL_R19;
         
         
         double caloParticle_n;
@@ -784,6 +789,18 @@ namespace TreeOutputInfo
             sprintf(name, "gsfEleFromTICL_superClus_nearestCellDist");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_nearestCellDist);
             
+            sprintf(name, "gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n);
+            
+            sprintf(name, "gsfEleFromTICL_R7");
+            tree->Branch(name, &v_gsfEleFromTICL_R7);
+            
+            sprintf(name, "gsfEleFromTICL_R19");
+            tree->Branch(name, &v_gsfEleFromTICL_R19);
+            
             
             //
             sprintf(name, "caloParticle_n");
@@ -1027,6 +1044,11 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_phi.clear();
             
             v_gsfEleFromTICL_superClus_nearestCellDist.clear();
+            v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n.clear();
+            v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n.clear();
+            
+            v_gsfEleFromTICL_R7.clear();
+            v_gsfEleFromTICL_R19.clear();
             
             
             //

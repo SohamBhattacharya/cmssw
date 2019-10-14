@@ -59,6 +59,229 @@ namespace Common
     }
     
     
+    double getEnergySum(
+        std::vector <DetId> v_hit_detId,
+        std::vector <std::pair <DetId, float> > v_HandF,
+        std::map <DetId, const HGCRecHit*> m_hit
+    )
+    {
+        double totalE = 0;
+        
+        for(int iHit = 0; iHit < (int) v_hit_detId.size(); iHit++)
+        {
+            DetId iHit_detId = v_hit_detId.at(iHit);
+            
+            auto iter = std::find_if(
+                v_HandF.begin(), v_HandF.end(),
+                
+                [&iHit_detId](std::pair <DetId, float> &HandF)
+                {
+                    return HandF.first == iHit_detId;
+                }
+            );
+            
+            if(iter == v_HandF.end())
+            {
+                continue;
+            }
+            
+            int HandF_idx = std::distance(v_HandF.begin(), iter);
+            
+            std::pair <DetId, float> HandF = v_HandF.at(HandF_idx);
+            
+            double energy = m_hit.at(HandF.first)->energy() * HandF.second;
+            
+            totalE += energy;
+            
+            //std::vector<Type> v = ....;
+            //std::string myString = ....;
+            //auto it = find_if(v.begin(), v.end(), [&myString](const Type& obj) {return obj.getName() == myString;})
+            //
+            //if (it != v.end())
+            //{
+            //// found element. it is an iterator to the first matching element.
+            //// if you really need the index, you can also get it:
+            //auto index = std::distance(v.begin(), it);
+            //}
+        }
+        
+        return totalE;
+    }
+    
+    
+    std::vector <DetId> getNeighbor19(DetId detId, const HGCalTopology topo)
+    {
+        if(!detId)
+        {
+            return {};
+        }
+        
+        std::vector <DetId> v_neighbor_detId = topo.neighbors(detId);
+        
+        std::map <DetId, bool> m_detId_isIncluded;
+        
+        int neighbor_n = v_neighbor_detId.size();
+        
+        for(int iNeighbor = 0; iNeighbor < neighbor_n; iNeighbor++)
+        {
+            DetId iNeighbor_detId = v_neighbor_detId.at(iNeighbor);
+            
+            m_detId_isIncluded[iNeighbor_detId] = true;
+        }
+        
+        for(int iNeighbor = 0; iNeighbor < neighbor_n; iNeighbor++)
+        {
+            DetId iNeighbor_detId = v_neighbor_detId.at(iNeighbor);
+            
+            std::vector <DetId> v_jNneighbor_detId = topo.neighbors(iNeighbor_detId);
+            
+            for(int jNeighbor = 0; jNeighbor < (int) v_jNneighbor_detId.size(); jNeighbor++)
+            {
+                DetId jNeighbor_detId = v_jNneighbor_detId.at(jNeighbor);
+                
+                if(m_detId_isIncluded.find(jNeighbor_detId) == m_detId_isIncluded.end())
+                {
+                    m_detId_isIncluded[jNeighbor_detId] = true;
+                    
+                    v_neighbor_detId.push_back(jNeighbor_detId);
+                }
+            }
+        }
+        
+        return v_neighbor_detId;
+    }
+    
+    
+    // Returns <XYZPoint, totalEnergy>
+    std::pair <math::XYZPoint, double> getCentroid(
+        std::vector <std::pair <DetId, float> > v_HandF,
+        std::map <DetId, const HGCRecHit*> m_hit,
+        hgcal::RecHitTools *recHitTools
+    )
+    {
+        double centroidX = 0;
+        double centroidY = 0;
+        double centroidZ = 0;
+        double totalE = 0;
+        
+        for(int iHit = 0; iHit < (int) v_HandF.size(); iHit++)
+        {
+            DetId detId = v_HandF.at(iHit).first;
+            
+            auto hit_pos = recHitTools->getPosition(detId);
+            
+            double energy = m_hit.at(detId)->energy() * v_HandF.at(iHit).second;
+            
+            centroidX += hit_pos.x() * energy;
+            centroidY += hit_pos.y() * energy;
+            centroidZ += hit_pos.z() * energy;
+            
+            totalE += energy;
+        }
+        
+        if(totalE)
+        {
+            centroidX /= totalE;
+            centroidY /= totalE;
+            centroidZ /= totalE;
+        }
+        
+        math::XYZPoint centroid_xyz(centroidX, centroidY, centroidZ);
+        
+        return std::make_pair(centroid_xyz, totalE);
+    }
+    
+    
+    
+    std::vector <std::vector <std::pair <DetId, float> > > getLayerwiseHandF(
+        std::vector <std::pair <DetId, float> > v_HandF,
+        hgcal::RecHitTools *recHitTools,
+        int nLayer
+    )
+    {
+        std::vector <std::vector <std::pair <DetId, float> > > vv_layerHandF;
+        
+        for(int iLayer = 0; iLayer < nLayer; iLayer++)
+        {
+            vv_layerHandF.push_back({});
+        }
+        
+        for(int iHit = 0; iHit < (int) v_HandF.size(); iHit++)
+        {
+            DetId detId = v_HandF.at(iHit).first;
+            
+            if(detId.det() != DetId::HGCalEE)
+            {
+                continue;
+            }
+            
+            int layer = recHitTools->getLayer(detId) - 1;
+            
+            if(layer >= nLayer)
+            {
+                continue;
+            }
+            
+            vv_layerHandF.at(layer).push_back(v_HandF.at(iHit));
+        }
+        
+        return vv_layerHandF;
+    }
+    
+    
+    // Returns <DetId, distance>
+    // Layer starts from 1
+    std::pair <DetId, double> getNearestCell(
+        double x, double y, double z,
+        std::vector <std::pair <DetId, float> > v_hit,
+        hgcal::RecHitTools *recHitTools,
+        int layer = -1
+    )
+    {
+        double dist_min = 9999;
+        DetId nearestCell_detId = 0;
+        
+        for(int iHit = 0; iHit < (int) v_hit.size(); iHit++)
+        {
+            DetId iHit_detId = v_hit.at(iHit).first;
+            
+            int iHit_layer = recHitTools->getLayer(iHit_detId);
+            
+            if(iHit_detId.det() != DetId::HGCalEE)
+            {
+                //printf("Invalid hit (Total hits %d). layer %d, det %d \n", (int) v_hit.size(), iHit_layer, (int) iHit_detId.det());
+                continue;
+            }
+            
+            if(layer > 0 && layer != (int) iHit_layer)
+            {
+                continue;
+            }
+            
+            auto recHit_pos = recHitTools->getPosition(iHit_detId);
+            
+            //math::XYZPoint recHit_xyz(recHit_pos.x(), recHit_pos.y(), recHit_pos.z());
+            
+            double dX = x - recHit_pos.x();
+            double dY = y - recHit_pos.y();
+            double dZ = z - recHit_pos.z();
+            
+            //double dist = (superClus_xyz-recHit_xyz).rho();
+            double dist = std::sqrt(dX*dX + dY*dY + dZ*dZ);
+            
+            if (dist < dist_min)
+            {
+                dist_min = dist;
+                nearestCell_detId = iHit_detId;
+            }
+        }
+        
+        std::pair <DetId, double> p_detId_dist = std::make_pair(nearestCell_detId, dist_min);
+        
+        return p_detId_dist;
+    }
+    
+    
     // PCA
     // Returns <(r, eta, phi) cov matrix, eigen vector matrix, eigen values>
     std::tuple <TMatrixD, TMatrixD, TVectorD> getMultiClusterPCAinfo(
@@ -245,6 +468,8 @@ namespace Common
         
         return info;
     }
+    
+    
 }
 
 

@@ -4,6 +4,7 @@
 <use name="DataFormats/Common"/>
 <use name="DataFormats/EgammaCandidates"/>
 <use name="DataFormats/EgammaReco"/>
+<use name="DataFormats/FWLite"/>
 <use name="DataFormats/GsfTrackReco"/>
 <use name="DataFormats/HepMCCandidate"/>
 <use name="DataFormats/JetReco"/>
@@ -22,6 +23,7 @@
 <use name="FWCore/PluginManager"/>
 <use name="FWCore/ServiceRegistry"/>
 <use name="Geometry/Records"/>
+<use name="Geometry/CaloTopology"/>
 <use name="L1Trigger/DTTrackFinder"/>
 <use name="L1Trigger/Skimmer"/>
 <use name="L1TriggerConfig/L1GtConfigProducers"/>

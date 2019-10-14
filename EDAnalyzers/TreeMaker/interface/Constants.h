@@ -19,7 +19,7 @@
 
 namespace Constants
 {
-    const int HGCalEE_nLayer = 32;
+    const int HGCalEE_nLayer = 28;
 }
 
 

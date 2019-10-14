@@ -29,6 +29,7 @@
 # include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 # include "DataFormats/ForwardDetId/interface/HGCEEDetId.h"
 # include "DataFormats/ForwardDetId/interface/HGCalDetId.h"
+# include "DataFormats/FWLite/interface/ESHandle.h"
 # include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 # include "DataFormats/HGCRecHit/interface/HGCRecHit.h"
 # include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -41,12 +42,15 @@
 # include "DataFormats/TrackReco/interface/TrackFwd.h"
 # include "DataFormats/VertexReco/interface/Vertex.h"
 # include "FWCore/Framework/interface/Event.h"
+# include "FWCore/Framework/interface/ESHandle.h"
 # include "FWCore/Framework/interface/Frameworkfwd.h"
 # include "FWCore/Framework/interface/MakerMacros.h"
 # include "FWCore/Framework/interface/one/EDAnalyzer.h"
 # include "FWCore/ParameterSet/interface/ParameterSet.h"
 # include "FWCore/ServiceRegistry/interface/Service.h"
 # include "FWCore/Utilities/interface/InputTag.h"
+# include "Geometry/CaloTopology/interface/HGCalTopology.h"
+# include "Geometry/Records/interface/IdealGeometryRecord.h"
 # include "RecoLocalCalo/HGCalRecAlgos/interface/RecHitTools.h"
 # include "SimDataFormats/CaloAnalysis/interface/CaloParticle.h"
 # include "SimDataFormats/CaloAnalysis/interface/SimCluster.h"
@@ -55,6 +59,7 @@
 # include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 # include "EDAnalyzers/TreeMaker/interface/Common.h"
+# include "EDAnalyzers/TreeMaker/interface/Constants.h"
 # include "EDAnalyzers/TreeMaker/interface/TreeOutputInfo.h"
 
 # include <CLHEP/Matrix/Matrix.h>
@@ -270,6 +275,20 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     treeOutput->eventNumber = iEvent.id().event();
     treeOutput->luminosityNumber = iEvent.id().luminosityBlock();
     treeOutput->bunchCrossingNumber = iEvent.bunchCrossing();
+    
+    
+    // HGCal Topology
+    edm::ESHandle <HGCalTopology> handle_topo_HGCalEE;
+    iSetup.get<IdealGeometryRecord>().get("HGCalEESensitive", handle_topo_HGCalEE);
+    
+    if(!handle_topo_HGCalEE.isValid())
+    {
+        printf("Error: Invalid HGCalEE topology. \n");
+        
+        exit(EXIT_FAILURE);
+    }
+    
+    const auto& topo_HGCalEE = *handle_topo_HGCalEE;
     
     
     //////////////////// Gen particle ////////////////////
@@ -1560,27 +1579,51 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         treeOutput->gsfEleFromTICL_n++;
         
-        std::vector <std::pair <DetId, float> > superClus_HandF = gsfEle.superCluster()->hitsAndFractions();
+        std::vector <std::pair <DetId, float> > v_superClus_HandF = gsfEle.superCluster()->hitsAndFractions();
         math::XYZPoint superClus_xyz = gsfEle.superCluster()->position();
         
-        double dist_min = 9999;
-        DetId centroid_detId = 0;
+        std::vector <std::vector <std::pair <DetId, float> > > vv_superClus_layerHandF = Common::getLayerwiseHandF(
+            v_superClus_HandF,
+            &recHitTools,
+            Constants::HGCalEE_nLayer
+        );
         
-        for(std::map <DetId, const HGCRecHit*>::iterator recHit_iter = m_recHit.begin(); recHit_iter != m_recHit.end(); recHit_iter++)
-        {
-            DetId recHit_detId = recHit_iter->first;
-            auto recHit_pos = recHitTools.getPosition(recHit_detId);
-            
-            math::XYZPoint recHit_xyz(recHit_pos.x(), recHit_pos.y(), recHit_pos.z());
-            
-            double dist = (superClus_xyz-recHit_xyz).r();
-            
-            if (dist < dist_min)
-            {
-                dist_min = dist;
-                centroid_detId = recHit_detId;
-            }
-        }
+        
+        //double dist_min = 9999;
+        //DetId centroid_detId = 0;
+        //
+        //for(std::map <DetId, const HGCRecHit*>::iterator recHit_iter = m_recHit.begin(); recHit_iter != m_recHit.end(); recHit_iter++)
+        //{
+        //    DetId recHit_detId = recHit_iter->first;
+        //    auto recHit_pos = recHitTools.getPosition(recHit_detId);
+        //    
+        //    //math::XYZPoint recHit_xyz(recHit_pos.x(), recHit_pos.y(), recHit_pos.z());
+        //    
+        //    double dX = superClus_xyz.x() - recHit_pos.x();
+        //    double dY = superClus_xyz.y() - recHit_pos.y();
+        //    
+        //    //double dist = (superClus_xyz-recHit_xyz).rho();
+        //    double dist = std::sqrt(dX*dX + dY*dY);
+        //    
+        //    if (dist < dist_min)
+        //    {
+        //        dist_min = dist;
+        //        centroid_detId = recHit_detId;
+        //    }
+        //}
+        
+        
+        std::pair <DetId, double> p_centroid_detId_dist = Common::getNearestCell(
+            superClus_xyz.x(), superClus_xyz.y(), superClus_xyz.z(),
+            v_superClus_HandF,
+            &recHitTools
+        );
+        
+        //printf("gsfEleFromTICL: pT %0.2f, eta %+0.2f, E %0.2f \n", gsfEle.pt(), gsfEle.eta(), gsfEle.energy());
+        
+        double dist_min = p_centroid_detId_dist.second;
+        DetId centroid_detId = p_centroid_detId_dist.first;
+        
         
         if(centroid_detId)
         {
@@ -1591,6 +1634,15 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         {
             treeOutput->v_gsfEleFromTICL_superClus_nearestCellDist.push_back(-1);
         }
+        
+        
+        HGCEEDetId centroid_HGCEEDetId(centroid_detId.rawId());
+        //auto centroidCell_pos = recHitTools.getPosition(centroid_detId);
+        
+        std::vector <DetId> v_neighbour7_detId = topo_HGCalEE.neighbors(centroid_detId);
+        v_neighbour7_detId.push_back(centroid_detId);
+        
+        std::vector <DetId> v_neighbour19_detId = Common::getNeighbor19(centroid_detId, topo_HGCalEE);
         
         printf(
             "[%llu] "
@@ -1603,6 +1655,10 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             "\t superClus E %0.2f, "
             "size %d, "
             "detId %llu, "
+            //"cell %d (x %+0.2f, y %+0.2f), "
+            "type %d, "
+            "neighbors %d, %d, "
+            //"sector %d, "
             "dist %0.2e, "
             
             "\n"
@@ -1619,10 +1675,139 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             gsfEle.superCluster()->energy(),
             (int) gsfEle.superCluster()->size(),
             (long long) centroid_detId.rawId(),
+            //centroid_HGCEEDetId.cell(), centroidCell_pos.x(), centroidCell_pos.y(),
+            topo_HGCalEE.decode(centroid_detId).iType,
+            (int) v_neighbour7_detId.size(), (int) v_neighbour19_detId.size(),
+            //centroid_HGCEEDetId.sector(),
             dist_min,
             
             gsfEle.gsfTrack()->p()
         );
+        
+        double totalE = 0;
+        
+        double energy7 = 0;
+        double energy19 = 0;
+        
+        for(int iLayer = 0; iLayer < Constants::HGCalEE_nLayer; iLayer++)
+        {
+            if(!vv_superClus_layerHandF.at(iLayer).size())
+            {
+                continue;
+            }
+            
+            // Get the centroid in the layer
+            std::pair <math::XYZPoint, double> p_iLayer_centroid_pos_E = Common::getCentroid(
+                vv_superClus_layerHandF.at(iLayer),
+                m_recHit,
+                &recHitTools
+            );
+            
+            math::XYZPoint iLayer_centroid_pos = p_iLayer_centroid_pos_E.first;
+            
+            
+            // Get the rec-hit cell nearest to the centroid in the layer
+            std::pair <DetId, double> p_iLayer_centroid_detId_dist = Common::getNearestCell(
+                iLayer_centroid_pos.x(), iLayer_centroid_pos.y(), iLayer_centroid_pos.z(),
+                vv_superClus_layerHandF.at(iLayer),
+                &recHitTools
+            );
+            
+            DetId iLayer_centroid_detId = p_iLayer_centroid_detId_dist.first;
+            
+            if(!iLayer_centroid_detId)
+            {
+                continue;
+            }
+            
+            //auto iLayer_centroid_cellPos = recHitTools.getPosition(iLayer_centroid_detId);
+            
+            
+            // R7 cells
+            std::vector <DetId> v_iLayer_neighbour7_detId = topo_HGCalEE.neighbors(iLayer_centroid_detId);
+            v_iLayer_neighbour7_detId.push_back(iLayer_centroid_detId);
+            
+            // R19 cells
+            std::vector <DetId> v_iLayer_neighbour19_detId = Common::getNeighbor19(iLayer_centroid_detId, topo_HGCalEE);
+            
+            
+            double iLayer_energy7 = Common::getEnergySum(
+                v_iLayer_neighbour7_detId,
+                vv_superClus_layerHandF.at(iLayer),
+                m_recHit
+            );
+            
+            double iLayer_energy19 = Common::getEnergySum(
+                v_iLayer_neighbour19_detId,
+                vv_superClus_layerHandF.at(iLayer),
+                m_recHit
+            );
+            
+            energy7 += iLayer_energy7;
+            energy19 += iLayer_energy19;
+            
+            
+            //printf(
+            //    "Layer %02d/%02d: "
+            //    "(%+0.2f, %+0.2f, %+0.2f), "
+            //    "(%+0.2f, %+0.2f, %+0.2f), "
+            //    "nHit %03d, "
+            //    "E %0.2f, "
+            //    "E7 (R7) %0.2f (%0.2f), "
+            //    "E19 (R19) %0.2f (%0.2f), "
+            //    "\n",
+            //    
+            //    iLayer+1, Constants::HGCalEE_nLayer,
+            //    iLayer_centroid_pos.x(), iLayer_centroid_pos.y(), iLayer_centroid_pos.z(),
+            //    iLayer_centroid_cellPos.x(), iLayer_centroid_cellPos.y(), iLayer_centroid_cellPos.z(),
+            //    (int) vv_superClus_layerHandF.at(iLayer).size(),
+            //    p_iLayer_centroid_pos_E.second,
+            //    iLayer_energy7, iLayer_energy7/p_iLayer_centroid_pos_E.second,
+            //    iLayer_energy19, iLayer_energy19/p_iLayer_centroid_pos_E.second
+            //);
+            
+            totalE += p_iLayer_centroid_pos_E.second;
+        }
+        
+        double R7 = energy7/totalE;
+        double R19 = energy19/totalE;
+        
+        treeOutput->v_gsfEleFromTICL_R7.push_back(R7);
+        treeOutput->v_gsfEleFromTICL_R19.push_back(R19);
+        
+        //printf("Sum[layer]: E %0.2f \n", totalE);
+        //
+        //printf(
+        //    "E7 (R7) %0.2f (%0.2f), "
+        //    "E19 (R19) %0.2f (%0.2f), "
+        //    "\n",
+        //    
+        //    energy7, energy7/totalE,
+        //    energy19, energy19/totalE
+        //);
+        
+        
+        treeOutput->v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n.push_back(v_neighbour7_detId.size());
+        treeOutput->v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n.push_back(v_neighbour19_detId.size());
+        
+        //for(int iCell = 0; iCell < (int) v_neighbour19_detId.size(); iCell++)
+        //{
+        //    DetId cell_detId = v_neighbour19_detId.at(iCell);
+        //    auto cell_pos = recHitTools.getPosition(cell_detId);
+        //    
+        //    printf(
+        //        "%02d/%02d: "
+        //        "%llu, "
+        //        "x %+0.2f, y %+0.2f, "
+        //        "type %d "
+        //        "\n",
+        //        
+        //        iCell+1, (int) v_neighbour19_detId.size(),
+        //        (long long) cell_detId.rawId(),
+        //        cell_pos.x(), cell_pos.y(),
+        //        topo_HGCalEE.decode(cell_detId).iType
+        //    );
+        //}
         
         //for()
         //{
