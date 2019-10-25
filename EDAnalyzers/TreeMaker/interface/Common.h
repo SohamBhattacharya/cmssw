@@ -20,6 +20,23 @@
 
 namespace Common
 {
+    double getCellSize(DetId detId, hgcal::RecHitTools *recHitTools)
+    {
+        double SiThickness = recHitTools->getSiThickness(detId);
+        
+        // HD wafers
+        if(SiThickness < 150)
+        {
+            return 0.465;
+        }
+        
+        // LD wafers
+        else
+        {
+            return 0.698;
+        }
+    }
+    
     template <typename T1, typename T2> std::vector <int> associateRecToSimHit(
         T1 simHitCollPtr,
         T2 recHitCollPtr
@@ -62,7 +79,8 @@ namespace Common
     double getEnergySum(
         std::vector <DetId> v_hit_detId,
         std::vector <std::pair <DetId, float> > v_HandF,
-        std::map <DetId, const HGCRecHit*> m_hit
+        std::map <DetId, const HGCRecHit*> m_hit,
+        bool useHandF = false
     )
     {
         double totalE = 0;
@@ -71,27 +89,45 @@ namespace Common
         {
             DetId iHit_detId = v_hit_detId.at(iHit);
             
-            auto iter = std::find_if(
-                v_HandF.begin(), v_HandF.end(),
-                
-                [&iHit_detId](std::pair <DetId, float> &HandF)
-                {
-                    return HandF.first == iHit_detId;
-                }
-            );
-            
-            if(iter == v_HandF.end())
+            if(m_hit.find(iHit_detId) == m_hit.end())
             {
                 continue;
             }
             
-            int HandF_idx = std::distance(v_HandF.begin(), iter);
+            //auto iter = std::find_if(
+            //    v_HandF.begin(), v_HandF.end(),
+            //    
+            //    [&iHit_detId](std::pair <DetId, float> &HandF)
+            //    {
+            //        return HandF.first == iHit_detId;
+            //    }
+            //);
+            //
+            //if(iter == v_HandF.end())
+            //{
+            //    continue;
+            //}
+            //
+            ////int HandF_idx = std::distance(v_HandF.begin(), iter);
+            ////
+            ////std::pair <DetId, float> HandF = v_HandF.at(HandF_idx);
+            //
+            //
+            //double energy = m_hit.at(iHit_detId)->energy();// * HandF.second;
+            //
+            //totalE += energy;
             
-            std::pair <DetId, float> HandF = v_HandF.at(HandF_idx);
-            
-            double energy = m_hit.at(HandF.first)->energy() * HandF.second;
-            
-            totalE += energy;
+            for(int iHandF = 0; iHandF < (int) v_HandF.size(); iHandF++)
+            {
+                std::pair <DetId, float> HandF = v_HandF.at(iHandF);
+                
+                if(iHit_detId == HandF.first)
+                {
+                    double energy = m_hit.at(iHit_detId)->energy() * HandF.second;
+                    
+                    totalE += energy;
+                }
+            }
             
             //std::vector<Type> v = ....;
             //std::string myString = ....;
@@ -105,7 +141,79 @@ namespace Common
             //}
         }
         
+        //double totalE_test = 0;
+        //
+        //for(int iHit = 0; iHit < (int) v_hit_detId.size(); iHit++)
+        //{
+        //    DetId iHit_detId = v_hit_detId.at(iHit);
+        //    
+        //    for(int iFrac = 0; iFrac < (int) v_HandF.size(); iFrac++)
+        //    {
+        //        std::pair <DetId, float> HandF = v_HandF.at(iFrac);
+        //        
+        //        if(iHit_detId == HandF.first)
+        //        {
+        //            totalE_test += m_hit.at(HandF.first)->energy() * HandF.second;
+        //        }
+        //    }
+        //}
+        //
+        //printf("totalE %0.2f, totalE_test %0.2f \n", totalE, totalE_test);
+        
         return totalE;
+    }
+    
+    
+    std::vector <DetId> getNeighborR(
+        DetId detId,
+        std::vector <std::pair <DetId, float> > v_HandF,
+        double R,
+        const HGCalTopology topo,
+        hgcal::RecHitTools *recHitTools
+    )
+    {
+        std::map <DetId, bool> m_detId_isIncluded;
+        
+        std::vector <DetId> v_neighborR_detId;
+        
+        v_neighborR_detId.push_back(detId);
+        m_detId_isIncluded[detId] = true;
+        
+        auto center_pos = recHitTools->getPosition(detId);
+        
+        for(int iHit = 0; iHit < (int) v_HandF.size(); iHit++)
+        {
+            std::pair <DetId, float> p_HandF = v_HandF.at(iHit);
+            
+            if(p_HandF.first.det() != DetId::HGCalEE)
+            {
+                continue;
+            }
+            
+            auto iHit_pos = recHitTools->getPosition(p_HandF.first);
+            
+            double dX = iHit_pos.x() - center_pos.x();
+            double dY = iHit_pos.y() - center_pos.y();
+            double dZ = iHit_pos.z() - center_pos.z();
+            
+            double dist = sqrt(dX*dX + dY*dY + dZ*dZ);
+            
+            double cellSize = getCellSize(detId, recHitTools);
+            
+            double R_max = R + cellSize;
+            
+            if(
+                dist < R_max &&
+                m_detId_isIncluded.find(p_HandF.first) == m_detId_isIncluded.end()
+            )
+            {
+                v_neighborR_detId.push_back(p_HandF.first);
+                m_detId_isIncluded[p_HandF.first] = true;
+            }
+        }
+        
+        
+        return v_neighborR_detId;
     }
     
     

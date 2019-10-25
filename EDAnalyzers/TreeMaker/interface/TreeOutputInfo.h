@@ -13,6 +13,7 @@
 # include <TH1F.h>
 # include <TH2F.h>
 # include <TMatrixD.h>
+# include <TROOT.h>
 # include <TTree.h> 
 # include <TVectorD.h> 
 
@@ -215,6 +216,12 @@ namespace TreeOutputInfo
         std::vector <double> v_recHit_isMultiClusMatched;
         std::vector <double> v_recHit_isCaloParticleMatched;
         
+        std::vector <double> v_recHit_iType;
+        std::vector <double> v_recHit_iCell1;
+        std::vector <double> v_recHit_iCell2;
+        
+        std::vector <double> v_recHit_SiThickness;
+        
         std::vector <double> v_simHit_HGCalEEPlayer_totE;
         std::vector <double> v_recHit_HGCalEEPlayer_totE;
         
@@ -240,13 +247,25 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_pT;
         std::vector <double> v_gsfEleFromTICL_eta;
         std::vector <double> v_gsfEleFromTICL_phi;
+        std::vector <double> v_gsfEleFromTICL_ET;
         
+        std::vector <double> v_gsfEleFromTICL_superClus_E;
         std::vector <double> v_gsfEleFromTICL_superClus_nearestCellDist;
         std::vector <double> v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n;
         std::vector <double> v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n;
         
         std::vector <double> v_gsfEleFromTICL_R7;
         std::vector <double> v_gsfEleFromTICL_R19;
+        std::vector <double> v_gsfEleFromTICL_R2p8;
+        
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dEta;
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dPhi;
+        
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClus_TICLclus_E;
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClus_TICLclus_ET;
+        
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta;
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi;
         
         
         double caloParticle_n;
@@ -264,6 +283,8 @@ namespace TreeOutputInfo
         
         TreeOutput(std::string details, edm::Service<TFileService> fs)
         {
+            gROOT->ProcessLine(".L EDAnalyzers/TreeMaker/interface/CustomRootDict.cc+");
+            
             tree = fs->make<TTree>(details.c_str(), details.c_str());
             
             
@@ -734,6 +755,18 @@ namespace TreeOutputInfo
             sprintf(name, "recHit_isCaloParticleMatched");
             tree->Branch(name, &v_recHit_isCaloParticleMatched);
             
+            sprintf(name, "recHit_iType");
+            tree->Branch(name, &v_recHit_iType);
+            
+            sprintf(name, "recHit_iCell1");
+            tree->Branch(name, &v_recHit_iCell1);
+            
+            sprintf(name, "recHit_iCell2");
+            tree->Branch(name, &v_recHit_iCell2);
+            
+            sprintf(name, "recHit_SiThickness");
+            tree->Branch(name, &v_recHit_SiThickness);
+            
             
             //
             sprintf(name, "gsfEleFromMultiClus_n");
@@ -786,6 +819,12 @@ namespace TreeOutputInfo
             sprintf(name, "gsfEleFromTICL_phi");
             tree->Branch(name, &v_gsfEleFromTICL_phi);
             
+            sprintf(name, "gsfEleFromTICL_ET");
+            tree->Branch(name, &v_gsfEleFromTICL_ET);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_E");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_E);
+            
             sprintf(name, "gsfEleFromTICL_superClus_nearestCellDist");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_nearestCellDist);
             
@@ -800,6 +839,27 @@ namespace TreeOutputInfo
             
             sprintf(name, "gsfEleFromTICL_R19");
             tree->Branch(name, &v_gsfEleFromTICL_R19);
+            
+            sprintf(name, "gsfEleFromTICL_R2p8");
+            tree->Branch(name, &v_gsfEleFromTICL_R2p8);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_clus_dEta");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_clus_dEta);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_clus_dPhi");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_clus_dPhi);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_TICLclus_E");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClus_TICLclus_E);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_TICLclus_ET");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClus_TICLclus_ET);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_TICLclus_dEta");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_TICLclus_dPhi");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi);
             
             
             //
@@ -1020,6 +1080,11 @@ namespace TreeOutputInfo
             v_recHit_matchedHGCALlayerClusIndex.clear();
             v_recHit_isMultiClusMatched.clear();
             v_recHit_isCaloParticleMatched.clear();
+            v_recHit_iType.clear();
+            v_recHit_iCell1.clear();
+            v_recHit_iCell2.clear();
+            
+            v_recHit_SiThickness.clear();
             
             
             //
@@ -1042,13 +1107,25 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_pT.clear();
             v_gsfEleFromTICL_eta.clear();
             v_gsfEleFromTICL_phi.clear();
+            v_gsfEleFromTICL_ET.clear();
             
+            v_gsfEleFromTICL_superClus_E.clear();
             v_gsfEleFromTICL_superClus_nearestCellDist.clear();
             v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n.clear();
             v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n.clear();
             
             v_gsfEleFromTICL_R7.clear();
             v_gsfEleFromTICL_R19.clear();
+            v_gsfEleFromTICL_R2p8.clear();
+            
+            vv_gsfEleFromTICL_superClusSeed_clus_dEta.clear();
+            vv_gsfEleFromTICL_superClusSeed_clus_dPhi.clear();
+            
+            vv_gsfEleFromTICL_superClus_TICLclus_E.clear();
+            vv_gsfEleFromTICL_superClus_TICLclus_ET.clear();
+            
+            vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta.clear();
+            vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.clear();
             
             
             //

@@ -1528,6 +1528,14 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 treeOutput->v_recHit_matchedHGCALlayerClusIndex.push_back(-1);
             }
             
+            //HGCalTopology::DecodedDetId decodetDetId = topo_HGCalEE.decode(recHit.id());
+            //
+            //treeOutput->v_recHit_iType.push_back(decodetDetId.iType);
+            //treeOutput->v_recHit_iCell1.push_back(decodetDetId.iCell1);
+            //treeOutput->v_recHit_iCell2.push_back(decodetDetId.iCell2);
+            
+            treeOutput->v_recHit_SiThickness.push_back(recHitTools.getSiThickness(recHit.id()));
+            
             treeOutput->recHit_n++;
         }
     }
@@ -1576,8 +1584,11 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->v_gsfEleFromTICL_eta.push_back(gsfEle.eta());
         treeOutput->v_gsfEleFromTICL_phi.push_back(gsfEle.phi());
         
+        treeOutput->v_gsfEleFromTICL_ET.push_back(gsfEle.et());
         
         treeOutput->gsfEleFromTICL_n++;
+        
+        treeOutput->v_gsfEleFromTICL_superClus_E.push_back(gsfEle.superCluster()->energy());
         
         std::vector <std::pair <DetId, float> > v_superClus_HandF = gsfEle.superCluster()->hitsAndFractions();
         math::XYZPoint superClus_xyz = gsfEle.superCluster()->position();
@@ -1688,6 +1699,7 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         double energy7 = 0;
         double energy19 = 0;
+        double energyR2p8 = 0;
         
         for(int iLayer = 0; iLayer < Constants::HGCalEE_nLayer; iLayer++)
         {
@@ -1697,18 +1709,18 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             }
             
             // Get the centroid in the layer
-            std::pair <math::XYZPoint, double> p_iLayer_centroid_pos_E = Common::getCentroid(
+            std::pair <math::XYZPoint, double> p_iLayer_centroid_xyz_E = Common::getCentroid(
                 vv_superClus_layerHandF.at(iLayer),
                 m_recHit,
                 &recHitTools
             );
             
-            math::XYZPoint iLayer_centroid_pos = p_iLayer_centroid_pos_E.first;
+            math::XYZPoint iLayer_centroid_xyz = p_iLayer_centroid_xyz_E.first;
             
             
             // Get the rec-hit cell nearest to the centroid in the layer
             std::pair <DetId, double> p_iLayer_centroid_detId_dist = Common::getNearestCell(
-                iLayer_centroid_pos.x(), iLayer_centroid_pos.y(), iLayer_centroid_pos.z(),
+                iLayer_centroid_xyz.x(), iLayer_centroid_xyz.y(), iLayer_centroid_xyz.z(),
                 vv_superClus_layerHandF.at(iLayer),
                 &recHitTools
             );
@@ -1726,6 +1738,25 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             // R7 cells
             std::vector <DetId> v_iLayer_neighbour7_detId = topo_HGCalEE.neighbors(iLayer_centroid_detId);
             v_iLayer_neighbour7_detId.push_back(iLayer_centroid_detId);
+            
+            
+            
+            //printf("Layer %02d: (x, y) (%+0.2f. %+0.2f), neighbors %d, \n", iLayer+1, iLayer_centroid_cellPos.x(), iLayer_centroid_cellPos.y(), (int) v_iLayer_neighbour7_detId.size()-1);
+            //printf("\t ");
+            //
+            //for(int iR7cell = 0; iR7cell < (int) v_iLayer_neighbour7_detId.size()-1; iR7cell++)
+            //{
+            //    auto pos_temp = recHitTools.getPosition(v_iLayer_neighbour7_detId.at(iR7cell));
+            //    math::XYZPoint xyz_temp(pos_temp.x(), pos_temp.y(), pos_temp.z());
+            //    
+            //    //double dist_temp = std::sqrt(std::pow(pos_temp.x()-iLayer_centroid_cellPos.x(), 2) + std::pow(pos_temp.y()-iLayer_centroid_cellPos.y(), 2) + std::pow(pos_temp.z()-iLayer_centroid_cellPos.z(), 2));
+            //    double dist_temp = std::sqrt(std::pow(pos_temp.x()-iLayer_centroid_cellPos.x(), 2) + std::pow(pos_temp.y()-iLayer_centroid_cellPos.y(), 2));
+            //    
+            //    printf("%0.4f, ", dist_temp);
+            //}
+            //
+            //printf("\n");
+            
             
             // R19 cells
             std::vector <DetId> v_iLayer_neighbour19_detId = Common::getNeighbor19(iLayer_centroid_detId, topo_HGCalEE);
@@ -1747,6 +1778,24 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             energy19 += iLayer_energy19;
             
             
+            // R2p8 cells
+            std::vector <DetId> v_iLayer_neighbourR2p8_detId = Common::getNeighborR(
+                iLayer_centroid_detId,
+                vv_superClus_layerHandF.at(iLayer),
+                2.8,
+                topo_HGCalEE,
+                &recHitTools
+            );
+            
+            double iLayer_energyR2p8 = Common::getEnergySum(
+                v_iLayer_neighbourR2p8_detId,
+                vv_superClus_layerHandF.at(iLayer),
+                m_recHit
+            );
+            
+            energyR2p8 += iLayer_energyR2p8;
+            
+            
             //printf(
             //    "Layer %02d/%02d: "
             //    "(%+0.2f, %+0.2f, %+0.2f), "
@@ -1758,33 +1807,37 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //    "\n",
             //    
             //    iLayer+1, Constants::HGCalEE_nLayer,
-            //    iLayer_centroid_pos.x(), iLayer_centroid_pos.y(), iLayer_centroid_pos.z(),
+            //    iLayer_centroid_xyz.x(), iLayer_centroid_xyz.y(), iLayer_centroid_xyz.z(),
             //    iLayer_centroid_cellPos.x(), iLayer_centroid_cellPos.y(), iLayer_centroid_cellPos.z(),
             //    (int) vv_superClus_layerHandF.at(iLayer).size(),
-            //    p_iLayer_centroid_pos_E.second,
-            //    iLayer_energy7, iLayer_energy7/p_iLayer_centroid_pos_E.second,
-            //    iLayer_energy19, iLayer_energy19/p_iLayer_centroid_pos_E.second
+            //    p_iLayer_centroid_xyz_E.second,
+            //    iLayer_energy7, iLayer_energy7/p_iLayer_centroid_xyz_E.second,
+            //    iLayer_energy19, iLayer_energy19/p_iLayer_centroid_xyz_E.second
             //);
             
-            totalE += p_iLayer_centroid_pos_E.second;
+            totalE += p_iLayer_centroid_xyz_E.second;
         }
         
-        double R7 = energy7/totalE;
-        double R19 = energy19/totalE;
+        double R7 = energy7/gsfEle.energy();
+        double R19 = energy19/gsfEle.energy();
+        double R2p8 = energyR2p8/gsfEle.energy();
         
         treeOutput->v_gsfEleFromTICL_R7.push_back(R7);
         treeOutput->v_gsfEleFromTICL_R19.push_back(R19);
+        treeOutput->v_gsfEleFromTICL_R2p8.push_back(R2p8);
         
-        //printf("Sum[layer]: E %0.2f \n", totalE);
-        //
-        //printf(
-        //    "E7 (R7) %0.2f (%0.2f), "
-        //    "E19 (R19) %0.2f (%0.2f), "
-        //    "\n",
-        //    
-        //    energy7, energy7/totalE,
-        //    energy19, energy19/totalE
-        //);
+        printf("Sum[layer]: E %0.2f \n", totalE);
+        
+        printf(
+            "E7 (R7) %0.2f (%0.2f), "
+            "E19 (R19) %0.2f (%0.2f), "
+            "E2p8 (R2p8) %0.2f (%0.2f), "
+            "\n",
+            
+            energy7, energy7/gsfEle.superCluster()->energy(),
+            energy19, energy19/gsfEle.superCluster()->energy(),
+            energyR2p8, energyR2p8/gsfEle.superCluster()->energy()
+        );
         
         
         treeOutput->v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n.push_back(v_neighbour7_detId.size());
@@ -1809,10 +1862,175 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //    );
         //}
         
-        //for()
-        //{
-        //    
-        //}
+        
+        const reco::CaloCluster *superClus_seed = gsfEle.superCluster()->seed().get();
+        
+        
+        //
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_clus_dEta;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_clus_dPhi;
+        
+        // REMEMBER to add the vectors to this!
+        std::vector <std::vector <double>* > vv_gsfEleFromTICL_superClus_clus = {
+            &v_gsfEleFromTICL_superClusSeed_clus_dEta,
+            &v_gsfEleFromTICL_superClusSeed_clus_dPhi,
+        };
+        
+        int superClus_clus_seed_index = -1;
+        double superClus_clus_dEta_min = 9999;
+        double superClus_clus_dPhi_min = 9999;
+        
+        edm::PtrVector <reco::CaloCluster> v_superClus_clus = gsfEle.superCluster()->clusters();
+        
+        for(int iCluster = 0, count = 0; iCluster < (int) v_superClus_clus.size(); iCluster++)
+        {
+            const reco::CaloCluster *cluster = v_superClus_clus[iCluster].get();
+            
+            // Must be in the same half of the detector
+            if(gsfEle.eta() && cluster->eta()/gsfEle.eta() < 0)
+            {
+                continue;
+            }
+            
+            //CLHEP::Hep3Vector cluster_3vec(
+            //    cluster->x(),
+            //    cluster->y(),
+            //    cluster->z()
+            //);
+            
+            double dEta = fabs(cluster->eta()) - fabs(superClus_seed->eta());
+            double dPhi = getDeltaPhi(cluster->phi(), superClus_seed->phi());
+            
+            if(fabs(dEta) < superClus_clus_dEta_min && fabs(dPhi) < superClus_clus_dPhi_min)
+            {
+                superClus_clus_dEta_min = fabs(dEta);
+                superClus_clus_dPhi_min = fabs(dPhi);
+                
+                superClus_clus_seed_index = count;
+            }
+            
+            v_gsfEleFromTICL_superClusSeed_clus_dEta.push_back(dEta);
+            v_gsfEleFromTICL_superClusSeed_clus_dPhi.push_back(dPhi);
+            
+            count++;
+        }
+        
+        // Remove the seed
+        if(superClus_clus_seed_index >= 0)
+        {
+            for(int i = 0; i < (int) vv_gsfEleFromTICL_superClus_clus.size(); i++)
+            {
+                if(superClus_clus_seed_index >= (int) vv_gsfEleFromTICL_superClus_clus.at(i)->size())
+                {
+                    printf(
+                        "Error: Invalid index (%d/%d) when deleting seed from vv_gsfEleFromTICL_superClus_clus[%d]. \n",
+                        superClus_clus_seed_index,
+                        (int) vv_gsfEleFromTICL_superClus_clus.at(i)->size()-1,
+                        i
+                    );
+                    exit(EXIT_FAILURE);
+                }
+                
+                vv_gsfEleFromTICL_superClus_clus.at(i)->erase(
+                    vv_gsfEleFromTICL_superClus_clus.at(i)->begin() + superClus_clus_seed_index
+                );
+            }
+        }
+        
+        treeOutput->vv_gsfEleFromTICL_superClusSeed_clus_dEta.push_back(v_gsfEleFromTICL_superClusSeed_clus_dEta);
+        treeOutput->vv_gsfEleFromTICL_superClusSeed_clus_dPhi.push_back(v_gsfEleFromTICL_superClusSeed_clus_dPhi);
+        
+        
+        
+        //
+        std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_E;
+        std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_ET;
+        
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dEta;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi;
+        
+        // REMEMBER to add the vectors to this!
+        std::vector <std::vector <double>* > vv_gsfEleFromTICL_superClus_TICLclus = {
+            &v_gsfEleFromTICL_superClus_TICLclus_E,
+            &v_gsfEleFromTICL_superClus_TICLclus_ET,
+            
+            &v_gsfEleFromTICL_superClusSeed_TICLclus_dEta,
+            &v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi,
+        };
+        
+        int superClus_TICLclus_seed_index = -1;
+        double superClus_TICLclus_dEta_min = 9999;
+        double superClus_TICLclus_dPhi_min = 9999;
+        
+        for(int iTICLmultiCluster = 0, count = 0; iTICLmultiCluster < nTICLmultiCluster; iTICLmultiCluster++)
+        {
+            reco::HGCalMultiCluster TICLmultiCluster = v_TICLmultiCluster->at(iTICLmultiCluster);
+            
+            // Must be in the same half of the detector
+            if(gsfEle.eta() && TICLmultiCluster.eta()/gsfEle.eta() < 0)
+            {
+                continue;
+            }
+            
+            CLHEP::Hep3Vector TICLmultiCluster_3vec(
+                TICLmultiCluster.x(),
+                TICLmultiCluster.y(),
+                TICLmultiCluster.z()
+            );
+            
+            double dEta = fabs(TICLmultiCluster.eta()) - fabs(superClus_seed->eta());
+            double dPhi = getDeltaPhi(TICLmultiCluster.phi(), superClus_seed->phi());
+            
+            if(fabs(dEta) < superClus_TICLclus_dEta_min && fabs(dPhi) < superClus_TICLclus_dPhi_min)
+            {
+                superClus_TICLclus_dEta_min = fabs(dEta);
+                superClus_TICLclus_dPhi_min = fabs(dPhi);
+                
+                superClus_TICLclus_seed_index = count;
+            }
+            
+            // Skip the same cluster
+            //if(fabs(dEta) < 1e-3 && fabs(dPhi) < 1e-3)
+            //{
+            //    continue;
+            //}
+            
+            v_gsfEleFromTICL_superClus_TICLclus_E.push_back(TICLmultiCluster.energy());
+            v_gsfEleFromTICL_superClus_TICLclus_ET.push_back(TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta()));
+            
+            v_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(dEta);
+            v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(dPhi);
+            
+            count++;
+        }
+        
+        // Remove the seed
+        if(superClus_TICLclus_seed_index >= 0)
+        {
+            for(int i = 0; i < (int) vv_gsfEleFromTICL_superClus_TICLclus.size(); i++)
+            {
+                if(superClus_TICLclus_seed_index >= (int) vv_gsfEleFromTICL_superClus_TICLclus.at(i)->size())
+                {
+                    printf(
+                        "Error: Invalid index (%d/%d) when deleting seed from vv_gsfEleFromTICL_superClus_TICLclus[%d]. \n",
+                        superClus_TICLclus_seed_index,
+                        (int) vv_gsfEleFromTICL_superClus_TICLclus.at(i)->size()-1,
+                        i
+                    );
+                    exit(EXIT_FAILURE);
+                }
+                
+                vv_gsfEleFromTICL_superClus_TICLclus.at(i)->erase(
+                    vv_gsfEleFromTICL_superClus_TICLclus.at(i)->begin() + superClus_TICLclus_seed_index
+                );
+            }
+        }
+        
+        treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_E.push_back(v_gsfEleFromTICL_superClus_TICLclus_E);
+        treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_ET.push_back(v_gsfEleFromTICL_superClus_TICLclus_ET);
+        
+        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dEta);
+        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi);
     }
     
     
