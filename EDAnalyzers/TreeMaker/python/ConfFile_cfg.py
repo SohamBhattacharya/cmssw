@@ -68,11 +68,26 @@ options.register("debugFile",
     "Create debug file" # Description
 )
 
+options.register("rerunTICL",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Whether to rerun TICL" # Description
+)
+
 options.register("modTICLele",
     0, # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
     VarParsing.VarParsing.varType.int, # string, int, or float
     "Whether to use modified TICL-electron sequence" # Description
+)
+
+
+options.register("modTICLeleWithRerunTICL",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Whether to use the rerun TICL for the modified TICL-electron sequence" # Description
 )
 
 options.register("storeSimHit",
@@ -133,9 +148,21 @@ else :
 
 outFileSuffix = ""
 
+if (options.rerunTICL) :
+    
+    outFileSuffix = "%s_rerunTICL" %(outFileSuffix)
+
+
 if (options.modTICLele) :
     
-    outFileSuffix = "_modTICLele"
+    if (options.rerunTICL and options.modTICLeleWithRerunTICL) :
+        
+        outFileSuffix = "%s_modTICLeleWithRerunTICL" %(outFileSuffix)
+        
+    else :
+        
+        outFileSuffix = "%s_modTICLele" %(outFileSuffix)
+
 
 outFile = "ntupleTree%s.root" %(outFileSuffix)
 
@@ -173,11 +200,22 @@ process.EnergySharedTICLmultiClusters = EnergySharedTICLmultiClusters.clone()
 process.EnergySharedTICLmultiClusters.algoTypeStr = energySharingAlgo
 process.EnergySharedTICLmultiClusters.distTypeStr = distanceType
 
+
+# Rerun TICL
+label_TICLmultiCluster = cms.untracked.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", "RECO")
+
+if (options.rerunTICL) :
+    
+    label_TICLmultiCluster = cms.untracked.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", "Demo")
+
+
+# Mod TICL-ele
 label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromTICL", "", "RECO")
 
 if (options.modTICLele) :
     
     label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromTICL", "", "Demo")
+
 
 process.treeMaker = cms.EDAnalyzer(
     "TreeMaker",
@@ -209,7 +247,7 @@ process.treeMaker = cms.EDAnalyzer(
     #label_TICLmultiCluster = cms.untracked.InputTag("MultiClustersFromTracksters", "MultiClustersFromTracksterByCA", "RECO"),
     #label_TICLmultiCluster = cms.untracked.InputTag("EnergySharedTICLmultiClusters", "EnergySharedTICLmultiClusters%s%s" %(energySharingAlgo, distanceType)),
     
-    label_TICLmultiCluster = cms.untracked.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", "RECO"),
+    label_TICLmultiCluster = label_TICLmultiCluster,
     
     label_TICLmultiClusterMIP = cms.untracked.InputTag("MultiClustersFromTrackstersMIP", "MIPMultiClustersFromTracksterByCA", "RECO"),
     
@@ -229,14 +267,6 @@ process.treeMaker = cms.EDAnalyzer(
 )
 
 
-# Import TICL
-#from ticl_iterations import TICL_iterations
-##from ticl_iterations import TICL_iterations_withReco
-#
-## Attach a sequence to process: process.TICL
-#process = TICL_iterations(process)
-##process = TICL_iterations_withReco(process)
-
 
 if (options.modTICLele) :
     
@@ -244,6 +274,19 @@ if (options.modTICLele) :
     from MyModules.Test.ecalDrivenGsfElectronsFromTICL_cff import ecalDrivenGsfElectronsFromTICL_customizeProcess
     
     process = ecalDrivenGsfElectronsFromTICL_customizeProcess(process, onReco = True)
+    
+    if (options.rerunTICL and options.modTICLeleWithRerunTICL) :
+        
+        #print label_TICLmultiCluster
+        #print label_TICLmultiCluster.__dict__
+        
+        #process.particleFlowClusterHGCalFromTICL.initialClusteringStep.clusterSrc = label_TICLmultiCluster
+        
+        process.particleFlowClusterHGCalFromTICL.initialClusteringStep.clusterSrc = cms.InputTag(
+            label_TICLmultiCluster.__dict__["_InputTag__moduleLabel"],
+            label_TICLmultiCluster.__dict__["_InputTag__productInstance"],
+            label_TICLmultiCluster.__dict__["_InputTag__processName"],
+        )
 
 
 process.p = cms.Path(
@@ -264,6 +307,16 @@ process.TFileService = cms.Service(
 process.schedule = cms.Schedule(
     process.p
 )
+
+
+# TICL
+
+#from RecoHGCal.TICL.ticl_iterations import TICL_iterations
+#TICL_iterations(process)
+
+from RecoHGCal.TICL.ticl_iterations import TICL_iterations_withReco
+TICL_iterations_withReco(process)
+
 
 
 if (options.modTICLele) :

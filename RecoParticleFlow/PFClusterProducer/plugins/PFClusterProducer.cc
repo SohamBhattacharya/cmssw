@@ -98,7 +98,17 @@ void PFClusterProducer::produce(edm::Event& e, const edm::EventSetup& es) {
   if (_positionReCalc) {
     _positionReCalc->calculateAndSetPositions(*pfClusters);
   }
-
+  
+  //int count = 0;
+  //for(const auto& clus : *pfClusters)
+  //{
+  //    printf("[%d, %0.2f, %+0.2f, %+0.2f], ", count, clus.energy(), clus.eta(), clus.phi());
+  //    
+  //    count++;
+  //}
+  //
+  //printf("\n");
+  
   if (_energyCorrector) {
     _energyCorrector->correctEnergies(*pfClusters);
   }

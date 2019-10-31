@@ -71,6 +71,7 @@
 # include <TH2F.h>
 # include <TMatrixD.h>
 # include <TTree.h> 
+# include <TVector2.h> 
 # include <TVectorD.h> 
 
 //
@@ -405,8 +406,8 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             
             else
             {
-                treeOutput->v_genPh_HGCalEEP_EsortedIndex.push_back(treeOutput->genPh_n);
-                treeOutput->v_genPh_HGCalEEP_EsortedIndex.push_back(treeOutput->genPh_n+1);
+                treeOutput->v_genPh_HGCalEEM_EsortedIndex.push_back(treeOutput->genPh_n);
+                treeOutput->v_genPh_HGCalEEM_EsortedIndex.push_back(treeOutput->genPh_n+1);
                 
                 treeOutput->v_genPh_HGCalEEM_deltaR.push_back(genPh1_4mom.deltaR(genPh2_4mom));
             }
@@ -649,6 +650,9 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     // Multiclusters
     int nTICLmultiCluster = v_TICLmultiCluster->size();
     
+    int multiClus1_HGCalEEP_idx = -1;
+    int multiClus1_HGCalEEM_idx = -1;
+    
     double multiClus_HGCalEEP_meanX = 0;
     double multiClus_HGCalEEP_meanY = 0;
     double multiClus_HGCalEEP_meanZ = 0;
@@ -749,6 +753,12 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             multiClus_HGCalEEP_totET += TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta());
             
             treeOutput->v_multiClus_HGCalEEP_EsortedIndex.push_back(iTICLmultiCluster);
+            
+            
+            if(multiClus1_HGCalEEP_idx < 0 || TICLmultiCluster.energy() > v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).energy())
+            {
+                multiClus1_HGCalEEP_idx = iTICLmultiCluster;
+            }
         }
         
         else
@@ -764,6 +774,12 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             multiClus_HGCalEEM_totET += TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta());
             
             treeOutput->v_multiClus_HGCalEEM_EsortedIndex.push_back(iTICLmultiCluster);
+            
+            
+            if(multiClus1_HGCalEEM_idx < 0 || TICLmultiCluster.energy() > v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).energy())
+            {
+                multiClus1_HGCalEEM_idx = iTICLmultiCluster;
+            }
         }
         
         edm::PtrVector <reco::CaloCluster> v_cluster = TICLmultiCluster.clusters();
@@ -1123,6 +1139,14 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             TICLmultiCluster.z()
         );
         
+        double multiClus1_dX = -999;
+        double multiClus1_dY = -999;
+        double multiClus1_dZ = -999;
+        
+        double multiClus1_dEta = -999;
+        double multiClus1_dPhi = -999;
+        double multiClus1_dR   = -999;
+        
         if(TICLmultiCluster.z() > 0)
         {
             double dX = fabs(TICLmultiCluster.x() - treeOutput->multiClus_HGCalEEP_meanX);
@@ -1130,7 +1154,7 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             double dZ = fabs(TICLmultiCluster.z() - treeOutput->multiClus_HGCalEEP_meanZ);
             
             double dEta = fabs(TICLmultiCluster_3vec.eta() - multiClus_HGCalEEP_meanEta);
-            double dPhi = fabs(getDeltaPhi(TICLmultiCluster_3vec.phi(), multiClus_HGCalEEP_meanPhi));
+            double dPhi = fabs(TVector2::Phi_mpi_pi(TICLmultiCluster_3vec.phi() - multiClus_HGCalEEP_meanPhi));
             
             multiClus_HGCalEEP_meanDx += TICLmultiCluster.energy() * dX;
             multiClus_HGCalEEP_meanDy += TICLmultiCluster.energy() * dY;
@@ -1146,6 +1170,18 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             
             treeOutput->v_multiClus_dEta.push_back(dEta);
             treeOutput->v_multiClus_dPhi.push_back(dPhi);
+            
+            
+            if(multiClus1_HGCalEEP_idx >= 0 && multiClus1_HGCalEEP_idx != iTICLmultiCluster)
+            {
+                multiClus1_dX = TICLmultiCluster.x() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).x();
+                multiClus1_dY = TICLmultiCluster.y() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).y();
+                multiClus1_dZ = TICLmultiCluster.z() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).z();
+                
+                multiClus1_dEta = fabs(TICLmultiCluster.eta()) - fabs(v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).eta());
+                multiClus1_dPhi = TVector2::Phi_mpi_pi(TICLmultiCluster.phi() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).phi());
+                multiClus1_dR   = std::sqrt(multiClus1_dX*multiClus1_dX + multiClus1_dY*multiClus1_dY + multiClus1_dZ*multiClus1_dZ);
+            }
         }
         
         else
@@ -1155,7 +1191,7 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             double dZ = fabs(TICLmultiCluster.z() - treeOutput->multiClus_HGCalEEM_meanZ);
             
             double dEta = fabs(TICLmultiCluster_3vec.eta() - multiClus_HGCalEEM_meanEta);
-            double dPhi = fabs(getDeltaPhi(TICLmultiCluster_3vec.phi(), multiClus_HGCalEEM_meanPhi));
+            double dPhi = fabs(TVector2::Phi_mpi_pi(TICLmultiCluster_3vec.phi() - multiClus_HGCalEEM_meanPhi));
             
             multiClus_HGCalEEM_meanDx += TICLmultiCluster.energy() * dX;
             multiClus_HGCalEEM_meanDy += TICLmultiCluster.energy() * dY;
@@ -1171,7 +1207,28 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             
             treeOutput->v_multiClus_dEta.push_back(dEta);
             treeOutput->v_multiClus_dPhi.push_back(dPhi);
+            
+            
+            if(multiClus1_HGCalEEM_idx >= 0 && multiClus1_HGCalEEM_idx != iTICLmultiCluster)
+            {
+                multiClus1_dX = TICLmultiCluster.x() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).x();
+                multiClus1_dY = TICLmultiCluster.y() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).y();
+                multiClus1_dZ = TICLmultiCluster.z() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).z();
+                
+                multiClus1_dEta = fabs(TICLmultiCluster.eta()) - fabs(v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).eta());
+                multiClus1_dPhi = TVector2::Phi_mpi_pi(TICLmultiCluster.phi() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).phi());
+                multiClus1_dR   = std::sqrt(multiClus1_dX*multiClus1_dX + multiClus1_dY*multiClus1_dY + multiClus1_dZ*multiClus1_dZ);
+            }
         }
+        
+        treeOutput->v_multiClus_mc1_dX.push_back(multiClus1_dX);
+        treeOutput->v_multiClus_mc1_dY.push_back(multiClus1_dY);
+        treeOutput->v_multiClus_mc1_dZ.push_back(multiClus1_dZ);
+        
+        treeOutput->v_multiClus_mc1_dEta.push_back(multiClus1_dEta);
+        treeOutput->v_multiClus_mc1_dPhi.push_back(multiClus1_dPhi);
+        treeOutput->v_multiClus_mc1_dR.push_back(multiClus1_dR);
+        
         
         
         // Photon multicluster sum
@@ -1590,6 +1647,8 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         treeOutput->v_gsfEleFromTICL_superClus_E.push_back(gsfEle.superCluster()->energy());
         
+        treeOutput->v_gsfEleFromTICL_superClus_nClus.push_back(gsfEle.superCluster()->clusters().size());
+        
         std::vector <std::pair <DetId, float> > v_superClus_HandF = gsfEle.superCluster()->hitsAndFractions();
         math::XYZPoint superClus_xyz = gsfEle.superCluster()->position();
         
@@ -1865,6 +1924,15 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         const reco::CaloCluster *superClus_seed = gsfEle.superCluster()->seed().get();
         
+        CLHEP::Hep3Vector superClus_seed_3vec(
+            superClus_seed->x(),
+            superClus_seed->y(),
+            superClus_seed->z()
+        );
+        
+        treeOutput->v_gsfEleFromTICL_superClusSeed_E.push_back(superClus_seed->energy());
+        treeOutput->v_gsfEleFromTICL_superClusSeed_ET.push_back(superClus_seed->energy() * sin(superClus_seed_3vec.theta()));
+        
         
         //
         std::vector <double> v_gsfEleFromTICL_superClusSeed_clus_dEta;
@@ -1899,7 +1967,7 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //);
             
             double dEta = fabs(cluster->eta()) - fabs(superClus_seed->eta());
-            double dPhi = getDeltaPhi(cluster->phi(), superClus_seed->phi());
+            double dPhi = TVector2::Phi_mpi_pi(cluster->phi() - superClus_seed->phi());
             
             if(fabs(dEta) < superClus_clus_dEta_min && fabs(dPhi) < superClus_clus_dPhi_min)
             {
@@ -1945,17 +2013,29 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //
         std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_E;
         std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_ET;
+        std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_nClus;
+        
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dX;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dY;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dZ;
         
         std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dEta;
         std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dR;
         
         // REMEMBER to add the vectors to this!
         std::vector <std::vector <double>* > vv_gsfEleFromTICL_superClus_TICLclus = {
             &v_gsfEleFromTICL_superClus_TICLclus_E,
             &v_gsfEleFromTICL_superClus_TICLclus_ET,
+            &v_gsfEleFromTICL_superClus_TICLclus_nClus,
+            
+            &v_gsfEleFromTICL_superClusSeed_TICLclus_dX,
+            &v_gsfEleFromTICL_superClusSeed_TICLclus_dY,
+            &v_gsfEleFromTICL_superClusSeed_TICLclus_dZ,
             
             &v_gsfEleFromTICL_superClusSeed_TICLclus_dEta,
             &v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi,
+            &v_gsfEleFromTICL_superClusSeed_TICLclus_dR,
         };
         
         int superClus_TICLclus_seed_index = -1;
@@ -1978,8 +2058,14 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 TICLmultiCluster.z()
             );
             
+            double dX = TICLmultiCluster.x() - superClus_seed->x();
+            double dY = TICLmultiCluster.y() - superClus_seed->y();
+            double dZ = TICLmultiCluster.z() - superClus_seed->z();
+            
             double dEta = fabs(TICLmultiCluster.eta()) - fabs(superClus_seed->eta());
-            double dPhi = getDeltaPhi(TICLmultiCluster.phi(), superClus_seed->phi());
+            double dPhi = TVector2::Phi_mpi_pi(TICLmultiCluster.phi() - superClus_seed->phi());
+            double dR   = sqrt(dX*dX + dY*dY + dZ*dZ);
+            //double dR = TICLmultiCluster_3vec.r() - superClus_seed->position().r();
             
             if(fabs(dEta) < superClus_TICLclus_dEta_min && fabs(dPhi) < superClus_TICLclus_dPhi_min)
             {
@@ -1997,12 +2083,20 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             
             v_gsfEleFromTICL_superClus_TICLclus_E.push_back(TICLmultiCluster.energy());
             v_gsfEleFromTICL_superClus_TICLclus_ET.push_back(TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta()));
+            v_gsfEleFromTICL_superClus_TICLclus_nClus.push_back(TICLmultiCluster.clusters().size());
+            
+            v_gsfEleFromTICL_superClusSeed_TICLclus_dX.push_back(dX);
+            v_gsfEleFromTICL_superClusSeed_TICLclus_dY.push_back(dY);
+            v_gsfEleFromTICL_superClusSeed_TICLclus_dZ.push_back(dZ);
             
             v_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(dEta);
             v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(dPhi);
+            v_gsfEleFromTICL_superClusSeed_TICLclus_dR.push_back(dR);
             
             count++;
         }
+        
+        treeOutput->v_gsfEleFromTICL_superClus_TICLclus_n.push_back(v_gsfEleFromTICL_superClus_TICLclus_E.size());
         
         // Remove the seed
         if(superClus_TICLclus_seed_index >= 0)
@@ -2028,9 +2122,15 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_E.push_back(v_gsfEleFromTICL_superClus_TICLclus_E);
         treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_ET.push_back(v_gsfEleFromTICL_superClus_TICLclus_ET);
+        treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_nClus.push_back(v_gsfEleFromTICL_superClus_TICLclus_nClus);
+        
+        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dX.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dX);
+        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dY.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dY);
+        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dZ.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dZ);
         
         treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dEta);
         treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi);
+        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dR.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dR);
     }
     
     
@@ -2108,8 +2208,11 @@ double TreeMaker::getDeltaPhi(double phi1, double phi2)
 {
     double deltaPhi = phi1 - phi2;
     
-    deltaPhi = (deltaPhi > M_PI)? (deltaPhi - M_PI): deltaPhi;
-    deltaPhi = (deltaPhi < -M_PI)? (deltaPhi + M_PI): deltaPhi;
+    deltaPhi = (deltaPhi > +M_PI)? (deltaPhi - 2*M_PI): deltaPhi;
+    deltaPhi = (deltaPhi < -M_PI)? (deltaPhi + 2*M_PI): deltaPhi;
+    
+    //deltaPhi = (deltaPhi > +M_PI)? (2*M_PI - deltaPhi): deltaPhi;
+    //deltaPhi = (deltaPhi < -M_PI)? (2*M_PI + deltaPhi): deltaPhi;
     
     return deltaPhi;
 }

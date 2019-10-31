@@ -96,8 +96,14 @@ void PFClusterFromHGCalMultiCluster::buildClusters(const edm::Handle<reco::PFRec
         pfClusEEM_totE += back.energy();
     }
     
-    count += 1;
+    
+    //printf("[%d, %0.2f (%0.2f), %+0.2f, %+0.2f], ", count, energy, mcl.energy(), mcl.eta(), mcl.phi());
+    
+    count ++;
+    
   }  // end of loop over hgcalMulticlusters (3D)
+  
+  //printf("\n");
   
   //printf(
   //  "PFClusterFromHGCalMultiCluster: \n"

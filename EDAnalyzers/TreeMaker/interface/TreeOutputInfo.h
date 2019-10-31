@@ -141,6 +141,7 @@ namespace TreeOutputInfo
         std::vector <double> v_multiClus_clus_nHit;
         
         
+        //
         std::vector <double> v_multiClus_uniqueClus_n;
         std::vector <double> v_multiClus_uniqueClus_E;
         std::vector <double> v_multiClus_uniqueClus_x;
@@ -153,6 +154,16 @@ namespace TreeOutputInfo
         std::vector <double> v_multiClus_uniqueClus_layer;
         std::vector <double> v_multiClus_uniqueClus_multiplicity;
         std::vector <double> v_multiClus_uniqueClus_nHit;
+        
+        
+        //
+        std::vector <double> v_multiClus_mc1_dX;
+        std::vector <double> v_multiClus_mc1_dY;
+        std::vector <double> v_multiClus_mc1_dZ;
+        
+        std::vector <double> v_multiClus_mc1_dEta;
+        std::vector <double> v_multiClus_mc1_dPhi;
+        std::vector <double> v_multiClus_mc1_dR;
         
         
         //
@@ -250,6 +261,7 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_ET;
         
         std::vector <double> v_gsfEleFromTICL_superClus_E;
+        std::vector <double> v_gsfEleFromTICL_superClus_nClus;
         std::vector <double> v_gsfEleFromTICL_superClus_nearestCellDist;
         std::vector <double> v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n;
         std::vector <double> v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n;
@@ -258,14 +270,24 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_R19;
         std::vector <double> v_gsfEleFromTICL_R2p8;
         
+        std::vector<double> v_gsfEleFromTICL_superClusSeed_E;
+        std::vector<double> v_gsfEleFromTICL_superClusSeed_ET;
+        
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dEta;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dPhi;
         
+        std::vector<double> v_gsfEleFromTICL_superClus_TICLclus_n;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClus_TICLclus_E;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClus_TICLclus_ET;
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClus_TICLclus_nClus;
+        
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_TICLclus_dX;
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_TICLclus_dY;
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_TICLclus_dZ;
         
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi;
+        std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_TICLclus_dR;
         
         
         double caloParticle_n;
@@ -609,6 +631,26 @@ namespace TreeOutputInfo
             
             
             //
+            sprintf(name, "multiClus_mc1_dX");
+            tree->Branch(name, &v_multiClus_mc1_dX);
+            
+            sprintf(name, "multiClus_mc1_dY");
+            tree->Branch(name, &v_multiClus_mc1_dY);
+            
+            sprintf(name, "multiClus_mc1_dZ");
+            tree->Branch(name, &v_multiClus_mc1_dZ);
+            
+            sprintf(name, "multiClus_mc1_dEta");
+            tree->Branch(name, &v_multiClus_mc1_dEta);
+            
+            sprintf(name, "multiClus_mc1_dPhi");
+            tree->Branch(name, &v_multiClus_mc1_dPhi);
+            
+            sprintf(name, "multiClus_mc1_dR");
+            tree->Branch(name, &v_multiClus_mc1_dR);
+            
+            
+            //
             sprintf(name, "multiClus_HGCalEEP_meanX");
             tree->Branch(name, &multiClus_HGCalEEP_meanX);
             
@@ -825,6 +867,9 @@ namespace TreeOutputInfo
             sprintf(name, "gsfEleFromTICL_superClus_E");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_E);
             
+            sprintf(name, "gsfEleFromTICL_superClus_nClus");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_nClus);
+            
             sprintf(name, "gsfEleFromTICL_superClus_nearestCellDist");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_nearestCellDist);
             
@@ -843,11 +888,20 @@ namespace TreeOutputInfo
             sprintf(name, "gsfEleFromTICL_R2p8");
             tree->Branch(name, &v_gsfEleFromTICL_R2p8);
             
+            sprintf(name, "gsfEleFromTICL_superClusSeed_E");
+            tree->Branch(name, &v_gsfEleFromTICL_superClusSeed_E);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_ET");
+            tree->Branch(name, &v_gsfEleFromTICL_superClusSeed_ET);
+            
             sprintf(name, "gsfEleFromTICL_superClusSeed_clus_dEta");
             tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_clus_dEta);
             
             sprintf(name, "gsfEleFromTICL_superClusSeed_clus_dPhi");
             tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_clus_dPhi);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_TICLclus_n");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_TICLclus_n);
             
             sprintf(name, "gsfEleFromTICL_superClus_TICLclus_E");
             tree->Branch(name, &vv_gsfEleFromTICL_superClus_TICLclus_E);
@@ -855,11 +909,26 @@ namespace TreeOutputInfo
             sprintf(name, "gsfEleFromTICL_superClus_TICLclus_ET");
             tree->Branch(name, &vv_gsfEleFromTICL_superClus_TICLclus_ET);
             
+            sprintf(name, "gsfEleFromTICL_superClus_TICLclus_nClus");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClus_TICLclus_nClus);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_TICLclus_dX");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_TICLclus_dX);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_TICLclus_dY");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_TICLclus_dY);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_TICLclus_dZ");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_TICLclus_dZ);
+            
             sprintf(name, "gsfEleFromTICL_superClusSeed_TICLclus_dEta");
             tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta);
             
             sprintf(name, "gsfEleFromTICL_superClusSeed_TICLclus_dPhi");
             tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_TICLclus_dR");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_TICLclus_dR);
             
             
             //
@@ -1018,6 +1087,14 @@ namespace TreeOutputInfo
             v_multiClus_uniqueClus_multiplicity.clear();
             v_multiClus_uniqueClus_nHit.clear();
             
+            v_multiClus_mc1_dX.clear();
+            v_multiClus_mc1_dY.clear();
+            v_multiClus_mc1_dZ.clear();
+            
+            v_multiClus_mc1_dEta.clear();
+            v_multiClus_mc1_dPhi.clear();
+            v_multiClus_mc1_dR.clear();
+            
             
             multiClus_HGCalEEP_meanX = 0;
             multiClus_HGCalEEP_meanY = 0;
@@ -1110,6 +1187,7 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_ET.clear();
             
             v_gsfEleFromTICL_superClus_E.clear();
+            v_gsfEleFromTICL_superClus_nClus.clear();
             v_gsfEleFromTICL_superClus_nearestCellDist.clear();
             v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n.clear();
             v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n.clear();
@@ -1118,14 +1196,25 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_R19.clear();
             v_gsfEleFromTICL_R2p8.clear();
             
+            v_gsfEleFromTICL_superClusSeed_E.clear();
+            v_gsfEleFromTICL_superClusSeed_ET.clear();
+            
             vv_gsfEleFromTICL_superClusSeed_clus_dEta.clear();
             vv_gsfEleFromTICL_superClusSeed_clus_dPhi.clear();
             
+            v_gsfEleFromTICL_superClus_TICLclus_n.clear();
+            
             vv_gsfEleFromTICL_superClus_TICLclus_E.clear();
             vv_gsfEleFromTICL_superClus_TICLclus_ET.clear();
+            vv_gsfEleFromTICL_superClus_TICLclus_nClus.clear();
+            
+            vv_gsfEleFromTICL_superClusSeed_TICLclus_dX.clear();
+            vv_gsfEleFromTICL_superClusSeed_TICLclus_dY.clear();
+            vv_gsfEleFromTICL_superClusSeed_TICLclus_dZ.clear();
             
             vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta.clear();
             vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.clear();
+            vv_gsfEleFromTICL_superClusSeed_TICLclus_dR.clear();
             
             
             //
