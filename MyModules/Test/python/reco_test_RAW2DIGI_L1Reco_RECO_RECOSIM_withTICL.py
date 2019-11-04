@@ -152,6 +152,11 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
 
+# Aging
+from SLHCUpgradeSimulations.Configuration.aging import customise_aging_1000
+customise_aging_1000(process)
+
+
 # Import TICL
 #from ticl_iterations import TICL_iterations
 from RecoHGCal.TICL.ticl_iterations import TICL_iterations_withReco
