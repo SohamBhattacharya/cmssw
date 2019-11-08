@@ -462,7 +462,7 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     );
     
     
-    /*
+    
     // SimHit dictionary
     edm::Handle <std::vector <PCaloHit> > v_HGCEESimHit;
     iEvent.getByToken(tok_HGCEESimHit, v_HGCEESimHit);
@@ -1618,31 +1618,31 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             treeOutput->recHit_n++;
         }
     }
-    */
+    
     
     
     // Gsf electrons from multiclusters
-    //edm::Handle <std::vector <reco::GsfElectron> > v_gsfEleFromMultiClus;
-    //iEvent.getByToken(tok_gsfEleFromMultiClus, v_gsfEleFromMultiClus);
-    //
-    //int nEleFromMultiClus = v_gsfEleFromMultiClus->size();
-    //
-    //for(int iEle = 0; iEle < nEleFromMultiClus; iEle++)
-    //{
-    //    reco::GsfElectron gsfEle = v_gsfEleFromMultiClus->at(iEle);
-    //    
-    //    treeOutput->v_gsfEleFromMultiClus_E.push_back(gsfEle.energy());
-    //    treeOutput->v_gsfEleFromMultiClus_px.push_back(gsfEle.px());
-    //    treeOutput->v_gsfEleFromMultiClus_py.push_back(gsfEle.py());
-    //    treeOutput->v_gsfEleFromMultiClus_pz.push_back(gsfEle.pz());
-    //    
-    //    treeOutput->v_gsfEleFromMultiClus_pT.push_back(gsfEle.pt());
-    //    treeOutput->v_gsfEleFromMultiClus_eta.push_back(gsfEle.eta());
-    //    treeOutput->v_gsfEleFromMultiClus_phi.push_back(gsfEle.phi());
-    //    
-    //    
-    //    treeOutput->gsfEleFromMultiClus_n++;
-    //}
+    edm::Handle <std::vector <reco::GsfElectron> > v_gsfEleFromMultiClus;
+    iEvent.getByToken(tok_gsfEleFromMultiClus, v_gsfEleFromMultiClus);
+    
+    int nEleFromMultiClus = v_gsfEleFromMultiClus->size();
+    
+    for(int iEle = 0; iEle < nEleFromMultiClus; iEle++)
+    {
+        reco::GsfElectron gsfEle = v_gsfEleFromMultiClus->at(iEle);
+        
+        treeOutput->v_gsfEleFromMultiClus_E.push_back(gsfEle.energy());
+        treeOutput->v_gsfEleFromMultiClus_px.push_back(gsfEle.px());
+        treeOutput->v_gsfEleFromMultiClus_py.push_back(gsfEle.py());
+        treeOutput->v_gsfEleFromMultiClus_pz.push_back(gsfEle.pz());
+        
+        treeOutput->v_gsfEleFromMultiClus_pT.push_back(gsfEle.pt());
+        treeOutput->v_gsfEleFromMultiClus_eta.push_back(gsfEle.eta());
+        treeOutput->v_gsfEleFromMultiClus_phi.push_back(gsfEle.phi());
+        
+        
+        treeOutput->gsfEleFromMultiClus_n++;
+    }
     
     
     
@@ -1656,10 +1656,10 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     {
         reco::GsfElectron gsfEle = v_gsfEleFromTICL->at(iEle);
         
-        if(fabs(gsfEle.eta()) < HGCal_minEta)
-        {
-            continue;
-        }
+        //if(fabs(gsfEle.eta()) < HGCal_minEta)
+        //{
+        //    continue;
+        //}
         
         treeOutput->v_gsfEleFromTICL_E.push_back(gsfEle.energy());
         treeOutput->v_gsfEleFromTICL_px.push_back(gsfEle.px());
@@ -1791,7 +1791,7 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             gsfEle.gsfTrack()->p()
         );
         
-        /*double totalE = 0;
+        double totalE = 0;
         
         double energy7 = 0;
         double energy19 = 0;
@@ -1969,6 +1969,8 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         treeOutput->v_gsfEleFromTICL_superClusSeed_E.push_back(superClus_seed->energy());
         treeOutput->v_gsfEleFromTICL_superClusSeed_ET.push_back(superClus_seed->energy() * sin(superClus_seed_3vec.theta()));
+        treeOutput->v_gsfEleFromTICL_superClusSeed_eta.push_back(superClus_seed->eta());
+        treeOutput->v_gsfEleFromTICL_superClusSeed_phi.push_back(superClus_seed->phi());
         
         
         //
@@ -2167,7 +2169,7 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dEta);
         treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi);
-        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dR.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dR);*/
+        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dR.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dR);
     }
     
     

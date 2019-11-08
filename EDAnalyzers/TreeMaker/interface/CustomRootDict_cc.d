@@ -1,8 +1,9 @@
 
 # DO NOT DELETE
 
-./EDAnalyzers/TreeMaker/interface/CustomRootDict_cc.so: /usr/include/stdlib.h
-./EDAnalyzers/TreeMaker/interface/CustomRootDict_cc.so: /usr/include/string.h
-./EDAnalyzers/TreeMaker/interface/CustomRootDict_cc.so: /usr/include/time.h
-./EDAnalyzers/TreeMaker/interface/CustomRootDict_cc.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/RVersion.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/RConfig.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TClass.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TDictAttributeMap.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TInterpreter.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TROOT.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TBuffer.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TMemberInspector.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TError.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/RtypesImp.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TIsAProxy.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TFileMergeInfo.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/lcg/root/6.14.09-nmpfii7/include/TCollectionProxyInfo.h /cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_11_0_0_pre11/external/slc7_amd64_gcc820/bin/rootcling
-CustomRootDict_cc__ROOTBUILDVERSION= 6.14/09
+./EDAnalyzers/TreeMaker/interface/CustomRootDict_cc.so: /usr/include/c++/5/iostream
+./EDAnalyzers/TreeMaker/interface/CustomRootDict_cc.so: /usr/include/c++/5/random
+./EDAnalyzers/TreeMaker/interface/CustomRootDict_cc.so: /usr/include/c++/5/typeinfo
+./EDAnalyzers/TreeMaker/interface/CustomRootDict_cc.so: /usr/include/c++/5/vector
+./EDAnalyzers/TreeMaker/interface/CustomRootDict_cc.so: /opt/root-6.06.06/include/root/RVersion.h /opt/root-6.06.06/include/root/RConfig.h /opt/root-6.06.06/include/root/TClass.h /opt/root-6.06.06/include/root/TDictAttributeMap.h /opt/root-6.06.06/include/root/TInterpreter.h /opt/root-6.06.06/include/root/TROOT.h /opt/root-6.06.06/include/root/TBuffer.h /opt/root-6.06.06/include/root/TMemberInspector.h /opt/root-6.06.06/include/root/TError.h /opt/root-6.06.06/include/root/RtypesImp.h /opt/root-6.06.06/include/root/TIsAProxy.h /opt/root-6.06.06/include/root/TFileMergeInfo.h /opt/root-6.06.06/include/root/TCollectionProxyInfo.h
+CustomRootDict_cc__ROOTBUILDVERSION= 6.06/06

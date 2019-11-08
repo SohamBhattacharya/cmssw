@@ -204,7 +204,7 @@ process.source = cms.Source("PoolSource",
     fileNames = sourceFileNames,
     
     # Run1:Event1 to Run2:Event2
-    eventsToProcess = cms.untracked.VEventRange("1:78722-1:78722"),
+    #eventsToProcess = cms.untracked.VEventRange("1:78722-1:78722"),
     
     duplicateCheckMode = cms.untracked.string("noDuplicateCheck"),
 )

@@ -286,6 +286,8 @@ namespace TreeOutputInfo
         
         std::vector<double> v_gsfEleFromTICL_superClusSeed_E;
         std::vector<double> v_gsfEleFromTICL_superClusSeed_ET;
+        std::vector<double> v_gsfEleFromTICL_superClusSeed_eta;
+        std::vector<double> v_gsfEleFromTICL_superClusSeed_phi;
         
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dEta;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dPhi;
@@ -940,6 +942,12 @@ namespace TreeOutputInfo
             sprintf(name, "gsfEleFromTICL_superClusSeed_ET");
             tree->Branch(name, &v_gsfEleFromTICL_superClusSeed_ET);
             
+            sprintf(name, "gsfEleFromTICL_superClusSeed_eta");
+            tree->Branch(name, &v_gsfEleFromTICL_superClusSeed_eta);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_phi");
+            tree->Branch(name, &v_gsfEleFromTICL_superClusSeed_phi);
+            
             sprintf(name, "gsfEleFromTICL_superClusSeed_clus_dEta");
             tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_clus_dEta);
             
@@ -1258,6 +1266,8 @@ namespace TreeOutputInfo
             
             v_gsfEleFromTICL_superClusSeed_E.clear();
             v_gsfEleFromTICL_superClusSeed_ET.clear();
+            v_gsfEleFromTICL_superClusSeed_eta.clear();
+            v_gsfEleFromTICL_superClusSeed_phi.clear();
             
             vv_gsfEleFromTICL_superClusSeed_clus_dEta.clear();
             vv_gsfEleFromTICL_superClusSeed_clus_dPhi.clear();
