@@ -371,14 +371,14 @@ void PFECALSuperClusterAlgo::run() {
   
   
   // clusterize the EB
-  printf("********** Building EB superclusters (seed ET > %0.2f) ********** \n", threshPFClusterSeedBarrel_);
+  //printf("********** Building EB superclusters (seed ET > %0.2f) ********** \n", threshPFClusterSeedBarrel_);
   buildAllSuperClusters(_clustersEB, threshPFClusterSeedBarrel_);
-  printf("\n\n");
+  //printf("\n\n");
   
   // clusterize the EE
-  printf("********** Building EE superclusters (seed ET > %0.2f) ********** \n", threshPFClusterSeedEndcap_);
+  //printf("********** Building EE superclusters (seed ET > %0.2f) ********** \n", threshPFClusterSeedEndcap_);
   buildAllSuperClusters(_clustersEE, threshPFClusterSeedEndcap_);
-  printf("\n\n");
+  //printf("\n\n");
   
   
   //clusTotE_EEP = 0;
@@ -426,15 +426,15 @@ void PFECALSuperClusterAlgo::buildAllSuperClusters(CalibClusterPtrVector& cluste
         tab = std::string("  ") + tab;
     }
     
-    printf("%sStarting SC iter %d: nCluster %d, seed ET %0.2f \n",
-        tab.c_str(), nSCiter, (int) clusters.size(), ptFast(clusters.front()->the_ptr()->energy(), clusters.front()->the_ptr()->position(), math::XYZPoint(0, 0, 0))
-    );
+    //printf("%sStarting SC iter %d: nCluster %d, seed ET %0.2f \n",
+    //    tab.c_str(), nSCiter, (int) clusters.size(), ptFast(clusters.front()->the_ptr()->energy(), clusters.front()->the_ptr()->position(), math::XYZPoint(0, 0, 0))
+    //);
     
     buildSuperCluster(clusters.front(), clusters);
     
-    printf("%sFinished SC iter %d: nCluster %d, seed ET %0.2f \n",
-        tab.c_str(), nSCiter, (int) clusters.size(), ptFast(clusters.front()->the_ptr()->energy(), clusters.front()->the_ptr()->position(), math::XYZPoint(0, 0, 0))
-    );
+    //printf("%sFinished SC iter %d: nCluster %d, seed ET %0.2f \n",
+    //    tab.c_str(), nSCiter, (int) clusters.size(), ptFast(clusters.front()->the_ptr()->energy(), clusters.front()->the_ptr()->position(), math::XYZPoint(0, 0, 0))
+    //);
     
     nSCiter++;
   }

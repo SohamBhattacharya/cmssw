@@ -224,7 +224,7 @@ void PFECALSuperClusterProducer::produce(edm::Event& iEvent, const edm::EventSet
       }
     }
     
-    printf(
+    /*printf(
         "EESC %d: "
         "E %0.2f, "
         //"rawE %0.2f, "
@@ -242,7 +242,7 @@ void PFECALSuperClusterProducer::produce(edm::Event& iEvent, const edm::EventSet
         (int) eesc.size(),
         caloClusTotE,
         PSclusTotE
-    );
+    );*/
     
     nEESC++;
   }
