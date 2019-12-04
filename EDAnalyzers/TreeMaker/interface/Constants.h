@@ -20,6 +20,10 @@
 namespace Constants
 {
     const int HGCalEE_nLayer = 28;
+    
+    const double _defaultVal_pos1 = 999;
+    
+    const double _deltaR_genMatch = 0.4;
 }
 
 

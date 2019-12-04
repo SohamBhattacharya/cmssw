@@ -40,7 +40,8 @@ def ecalDrivenGsfElectronsFromTICL_customizeProcess(process, onReco = False) :
     #process.particleFlowSuperClusterHGCalFromTICL.doSatelliteClusterMerge = cms.bool(True)
     #process.particleFlowSuperClusterHGCalFromTICL.satelliteClusterSeedThreshold = cms.double(1.0)
     #process.particleFlowSuperClusterHGCalFromTICL.satelliteMajorityFraction = cms.double(0.1)
-    process.particleFlowSuperClusterHGCalFromTICL.useDynamicDPhiWindow = cms.bool(False)
+    process.particleFlowSuperClusterHGCalFromTICL.useDynamicDPhiWindow = cms.bool(True)
+    process.particleFlowSuperClusterHGCalFromTICL.useHGCalParam = cms.bool(True)
     #process.ecalDrivenElectronSeedsFromTICL.barrelSuperClusters = ""
     process.ecalDrivenElectronSeedsFromTICL.endcapSuperClusters = cms.InputTag("particleFlowSuperClusterHGCalFromTICL", "")
     process.electronMergedSeedsFromTICL.EcalBasedSeeds = cms.InputTag("ecalDrivenElectronSeedsFromTICL", "")
@@ -55,9 +56,10 @@ def ecalDrivenGsfElectronsFromTICL_customizeProcess(process, onReco = False) :
     
     
     # Thresholds
-    process.particleFlowSuperClusterHGCalFromTICL.thresh_SCEt = cms.double(10.0)
+    process.particleFlowSuperClusterHGCalFromTICL.thresh_SCEt = cms.double(5.0)
+    process.particleFlowSuperClusterHGCalFromTICL.seedThresholdIsET = cms.bool(True) # True is the default
     process.particleFlowSuperClusterHGCalFromTICL.thresh_PFClusterSeedEndcap = cms.double(5.0)
-    process.particleFlowSuperClusterHGCalFromTICL.thresh_PFClusterEndcap = cms.double(1.0)
+    process.particleFlowSuperClusterHGCalFromTICL.thresh_PFClusterEndcap = cms.double(2.0) # Cut on E (not ET)
     
     
     process.ecalDrivenGsfElectronsFromTICL_step = cms.Path(

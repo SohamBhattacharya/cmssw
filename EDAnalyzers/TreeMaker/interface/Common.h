@@ -17,9 +17,35 @@
 # include <TTree.h> 
 # include <TVectorD.h> 
 
+# include "Constants.h"
+
 
 namespace Common
 {
+    int getPileup(edm::Handle <std::vector <PileupSummaryInfo> > pileUps_reco)
+    {
+        int pileup_n = 0;
+        
+        // Start from the end to reach the In-time bunch-crossing quicker
+        for(int iPileUp = (int) pileUps_reco->size() - 1; iPileUp >= 0; iPileUp--)
+        {
+            PileupSummaryInfo pileUpInfo = (*pileUps_reco)[iPileUp];
+            
+            int bunchCrossingNumber = pileUpInfo.getBunchCrossing();
+            
+            // In-time bunch-crossing pile-up
+            if(bunchCrossingNumber == 0)
+            {
+                pileup_n = pileUpInfo.getPU_NumInteractions();
+                
+                break;
+            }
+        }
+        
+        return pileup_n;
+    }
+    
+    
     double getCellSize(DetId detId, hgcal::RecHitTools *recHitTools)
     {
         double SiThickness = recHitTools->getSiThickness(detId);
@@ -73,6 +99,40 @@ namespace Common
         fflush(stderr);
         
         return v_matchedSimHitIndex;
+    }
+    
+    
+    // Returns the vector of pairs (energy sorted): < <idx1, energy1>, ...., <<idxN, energyN>> >
+    std::vector <std::pair <int, double> > getSortedHitIndex(
+        std::vector <std::pair <DetId, float> > v_HandF,
+        std::map <DetId, const HGCRecHit*> m_hit
+    )
+    {
+        int nHit = v_HandF.size();
+        
+        std::vector <std::pair <int, double> > vp_index_energy;
+        
+        for(int iHit = 0; iHit < nHit; iHit++)
+        {
+            double energy = 0;
+            
+            if(m_hit.find(v_HandF.at(iHit).first) != m_hit.end())
+            {
+                energy = m_hit[v_HandF.at(iHit).first]->energy() * v_HandF.at(iHit).second;
+            }
+            
+            vp_index_energy.push_back(std::make_pair(iHit, energy));
+        }
+        
+        std::sort(
+            vp_index_energy.begin(), vp_index_energy.end(),
+            [&](std::pair <int, double> ele1, std::pair <int, double> ele2)
+            {
+                return ele1.second > ele2.second;
+            }
+        );
+        
+        return vp_index_energy;
     }
     
     
@@ -446,6 +506,8 @@ namespace Common
                     position.z()
                 );
                 
+                // Note that we're calculating sigma^2(rr) here.
+                // So the dR is is simply the difference, and not the 3D difference
                 double dR = multiCluster_3mom.r() - recHit_3mom.r();
                 double dEta = multiCluster_3mom.eta() - recHit_3mom.eta();
                 double dPhi = multiCluster_3mom.deltaPhi(recHit_3mom);
@@ -578,6 +640,301 @@ namespace Common
     }
     
     
+    // PCA
+    // Returns <(r, eta, phi) cov matrix, eigen vector matrix, eigen values>
+    std::tuple <TMatrixD, TMatrixD, TVectorD> getSuperClusPCAinfo(
+        reco::SuperClusterRef superClus,
+        std::map <DetId, const HGCRecHit*> m_recHit,
+        hgcal::RecHitTools *recHitTools,
+        bool debug = false
+    )
+    {
+        double recHit_meanDrSq = 0;
+        double recHit_meanDetaSq = 0;
+        double recHit_meanDphiSq = 0;
+        
+        double recHit_meanDrDeta = 0;
+        double recHit_meanDrDphi = 0;
+        double recHit_meanDetaDphi = 0;
+        
+        int nHitTotal = 0;
+        double totE = 0;
+        
+        std::vector <std::pair <DetId, float> > v_superClus_HandF = superClus->hitsAndFractions();
+        math::XYZPoint superClus_xyz = superClus->position();
+        
+        CLHEP::Hep3Vector superClus_3mom(
+            superClus_xyz.x(),
+            superClus_xyz.y(),
+            superClus_xyz.z()
+        );
+        
+        int nHit = v_superClus_HandF.size();
+        
+        for(int iHit = 0; iHit < nHit; iHit++)
+        {
+            if(m_recHit.find(v_superClus_HandF.at(iHit).first) == m_recHit.end())
+            {
+                printf("Warning in Common::getSuperClusPCAinfo(...): Cluster-hit not in rec-hit map. \n");
+                //exit(EXIT_FAILURE);
+                continue;
+            }
+            
+            const HGCRecHit *recHit = m_recHit[v_superClus_HandF.at(iHit).first];
+            
+            auto position = recHitTools->getPosition(recHit->id());
+            
+            CLHEP::Hep3Vector recHit_3mom(
+                position.x(),
+                position.y(),
+                position.z()
+            );
+            
+            //double dX = superClus_3mom.x() - recHit_3mom.x();
+            //double dY = superClus_3mom.y() - recHit_3mom.y();
+            //double dZ = superClus_3mom.z() - recHit_3mom.z();
+            //
+            //double dR = sqrt(dX*dX + dY*dY + dZ*dZ);
+            
+            // Note that we're calculating sigma^2(rr) here.
+            // So the dR is is simply the difference, and not the 3D difference
+            double dR = superClus_3mom.r() - recHit_3mom.r();
+            double dEta = superClus_xyz.eta() - recHit_3mom.eta();
+            double dPhi = superClus_3mom.deltaPhi(recHit_3mom);
+            
+            double recHit_E = recHit->energy() * v_superClus_HandF.at(iHit).second;
+            
+            recHit_meanDrSq   += recHit_E * dR*dR;
+            recHit_meanDetaSq += recHit_E * dEta*dEta;
+            recHit_meanDphiSq += recHit_E * dPhi*dPhi;
+            
+            recHit_meanDrDeta   += recHit_E * dR*dEta;
+            recHit_meanDrDphi   += recHit_E * dR*dPhi;
+            recHit_meanDetaDphi += recHit_E * dEta*dPhi;
+            
+            nHitTotal++;
+            totE += recHit_E;
+        }
+        
+        if(totE > 0)
+        {
+            recHit_meanDrSq /= totE;
+            recHit_meanDetaSq /= totE;
+            recHit_meanDphiSq /= totE;
+            
+            recHit_meanDrDeta /= totE;
+            recHit_meanDrDphi /= totE;
+            recHit_meanDetaDphi /= totE;
+        }
+        
+        else
+        {
+            recHit_meanDrSq = 0;
+            recHit_meanDetaSq = 0;
+            recHit_meanDphiSq = 0;
+            
+            recHit_meanDrDeta = 0;
+            recHit_meanDrDphi = 0;
+            recHit_meanDetaDphi = 0;
+            
+            printf("Warning in Common::getSuperClusPCAinfo(...): Encountered multicluster with zero energy. \n");
+        }
+        
+        int dimension = 3;
+        
+        // Covariance matrix
+        TMatrixD mat_superClus_rEtaPhiCov(dimension, dimension);
+        
+        mat_superClus_rEtaPhiCov(0, 0) = recHit_meanDrSq;
+        mat_superClus_rEtaPhiCov(1, 1) = recHit_meanDetaSq;
+        mat_superClus_rEtaPhiCov(2, 2) = recHit_meanDphiSq;
+        
+        mat_superClus_rEtaPhiCov(0, 1) = mat_superClus_rEtaPhiCov(1, 0) = recHit_meanDrDeta;
+        mat_superClus_rEtaPhiCov(0, 2) = mat_superClus_rEtaPhiCov(2, 0) = recHit_meanDrDphi;
+        mat_superClus_rEtaPhiCov(1, 2) = mat_superClus_rEtaPhiCov(2, 1) = recHit_meanDetaDphi;
+        
+        
+        // Get eigen values and vectors
+        TVectorD v_superClus_rEtaPhiCov_eigVal(dimension);
+        TMatrixD mat_superClus_rEtaPhiCov_eigVec(dimension, dimension);
+        
+        if(totE > 0 && superClus->energy() > 0)
+        {
+            try
+            {
+                mat_superClus_rEtaPhiCov_eigVec = mat_superClus_rEtaPhiCov.EigenVectors(v_superClus_rEtaPhiCov_eigVal);
+            }
+            
+            catch(...)
+            {
+                printf("Error in Common::getSuperClusPCAinfo(...): Cannot get eigen values and vectors. \n");
+                
+                printf(
+                    "Multicluster: "
+                    "E %0.2e, "
+                    "x %0.2e, y %0.2e, z %0.2e \n",
+                    superClus->energy(),
+                    superClus_3mom.x(), superClus_3mom.y(), superClus_3mom.z()
+                );
+                
+                printf("recHit_meanDrSq %0.2f \n", recHit_meanDrSq);
+                printf("recHit_meanDetaSq %0.2f \n", recHit_meanDetaSq);
+                printf("recHit_meanDphiSq %0.2f \n", recHit_meanDphiSq);
+                printf("recHit_meanDrDeta %0.2f \n", recHit_meanDrDeta);
+                printf("recHit_meanDrDphi %0.2f \n", recHit_meanDrDphi);
+                printf("recHit_meanDetaDphi %0.2f \n", recHit_meanDetaDphi);
+                
+                //printf("Total energy: %0.2f \n", totE);
+                
+                mat_superClus_rEtaPhiCov.Print();
+                
+                fflush(stdout);
+                fflush(stderr);
+            }
+        }
+        
+        if(debug)
+        {
+            printf("In Common::getSuperClusPCAinfo(...): \n");
+            
+            printf(
+                "Multicluster: "
+                "E %0.2e, "
+                "x %0.2e, y %0.2e, z %0.2e \n",
+                superClus->energy(),
+                superClus_3mom.x(), superClus_3mom.y(), superClus_3mom.z()
+            );
+            
+            printf("Covariance matrix: \n");
+            mat_superClus_rEtaPhiCov.Print();
+            
+            printf("Eigen values: \n");
+            v_superClus_rEtaPhiCov_eigVal.Print();
+            
+            printf("Eigen vectors: \n");
+            mat_superClus_rEtaPhiCov_eigVec.Print();
+            
+            fflush(stdout);
+            fflush(stderr);
+        }
+        
+        auto info = std::make_tuple(
+            mat_superClus_rEtaPhiCov,
+            mat_superClus_rEtaPhiCov_eigVec,
+            v_superClus_rEtaPhiCov_eigVal
+        );
+        
+        fflush(stdout);
+        fflush(stderr);
+        
+        return info;
+    }
+    
+    
+    std::pair <std::pair <int, int>, double> findMatrixMinimum(TMatrixD matrix)
+    {
+        int minRow = -1;
+        int minCol = -1;
+        
+        double minVal = matrix.Max() + 1;
+        
+        for(int iRow = 0; iRow < matrix.GetNrows(); iRow++)
+        {
+            for(int iCol = 0; iCol < matrix.GetNcols(); iCol++)
+            {
+                if(matrix(iRow, iCol) < minVal)
+                {
+                    minVal = matrix(iRow, iCol);
+                    
+                    minRow = iRow;
+                    minCol = iCol;
+                }
+            }
+        }
+        
+        std::pair <std::pair <int, int>, double> result = std::make_pair(
+            std::make_pair(minRow, minCol),
+            minVal
+        );
+        
+        return result;
+    }
+    
+    
+    // Will return {dRmin1, ... dRminN} of size v_obj1_4mom.size()
+    std::vector <double> getMinDeltaR(
+        std::vector <CLHEP::HepLorentzVector> v_obj1_4mom,
+        std::vector <CLHEP::HepLorentzVector> v_obj2_4mom,
+        TMatrixD &mat_deltaR_result, // Will fill this with the dR values
+        std::vector <int> &v_obj1_matchedObj2_index, // Will be of v_obj1_4mom.size(). Will be filled with the index of the matched obj1; if not matched, then -1.
+        double defaultVal = Constants::_defaultVal_pos1
+    )
+    {
+        int nObj1 = v_obj1_4mom.size();
+        int nObj2 = v_obj2_4mom.size();
+        
+        TMatrixD tmat_deltaR(nObj1, nObj2);
+        
+        for(int iObj1 = 0; iObj1 < nObj1; iObj1++)
+        {
+            for(int iObj2 = 0; iObj2 < nObj2; iObj2++)
+            {
+                double deltaR = v_obj1_4mom.at(iObj1).deltaR(v_obj2_4mom.at(iObj2));
+                
+                tmat_deltaR(iObj1, iObj2) = deltaR;
+            }
+        }
+        
+        mat_deltaR_result.ResizeTo(nObj1, nObj2);
+        
+        mat_deltaR_result = tmat_deltaR;
+        
+        std::vector <double> v_deltaR_min(nObj1, defaultVal);
+        
+        v_obj1_matchedObj2_index.clear();
+        v_obj1_matchedObj2_index.resize(v_obj1_4mom.size(), -1);
+        
+        int nIter = std::min(nObj1, nObj2);
+        
+        for(int iIter = 0; iIter < nIter; iIter++)
+        {
+            std::pair <std::pair <int, int>, double> matrixMinResult = findMatrixMinimum(tmat_deltaR);
+            
+            int minRow = matrixMinResult.first.first;
+            int minCol = matrixMinResult.first.second;
+            
+            double minVal = matrixMinResult.second;
+            
+            if(minVal == defaultVal)
+            {
+                break;
+            }
+            
+            v_deltaR_min.at(minRow) = minVal;
+            v_obj1_matchedObj2_index.at(minRow) = minCol;
+            
+            //printf("tmat_deltaR before masking: \n");
+            //tmat_deltaR.Print();
+            
+            // Mask minRow and minCol
+            TMatrixDRow(tmat_deltaR, minRow).Assign(defaultVal);
+            TMatrixDColumn(tmat_deltaR, minCol).Assign(defaultVal);
+            
+            //printf("tmat_deltaR after masking: \n");
+            //tmat_deltaR.Print();
+            
+            //v_deltaR_min.at(iIter) = minVal;
+            //
+            //deleteMatrixRowCol(tmat_deltaR, minRow, minCol);
+            //
+            //if(!tmat_deltaR.GetNrows() || !tmat_deltaR.GetNcols())
+            //{
+            //    break;
+            //}
+        }
+        
+        return v_deltaR_min;
+    }
 }
 
 

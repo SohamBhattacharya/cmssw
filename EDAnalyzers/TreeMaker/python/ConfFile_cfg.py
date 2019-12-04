@@ -69,6 +69,20 @@ options.register("outputDir",
     "Output directory" # Description
 )
 
+options.register("outFileNumber",
+    -1, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "File number (will be added to the filename if >= 0)" # Description
+)
+
+options.register("eventRange",
+    "", # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.string, # string, int, or float
+    "Syntax: Run1:Event1-Run2:Event2" # Description
+)
+
 options.register("debugFile",
     0, # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -123,6 +137,13 @@ options.register("trace",
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
     VarParsing.VarParsing.varType.int, # string, int, or float
     "Trace modules" # Description
+)
+
+options.register("memoryCheck",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Check memory usage" # Description
 )
 
 options.parseArguments()
@@ -190,9 +211,16 @@ if (options.onRaw) :
     outFileSuffix = "%s_onRaw" %(outFileSuffix)
 
 
+if (options.outFileNumber >= 0) :
+    
+    outFileSuffix = "%s_%d" %(outFileSuffix, options.outFileNumber)
+
+
 outFile = "ntupleTree%s.root" %(outFileSuffix)
 
 if (len(options.outputDir)) :
+    
+    os.system("mkdir -p %s" %(options.outputDir))
     
     outFile = "%s/%s" %(options.outputDir, outFile)
 
@@ -209,6 +237,10 @@ process.source = cms.Source("PoolSource",
     duplicateCheckMode = cms.untracked.string("noDuplicateCheck"),
 )
 
+
+if (len(options.eventRange)) :
+    
+    process.source.eventsToProcess = cms.untracked.VEventRange(options.eventRange)
 
 
 #process.options = cms.untracked.PSet(
@@ -304,11 +336,12 @@ if (options.onRaw) :
     
     reconstruction_mod = process.reconstruction.copy()
     
-    reconstruction_mod.replace(localreco, localreco_mod)
-    reconstruction_mod.replace(globalreco, globalreco_mod)
-    #reconstruction_mod.replace(highlevelreco, highlevelreco_mod)
-    #reconstruction_mod.replace(highlevelreco, cms.Sequence(process.egammaHighLevelRecoPrePF))
-    reconstruction_mod.replace(highlevelreco, cms.Sequence())
+    #reconstruction_mod.replace(localreco, localreco_mod)
+    #reconstruction_mod.replace(globalreco, globalreco_mod)
+    ###reconstruction_mod.replace(highlevelreco, highlevelreco_mod)
+    ###reconstruction_mod.replace(highlevelreco, cms.Sequence(process.egammaHighLevelRecoPrePF))
+    #reconstruction_mod.replace(highlevelreco, cms.Sequence())
+    
     print ""
     print "reconstruction_mod:", reconstruction_mod
     print ""
@@ -371,6 +404,9 @@ process.treeMaker = cms.EDAnalyzer(
     
     ############################## RECO ##############################
     
+    label_pileup = cms.untracked.InputTag("addPileupInfo"),
+    label_rho = cms.untracked.InputTag("fixedGridRhoFastjetAll"),
+    
     label_HGCEESimHit = cms.untracked.InputTag("g4SimHits", "HGCHitsEE"),
     #label_HGCEESimHit = cms.untracked.InputTag("g4SimHits", "HGCHitsEE", "SIM"),
     
@@ -426,7 +462,24 @@ if (options.modTICLele) :
         )
 
 
+########## Filters ##########
+
+from EDFilters.MyFilters.GenParticleFilter_cfi import *
+
+process.GenParticleFilter_ele = GenParticleFilter.clone()
+process.GenParticleFilter_ele.atLeastN = cms.int32(2)
+process.GenParticleFilter_ele.pdgId = cms.int32(11)
+process.GenParticleFilter_ele.minEta = cms.double(1.479)
+process.GenParticleFilter_ele.maxEta = cms.double(3.0)
+
+
+process.filter_seq = cms.Sequence(
+    process.GenParticleFilter_ele
+)
+
+
 process.p = cms.Path(
+    process.filter_seq *
     process.treeMaker
 )
 
@@ -438,12 +491,7 @@ process.TFileService = cms.Service(
 )
 
 
-# Tracer
-if (options.trace) :
-    
-    process.Tracer = cms.Service("Tracer")
-
-
+#process.schedule = cms.Schedule()
 process.schedule = cms.Schedule(
     process.p
 )
@@ -479,8 +527,29 @@ if (options.onRaw) :
     process.schedule.insert(0, process.reconstruction_step)
     process.schedule.insert(0, process.L1Reco_step)
     process.schedule.insert(0, process.raw2digi_step)
+
+
+print "\n"
+print "*"*50
+print "process.schedule:", process.schedule
+print "*"*50
+#print "process.schedule.__dict__:", process.schedule.__dict__
+#print "*"*50
+print "\n"
+
+
+# Tracer
+if (options.trace) :
     
-    print process.schedule
+    process.Tracer = cms.Service("Tracer")
+
+
+if (options.memoryCheck) :
+    
+    process.SimpleMemoryCheck = cms.Service(
+        "SimpleMemoryCheck",
+        moduleMemorySummary = cms.untracked.bool(True),
+    )
 
 
 # Debug
@@ -495,4 +564,10 @@ if (options.debugFile) :
 
 
 from FWCore.ParameterSet.Utilities import convertToUnscheduled
-process=convertToUnscheduled(process)
+process = convertToUnscheduled(process)
+
+
+# Add early deletion of temporary data products to reduce peak memory need
+#from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+#process = customiseEarlyDelete(process)
+# End adding early deletion

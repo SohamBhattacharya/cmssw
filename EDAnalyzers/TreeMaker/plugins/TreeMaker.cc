@@ -86,7 +86,7 @@
 
 
 
-double HGCal_minEta = 1.5;
+double HGCal_minEta = 1.479;
 double HGCal_maxEta = 3.0;
 
 double el_minPt = 0; //15;
@@ -135,6 +135,14 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
     
     // Gen particles //
     edm::EDGetTokenT <std::vector <reco::GenParticle> > tok_genParticle;
+    
+    
+    // Pileup //
+    edm::EDGetTokenT <std::vector <PileupSummaryInfo> > tok_pileup;
+    
+    
+    // Rho //
+    edm::EDGetTokenT <double> tok_rho;
     
     
     // SimHits //
@@ -209,6 +217,14 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     
     // Gen particles //
     tok_genParticle = consumes <std::vector <reco::GenParticle> >(iConfig.getUntrackedParameter <edm::InputTag>("label_genParticle"));
+    
+    
+    // Pileup //
+    tok_pileup = consumes <std::vector <PileupSummaryInfo> >(iConfig.getUntrackedParameter <edm::InputTag>("label_pileup"));
+    
+    
+    // Rho //
+    tok_rho = consumes <double>(iConfig.getUntrackedParameter <edm::InputTag>("label_rho"));
     
     
     // SimHits //
@@ -461,6 +477,19 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         }
     );
     
+    
+    // Pileup
+    edm::Handle <std::vector <PileupSummaryInfo> > pileUps_reco;
+    iEvent.getByToken(tok_pileup, pileUps_reco);
+    treeOutput->pileup_n = Common::getPileup(pileUps_reco);
+    
+    
+    // Rho
+    edm::Handle <double> handle_rho;
+    iEvent.getByToken(tok_rho, handle_rho);
+    double rho = *handle_rho;
+    
+    treeOutput->rho = rho;
     
     
     // SimHit dictionary
@@ -723,12 +752,12 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //treeOutput->v_multiClus_corrE.push_back(TICLtrackster.regressed_energy);
         //treeOutput->v_multiClus_corrET.push_back(TICLtrackster.regressed_energy * sin(TICLmultiCluster_3vec.theta()));
         
-        auto tup_TICLmultiClus_PCAinfo = Common::getMultiClusterPCAinfo(
-            &TICLmultiCluster,
-            m_recHit,
-            &recHitTools,
-            debug
-        );
+        //auto tup_TICLmultiClus_PCAinfo = Common::getMultiClusterPCAinfo(
+        //    &TICLmultiCluster,
+        //    m_recHit,
+        //    &recHitTools,
+        //    debug
+        //);
         
         //if(iTICLmultiCluster < 2)
         //{
@@ -744,20 +773,20 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //    std::get<2>(tup_TICLmultiClus_PCAinfo).Print();
         //}
         
-        TMatrixD mat_TICLmultiClus_rEtaPhiCov = std::get<0>(tup_TICLmultiClus_PCAinfo);
-        TVectorD v_multiClus_rEtaPhiCov_eigVal = std::get<2>(tup_TICLmultiClus_PCAinfo);
-        
-        treeOutput->v_multiClus_sigma2rr.push_back(    mat_TICLmultiClus_rEtaPhiCov(0, 0));
-        treeOutput->v_multiClus_sigma2etaEta.push_back(mat_TICLmultiClus_rEtaPhiCov(1, 1));
-        treeOutput->v_multiClus_sigma2phiPhi.push_back(mat_TICLmultiClus_rEtaPhiCov(2, 2));
-        
-        treeOutput->v_multiClus_sigma2rEta.push_back(  mat_TICLmultiClus_rEtaPhiCov(0, 1));
-        treeOutput->v_multiClus_sigma2rPhi.push_back(  mat_TICLmultiClus_rEtaPhiCov(0, 2));
-        treeOutput->v_multiClus_sigma2etaPhi.push_back(mat_TICLmultiClus_rEtaPhiCov(1, 2));
-        
-        treeOutput->v_multiClus_sigma2diag1.push_back(v_multiClus_rEtaPhiCov_eigVal(0));
-        treeOutput->v_multiClus_sigma2diag2.push_back(v_multiClus_rEtaPhiCov_eigVal(1));
-        treeOutput->v_multiClus_sigma2diag3.push_back(v_multiClus_rEtaPhiCov_eigVal(2));
+        //TMatrixD mat_TICLmultiClus_rEtaPhiCov = std::get<0>(tup_TICLmultiClus_PCAinfo);
+        //TVectorD v_multiClus_rEtaPhiCov_eigVal = std::get<2>(tup_TICLmultiClus_PCAinfo);
+        //
+        //treeOutput->v_multiClus_sigma2rr.push_back(    mat_TICLmultiClus_rEtaPhiCov(0, 0));
+        //treeOutput->v_multiClus_sigma2etaEta.push_back(mat_TICLmultiClus_rEtaPhiCov(1, 1));
+        //treeOutput->v_multiClus_sigma2phiPhi.push_back(mat_TICLmultiClus_rEtaPhiCov(2, 2));
+        //
+        //treeOutput->v_multiClus_sigma2rEta.push_back(  mat_TICLmultiClus_rEtaPhiCov(0, 1));
+        //treeOutput->v_multiClus_sigma2rPhi.push_back(  mat_TICLmultiClus_rEtaPhiCov(0, 2));
+        //treeOutput->v_multiClus_sigma2etaPhi.push_back(mat_TICLmultiClus_rEtaPhiCov(1, 2));
+        //
+        //treeOutput->v_multiClus_sigma2diag1.push_back(v_multiClus_rEtaPhiCov_eigVal(0));
+        //treeOutput->v_multiClus_sigma2diag2.push_back(v_multiClus_rEtaPhiCov_eigVal(1));
+        //treeOutput->v_multiClus_sigma2diag3.push_back(v_multiClus_rEtaPhiCov_eigVal(2));
         
         treeOutput->v_multiClus_EsortedIndex.push_back(iTICLmultiCluster);
         
@@ -1408,40 +1437,40 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         int iSimCluster = 0;
         
-        //for(int iSimCluster = 0; iSimCluster < nSimCluster; iSimCluster++)
-        for(auto const& simCluster : caloPart.simClusters())
-        {
-            //SimCluster simCluster = v_simCluster.at(iSimCluster);
-            
-            std::vector <std::pair <uint32_t, float> > v_hit = simCluster.get()->hits_and_fractions();
-            
-            //printf(
-            //    "[%llu] "
-            //    "CaloParticle %d/%d: "
-            //    "SimCluster %d/%d: "
-            //    "nSimHit %d "
-            //    "nHGCEERecHit %d "
-            //    "h&f size %d "
-            //    "\n",
-            //    eventNumber,
-            //    iCaloPart+1, nCaloPart,
-            //    iSimCluster+1, (int) caloPart.simClusters().size(),
-            //    simCluster.get()->numberOfSimHits(),
-            //    simCluster.get()->numberOfRecHits(),
-            //    (int) v_hit.size()
-            //);
-            
-            int nHit = v_hit.size();
-            
-            for(int iHit = 0; iHit < nHit; iHit++)
-            {
-                DetId detId(v_hit.at(iHit).first);
-                
-                m_caloPart_simClustHit[detId] = iCaloPart;
-            }
-            
-            iSimCluster++;
-        }
+        ////for(int iSimCluster = 0; iSimCluster < nSimCluster; iSimCluster++)
+        //for(auto const& simCluster : caloPart.simClusters())
+        //{
+        //    //SimCluster simCluster = v_simCluster.at(iSimCluster);
+        //    
+        //    std::vector <std::pair <uint32_t, float> > v_hit = simCluster.get()->hits_and_fractions();
+        //    
+        //    //printf(
+        //    //    "[%llu] "
+        //    //    "CaloParticle %d/%d: "
+        //    //    "SimCluster %d/%d: "
+        //    //    "nSimHit %d "
+        //    //    "nHGCEERecHit %d "
+        //    //    "h&f size %d "
+        //    //    "\n",
+        //    //    eventNumber,
+        //    //    iCaloPart+1, nCaloPart,
+        //    //    iSimCluster+1, (int) caloPart.simClusters().size(),
+        //    //    simCluster.get()->numberOfSimHits(),
+        //    //    simCluster.get()->numberOfRecHits(),
+        //    //    (int) v_hit.size()
+        //    //);
+        //    
+        //    int nHit = v_hit.size();
+        //    
+        //    for(int iHit = 0; iHit < nHit; iHit++)
+        //    {
+        //        DetId detId(v_hit.at(iHit).first);
+        //        
+        //        m_caloPart_simClustHit[detId] = iCaloPart;
+        //    }
+        //    
+        //    iSimCluster++;
+        //}
     }
     
     
@@ -1627,9 +1656,19 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     int nEleFromMultiClus = v_gsfEleFromMultiClus->size();
     
+    std::vector <CLHEP::HepLorentzVector> v_gsfEleFromMultiClus_4mom;
+    
     for(int iEle = 0; iEle < nEleFromMultiClus; iEle++)
     {
         reco::GsfElectron gsfEle = v_gsfEleFromMultiClus->at(iEle);
+        
+        CLHEP::HepLorentzVector gsfEleFromMultiClus_4mom;
+        gsfEleFromMultiClus_4mom.setT(gsfEle.energy());
+        gsfEleFromMultiClus_4mom.setX(gsfEle.px());
+        gsfEleFromMultiClus_4mom.setY(gsfEle.py());
+        gsfEleFromMultiClus_4mom.setZ(gsfEle.pz());
+        
+        v_gsfEleFromMultiClus_4mom.push_back(gsfEleFromMultiClus_4mom);
         
         treeOutput->v_gsfEleFromMultiClus_E.push_back(gsfEle.energy());
         treeOutput->v_gsfEleFromMultiClus_px.push_back(gsfEle.px());
@@ -1644,6 +1683,30 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->gsfEleFromMultiClus_n++;
     }
     
+    // TDR-ele gen-matching
+    TMatrixD mat_gsfEleFromMultiClus_gelEl_deltaR;
+    
+    std::vector <int> v_gsfEleFromMultiClus_matchedGenEl_index;
+    
+    std::vector <double> v_gsfEleFromMultiClus_gelEl_minDeltaR = Common::getMinDeltaR(
+        v_gsfEleFromMultiClus_4mom,
+        v_genEl_4mom,
+        mat_gsfEleFromMultiClus_gelEl_deltaR,
+        v_gsfEleFromMultiClus_matchedGenEl_index
+    );
+    
+    for(int iEle = 0; iEle < (int) v_gsfEleFromMultiClus_gelEl_minDeltaR.size(); iEle++)
+    {
+        treeOutput->v_gsfEleFromMultiClus_genEl_minDeltaR.push_back(v_gsfEleFromMultiClus_gelEl_minDeltaR.at(iEle));
+        
+        int index = v_gsfEleFromMultiClus_matchedGenEl_index.at(iEle);
+        
+        if(index >= 0)
+        {
+            treeOutput->v_gsfEleFromMultiClus_matchedGenEl_E.push_back(v_genEl_4mom.at(index).e());
+        }
+    }
+    
     
     
     // Gsf electrons from TICL
@@ -1651,6 +1714,10 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     iEvent.getByToken(tok_gsfEleFromTICL, v_gsfEleFromTICL);
     
     int nEleFromTICL = v_gsfEleFromTICL->size();
+    
+    std::map <reco::SuperClusterRef, int> m_gsfEle_superClus;
+    
+    std::vector <CLHEP::HepLorentzVector> v_gsfEleFromTICL_4mom;
     
     for(int iEle = 0; iEle < nEleFromTICL; iEle++)
     {
@@ -1660,6 +1727,16 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //{
         //    continue;
         //}
+        
+        
+        CLHEP::HepLorentzVector gsfEleFromTICL_4mom;
+        gsfEleFromTICL_4mom.setT(gsfEle.energy());
+        gsfEleFromTICL_4mom.setX(gsfEle.px());
+        gsfEleFromTICL_4mom.setY(gsfEle.py());
+        gsfEleFromTICL_4mom.setZ(gsfEle.pz());
+        
+        v_gsfEleFromTICL_4mom.push_back(gsfEleFromTICL_4mom);
+        
         
         treeOutput->v_gsfEleFromTICL_E.push_back(gsfEle.energy());
         treeOutput->v_gsfEleFromTICL_px.push_back(gsfEle.px());
@@ -1676,7 +1753,11 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         treeOutput->v_gsfEleFromTICL_superClus_E.push_back(gsfEle.superCluster()->energy());
         
+        treeOutput->v_gsfEleFromTICL_superClus_etaWidth.push_back(gsfEle.superCluster()->etaWidth());
+        treeOutput->v_gsfEleFromTICL_superClus_phiWidth.push_back(gsfEle.superCluster()->phiWidth());
+        
         treeOutput->v_gsfEleFromTICL_superClus_nClus.push_back(gsfEle.superCluster()->clusters().size());
+        treeOutput->v_gsfEleFromTICL_superClus_nHit.push_back(gsfEle.superCluster()->hitsAndFractions().size());
         
         std::vector <std::pair <DetId, float> > v_superClus_HandF = gsfEle.superCluster()->hitsAndFractions();
         math::XYZPoint superClus_xyz = gsfEle.superCluster()->position();
@@ -1686,6 +1767,57 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             &recHitTools,
             Constants::HGCalEE_nLayer
         );
+        
+        
+        // PCA
+        auto tup_gsfEleFromTICL_superClus_PCAinfo = Common::getSuperClusPCAinfo(
+            gsfEle.superCluster(),
+            m_recHit,
+            &recHitTools,
+            debug
+        );
+        
+        TMatrixD mat_gsfEleFromTICL_superClus_rEtaPhiCov = std::get<0>(tup_gsfEleFromTICL_superClus_PCAinfo);
+        TVectorD v_gsfEleFromTICL_superClus_rEtaPhiCov_eigVal = std::get<2>(tup_gsfEleFromTICL_superClus_PCAinfo);
+        
+        treeOutput->v_gsfEleFromTICL_superClus_sigma2rr.push_back(    mat_gsfEleFromTICL_superClus_rEtaPhiCov(0, 0));
+        treeOutput->v_gsfEleFromTICL_superClus_sigma2etaEta.push_back(mat_gsfEleFromTICL_superClus_rEtaPhiCov(1, 1));
+        treeOutput->v_gsfEleFromTICL_superClus_sigma2phiPhi.push_back(mat_gsfEleFromTICL_superClus_rEtaPhiCov(2, 2));
+        
+        treeOutput->v_gsfEleFromTICL_superClus_sigma2rEta.push_back(  mat_gsfEleFromTICL_superClus_rEtaPhiCov(0, 1));
+        treeOutput->v_gsfEleFromTICL_superClus_sigma2rPhi.push_back(  mat_gsfEleFromTICL_superClus_rEtaPhiCov(0, 2));
+        treeOutput->v_gsfEleFromTICL_superClus_sigma2etaPhi.push_back(mat_gsfEleFromTICL_superClus_rEtaPhiCov(1, 2));
+        
+        treeOutput->v_gsfEleFromTICL_superClus_sigma2diag1.push_back(v_gsfEleFromTICL_superClus_rEtaPhiCov_eigVal(0));
+        treeOutput->v_gsfEleFromTICL_superClus_sigma2diag2.push_back(v_gsfEleFromTICL_superClus_rEtaPhiCov_eigVal(1));
+        treeOutput->v_gsfEleFromTICL_superClus_sigma2diag3.push_back(v_gsfEleFromTICL_superClus_rEtaPhiCov_eigVal(2));
+        
+        
+        treeOutput->v_gsfEleFromTICL_superClus_seed_dEta.push_back(gsfEle.superCluster()->eta() - gsfEle.superCluster()->seed().get()->eta());
+        treeOutput->v_gsfEleFromTICL_superClus_seed_dPhi.push_back(TVector2::Phi_mpi_pi(gsfEle.superCluster()->phi() - gsfEle.superCluster()->seed().get()->phi()));
+        
+        
+        // Sorted hit energies
+        std::vector <std::pair <int, double> > vp_gsfEleFromTICL_superClus_sortedRecHit_index_energy = Common::getSortedHitIndex(
+            gsfEle.superCluster()->hitsAndFractions(),
+            m_recHit
+        );
+        
+        double gsfEleFromTICL_superClus_recHit1_E = 0;
+        double gsfEleFromTICL_superClus_recHit2_E = 0;
+        
+        if(vp_gsfEleFromTICL_superClus_sortedRecHit_index_energy.size() >= 1)
+        {
+            gsfEleFromTICL_superClus_recHit1_E = vp_gsfEleFromTICL_superClus_sortedRecHit_index_energy.at(0).second;
+        }
+        
+        if(vp_gsfEleFromTICL_superClus_sortedRecHit_index_energy.size() >= 2)
+        {
+            gsfEleFromTICL_superClus_recHit2_E = vp_gsfEleFromTICL_superClus_sortedRecHit_index_energy.at(1).second;
+        }
+        
+        treeOutput->v_gsfEleFromTICL_superClus_recHit1_E.push_back(gsfEleFromTICL_superClus_recHit1_E);
+        treeOutput->v_gsfEleFromTICL_superClus_recHit2_E.push_back(gsfEleFromTICL_superClus_recHit2_E);
         
         
         //double dist_min = 9999;
@@ -1749,22 +1881,27 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             "gsfEleFromTICL %d/%d: "
             "E %0.2f, "
             "eta %+0.2f, "
+            //"ambiguous %d, "
             
-            "\n"
-            "\t superClus E %0.2f, "
-            "size %d, "
-            "detId %llu, "
-            //"cell %d (x %+0.2f, y %+0.2f), "
-            "type %d, "
-            "neighbors %d, %d, "
-            //"sector %d, "
-            "dist %0.2e, "
-            
-            "\n"
-            "\t\t superClus seed: E %0.2f, eta %+0.2f, z %+0.2f, size %d"
-            
-            "\n"
-            "\t gsfTrack p %0.2f, "
+            //"\n"
+            //"\t superClus E %0.2f, "
+            //"size %d, "
+            //"detId %llu, "
+            ////"cell %d (x %+0.2f, y %+0.2f), "
+            //"type %d, "
+            //"neighbors %d, %d, "
+            ////"sector %d, "
+            //"dist %0.2e, "
+            //
+            //"\n"
+            //"\t\t superClus seed: E %0.2f, eta %+0.2f, z %+0.2f, size %d"
+            //
+            //"\n"
+            //"\t gsfTrack p %0.2f, "
+            //
+            //"\n"
+            //"\t trackMomentumAtVtx p %0.2f, "// (%0.2f), "
+            //"pT %0.2f, "// (%0.2f), "
             
             "\n",
             
@@ -1772,30 +1909,79 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             
             iEle+1, nEleFromTICL,
             gsfEle.energy(),
-            gsfEle.eta(),
+            gsfEle.eta()
+            //gsfEle.ambiguous(),
             
-            gsfEle.superCluster()->energy(),
-            (int) gsfEle.superCluster()->size(),
-            (long long) centroid_detId.rawId(),
-            //centroid_HGCEEDetId.cell(), centroidCell_pos.x(), centroidCell_pos.y(),
-            topo_HGCalEE.decode(centroid_detId).iType,
-            (int) v_neighbour7_detId.size(), (int) v_neighbour19_detId.size(),
-            //centroid_HGCEEDetId.sector(),
-            dist_min,
-            
-            gsfEle.superCluster()->seed().get()->energy(),
-            gsfEle.superCluster()->seed().get()->eta(),
-            gsfEle.superCluster()->seed().get()->z(),
-            (int) gsfEle.superCluster()->seed().get()->size(),
-            
-            gsfEle.gsfTrack()->p()
+            //gsfEle.superCluster()->energy(),
+            //(int) gsfEle.superCluster()->size(),
+            //(long long) centroid_detId.rawId(),
+            ////centroid_HGCEEDetId.cell(), centroidCell_pos.x(), centroidCell_pos.y(),
+            //topo_HGCalEE.decode(centroid_detId).iType,
+            //(int) v_neighbour7_detId.size(), (int) v_neighbour19_detId.size(),
+            ////centroid_HGCEEDetId.sector(),
+            //dist_min,
+            //
+            //gsfEle.superCluster()->seed().get()->energy(),
+            //gsfEle.superCluster()->seed().get()->eta(),
+            //gsfEle.superCluster()->seed().get()->z(),
+            //(int) gsfEle.superCluster()->seed().get()->size(),
+            //
+            //gsfEle.gsfTrack()->p(),
+            //gsfEle.trackMomentumAtVtx().r(),// std::sqrt(gsfEle.trackMomentumAtVtx().mag2()),
+            //gsfEle.trackMomentumAtVtx().rho()//, std::sqrt(gsfEle.trackMomentumAtVtx().perp2())
         );
+        
+        //printf("\t Same-SC: ");
+        //
+        //for(int jEle = 0; jEle < nEleFromTICL; jEle++)
+        //{
+        //    if(iEle == jEle)
+        //    {
+        //        continue;
+        //    }
+        //    
+        //    reco::GsfElectron gsfEle_j = v_gsfEleFromTICL->at(jEle);
+        //    
+        //    printf("%d:%d, ", jEle+1, (int) (gsfEle.superCluster() == gsfEle_j.superCluster()));
+        //}
+        //
+        //printf("\n");
+        
+        if(m_gsfEle_superClus.find(gsfEle.superCluster()) == m_gsfEle_superClus.end())
+        {
+            m_gsfEle_superClus[gsfEle.superCluster()] = 0;
+        }
+        
+        else
+        {
+            m_gsfEle_superClus[gsfEle.superCluster()]++;
+        }
+        
+        
+        // Gsf-track
+        treeOutput->v_gsfEleFromTICL_gsfTrack_p.push_back(gsfEle.gsfTrack()->p());
+        treeOutput->v_gsfEleFromTICL_gsfTrack_px.push_back(gsfEle.gsfTrack()->px());
+        treeOutput->v_gsfEleFromTICL_gsfTrack_py.push_back(gsfEle.gsfTrack()->py());
+        treeOutput->v_gsfEleFromTICL_gsfTrack_pz.push_back(gsfEle.gsfTrack()->pz());
+        treeOutput->v_gsfEleFromTICL_gsfTrack_pT.push_back(gsfEle.gsfTrack()->pt());
+        treeOutput->v_gsfEleFromTICL_gsfTrack_eta.push_back(gsfEle.gsfTrack()->pt());
+        treeOutput->v_gsfEleFromTICL_gsfTrack_phi.push_back(gsfEle.gsfTrack()->eta());
+        
+        // Track at vertex
+        treeOutput->v_gsfEleFromTICL_trkAtVtx_p.push_back(gsfEle.trackMomentumAtVtx().r());
+        treeOutput->v_gsfEleFromTICL_trkAtVtx_px.push_back(gsfEle.trackMomentumAtVtx().x());
+        treeOutput->v_gsfEleFromTICL_trkAtVtx_py.push_back(gsfEle.trackMomentumAtVtx().y());
+        treeOutput->v_gsfEleFromTICL_trkAtVtx_pz.push_back(gsfEle.trackMomentumAtVtx().z());
+        treeOutput->v_gsfEleFromTICL_trkAtVtx_pT.push_back(gsfEle.trackMomentumAtVtx().rho());
+        treeOutput->v_gsfEleFromTICL_trkAtVtx_eta.push_back(gsfEle.trackMomentumAtVtx().eta());
+        treeOutput->v_gsfEleFromTICL_trkAtVtx_phi.push_back(gsfEle.trackMomentumAtVtx().phi());
+        
         
         double totalE = 0;
         
         double energy7 = 0;
         double energy19 = 0;
-        double energyR2p8 = 0;
+        double energy2p8 = 0;
         
         for(int iLayer = 0; iLayer < Constants::HGCalEE_nLayer; iLayer++)
         {
@@ -1832,8 +2018,8 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             
             
             // R7 cells
-            std::vector <DetId> v_iLayer_neighbour7_detId = topo_HGCalEE.neighbors(iLayer_centroid_detId);
-            v_iLayer_neighbour7_detId.push_back(iLayer_centroid_detId);
+            //std::vector <DetId> v_iLayer_neighbour7_detId = topo_HGCalEE.neighbors(iLayer_centroid_detId);
+            //v_iLayer_neighbour7_detId.push_back(iLayer_centroid_detId);
             
             
             
@@ -1855,23 +2041,23 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             
             
             // R19 cells
-            std::vector <DetId> v_iLayer_neighbour19_detId = Common::getNeighbor19(iLayer_centroid_detId, topo_HGCalEE);
-            
-            
-            double iLayer_energy7 = Common::getEnergySum(
-                v_iLayer_neighbour7_detId,
-                vv_superClus_layerHandF.at(iLayer),
-                m_recHit
-            );
-            
-            double iLayer_energy19 = Common::getEnergySum(
-                v_iLayer_neighbour19_detId,
-                vv_superClus_layerHandF.at(iLayer),
-                m_recHit
-            );
-            
-            energy7 += iLayer_energy7;
-            energy19 += iLayer_energy19;
+            //std::vector <DetId> v_iLayer_neighbour19_detId = Common::getNeighbor19(iLayer_centroid_detId, topo_HGCalEE);
+            //
+            //
+            //double iLayer_energy7 = Common::getEnergySum(
+            //    v_iLayer_neighbour7_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    m_recHit
+            //);
+            //
+            //double iLayer_energy19 = Common::getEnergySum(
+            //    v_iLayer_neighbour19_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    m_recHit
+            //);
+            //
+            //energy7 += iLayer_energy7;
+            //energy19 += iLayer_energy19;
             
             
             // R2p8 cells
@@ -1883,13 +2069,13 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 &recHitTools
             );
             
-            double iLayer_energyR2p8 = Common::getEnergySum(
+            double iLayer_energy2p8 = Common::getEnergySum(
                 v_iLayer_neighbourR2p8_detId,
                 vv_superClus_layerHandF.at(iLayer),
                 m_recHit
             );
             
-            energyR2p8 += iLayer_energyR2p8;
+            energy2p8 += iLayer_energy2p8;
             
             
             //printf(
@@ -1916,24 +2102,29 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         double R7 = energy7/gsfEle.energy();
         double R19 = energy19/gsfEle.energy();
-        double R2p8 = energyR2p8/gsfEle.energy();
+        double R2p8 = energy2p8/gsfEle.energy();
         
+        treeOutput->v_gsfEleFromTICL_E7.push_back(energy7);
         treeOutput->v_gsfEleFromTICL_R7.push_back(R7);
+        
+        treeOutput->v_gsfEleFromTICL_E19.push_back(energy19);
         treeOutput->v_gsfEleFromTICL_R19.push_back(R19);
+        
+        treeOutput->v_gsfEleFromTICL_E2p8.push_back(energy2p8);
         treeOutput->v_gsfEleFromTICL_R2p8.push_back(R2p8);
         
-        printf("Sum[layer]: E %0.2f \n", totalE);
-        
-        printf(
-            "E7 (R7) %0.2f (%0.2f), "
-            "E19 (R19) %0.2f (%0.2f), "
-            "E2p8 (R2p8) %0.2f (%0.2f), "
-            "\n",
-            
-            energy7, energy7/gsfEle.superCluster()->energy(),
-            energy19, energy19/gsfEle.superCluster()->energy(),
-            energyR2p8, energyR2p8/gsfEle.superCluster()->energy()
-        );
+        //printf("Sum[layer]: E %0.2f \n", totalE);
+        //
+        //printf(
+        //    "E7 (R7) %0.2f (%0.2f), "
+        //    "E19 (R19) %0.2f (%0.2f), "
+        //    "E2p8 (R2p8) %0.2f (%0.2f), "
+        //    "\n",
+        //    
+        //    energy7, energy7/gsfEle.superCluster()->energy(),
+        //    energy19, energy19/gsfEle.superCluster()->energy(),
+        //    energy2p8, energy2p8/gsfEle.superCluster()->energy()
+        //);
         
         
         treeOutput->v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n.push_back(v_neighbour7_detId.size());
@@ -2170,6 +2361,33 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dEta);
         treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi);
         treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dR.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dR);
+    }
+    
+    printf("m_gsfEle_superClus.size(): %d \n", (int) m_gsfEle_superClus.size() );
+    
+    
+    // TICL-ele gen-matching
+    TMatrixD mat_gsfEleFromTICL_gelEl_deltaR;
+    
+    std::vector <int> v_gsfEleFromTICL_matchedGenEl_index;
+    
+    std::vector <double> v_gsfEleFromTICL_gelEl_minDeltaR = Common::getMinDeltaR(
+        v_gsfEleFromTICL_4mom,
+        v_genEl_4mom,
+        mat_gsfEleFromTICL_gelEl_deltaR,
+        v_gsfEleFromTICL_matchedGenEl_index
+    );
+    
+    for(int iEle = 0; iEle < (int) v_gsfEleFromTICL_gelEl_minDeltaR.size(); iEle++)
+    {
+        treeOutput->v_gsfEleFromTICL_genEl_minDeltaR.push_back(v_gsfEleFromTICL_gelEl_minDeltaR.at(iEle));
+        
+        int index = v_gsfEleFromTICL_matchedGenEl_index.at(iEle);
+        
+        if(index >= 0)
+        {
+            treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(v_genEl_4mom.at(index).e());
+        }
     }
     
     
