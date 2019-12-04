@@ -76,47 +76,47 @@ namespace {
     //    seed->energy_nocalib(), threshold, seed->eta(), x->energy(), dEta, maxDEta, dPhi, maxDPhi
     //);
     
-    double absSeedEta = std::fabs(seed->eta());
-    
-    int etaBin = ((int)(absSeedEta >= 1.479) + (int)(absSeedEta >= 1.75) + (int)(absSeedEta >= 2.0));
-    
-    switch (etaBin) {
-         case 0:  // EB
-           //yoffset = yoffsetEB;
-           //scale = scaleEB;
-           //xoffset = xoffsetEB;
-           //width = 1.0 / widthEB;
-           //saturation = 0.14;
-           maxDPhi = 0.60;
-           break;
-         case 1:  // 1.479 -> 1.75
-           //yoffset = yoffsetEE_0;
-           //scale = scaleEE_0;
-           //xoffset = xoffsetEE_0;
-           //width = 1.0 / widthEE_0;
-           //saturation = 0.14;
-           maxDPhi = 0.55;
-           break;
-         case 2:  // 1.75 -> 2.0
-           //yoffset = yoffsetEE_1;
-           //scale = scaleEE_1;
-           //xoffset = xoffsetEE_1;
-           //width = 1.0 / widthEE_1;
-           //saturation = 0.12;
-           maxDPhi = 0.45;
-           break;
-         case 3:  // 2.0 and up
-           //yoffset = yoffsetEE_2;
-           //scale = scaleEE_2;
-           //xoffset = xoffsetEE_2;
-           //width = 1.0 / widthEE_2;
-           //saturation = 0.12;
-           maxDPhi = 0.30;
-           break;
-         default:
-           throw cms::Exception("InValidEtaBin")
-               << "Calculated invalid eta bin = " << etaBin << " in \"inDynamicDPhiWindow\"" << std::endl;
-    }
+    //double absSeedEta = std::fabs(seed->eta());
+    //
+    //int etaBin = ((int)(absSeedEta >= 1.479) + (int)(absSeedEta >= 1.75) + (int)(absSeedEta >= 2.0));
+    //
+    //switch (etaBin) {
+    //     case 0:  // EB
+    //       //yoffset = yoffsetEB;
+    //       //scale = scaleEB;
+    //       //xoffset = xoffsetEB;
+    //       //width = 1.0 / widthEB;
+    //       //saturation = 0.14;
+    //       maxDPhi = 0.60;
+    //       break;
+    //     case 1:  // 1.479 -> 1.75
+    //       //yoffset = yoffsetEE_0;
+    //       //scale = scaleEE_0;
+    //       //xoffset = xoffsetEE_0;
+    //       //width = 1.0 / widthEE_0;
+    //       //saturation = 0.14;
+    //       maxDPhi = 0.55;
+    //       break;
+    //     case 2:  // 1.75 -> 2.0
+    //       //yoffset = yoffsetEE_1;
+    //       //scale = scaleEE_1;
+    //       //xoffset = xoffsetEE_1;
+    //       //width = 1.0 / widthEE_1;
+    //       //saturation = 0.12;
+    //       maxDPhi = 0.45;
+    //       break;
+    //     case 3:  // 2.0 and up
+    //       //yoffset = yoffsetEE_2;
+    //       //scale = scaleEE_2;
+    //       //xoffset = xoffsetEE_2;
+    //       //width = 1.0 / widthEE_2;
+    //       //saturation = 0.12;
+    //       maxDPhi = 0.30;
+    //       break;
+    //     default:
+    //       throw cms::Exception("InValidEtaBin")
+    //           << "Calculated invalid eta bin = " << etaBin << " in \"inDynamicDPhiWindow\"" << std::endl;
+    //}
     
     //bool inDynPhi = reco::MustacheKernel::inDynamicDPhiWindow(
     //    seed->eta(), seed->phi(), x->energy_nocalib(), x->eta(), x->phi()
@@ -151,6 +151,7 @@ namespace {
                    const CalibClusterPtr seed,
                    const PFECALSuperClusterAlgo::clustering_type type,
                    const bool dyn_dphi,
+                   const bool useHGCalParam,
                    const double etawidthSuperCluster,
                    double phiwidthSuperCluster) {
     
@@ -158,51 +159,51 @@ namespace {
     
     const double dphi = std::fabs(TVector2::Phi_mpi_pi(seed->phi() - x->phi()));
     
-    double absSeedEta = std::fabs(seed->eta());
-    
-    int etaBin = ((int)(absSeedEta >= 1.479) + (int)(absSeedEta >= 1.75) + (int)(absSeedEta >= 2.0));
-    
-    switch (etaBin) {
-        case 0:  // EB
-          //yoffset = yoffsetEB;
-          //scale = scaleEB;
-          //xoffset = xoffsetEB;
-          //width = 1.0 / widthEB;
-          //saturation = 0.14;
-          phiwidthSuperCluster = 0.60;
-          break;
-        case 1:  // 1.479 -> 1.75
-          //yoffset = yoffsetEE_0;
-          //scale = scaleEE_0;
-          //xoffset = xoffsetEE_0;
-          //width = 1.0 / widthEE_0;
-          //saturation = 0.14;
-          phiwidthSuperCluster = 0.55;
-          break;
-        case 2:  // 1.75 -> 2.0
-          //yoffset = yoffsetEE_1;
-          //scale = scaleEE_1;
-          //xoffset = xoffsetEE_1;
-          //width = 1.0 / widthEE_1;
-          //saturation = 0.12;
-          phiwidthSuperCluster = 0.45;
-          break;
-        case 3:  // 2.0 and up
-          //yoffset = yoffsetEE_2;
-          //scale = scaleEE_2;
-          //xoffset = xoffsetEE_2;
-          //width = 1.0 / widthEE_2;
-          //saturation = 0.12;
-          phiwidthSuperCluster = 0.30;
-          break;
-        default:
-          throw cms::Exception("InValidEtaBin")
-              << "Calculated invalid eta bin = " << etaBin << " in \"inDynamicDPhiWindow\"" << std::endl;
-    }
+    //double absSeedEta = std::fabs(seed->eta());
+    //
+    //int etaBin = ((int)(absSeedEta >= 1.479) + (int)(absSeedEta >= 1.75) + (int)(absSeedEta >= 2.0));
+    //
+    //switch (etaBin) {
+    //    case 0:  // EB
+    //      //yoffset = yoffsetEB;
+    //      //scale = scaleEB;
+    //      //xoffset = xoffsetEB;
+    //      //width = 1.0 / widthEB;
+    //      //saturation = 0.14;
+    //      phiwidthSuperCluster = 0.60;
+    //      break;
+    //    case 1:  // 1.479 -> 1.75
+    //      //yoffset = yoffsetEE_0;
+    //      //scale = scaleEE_0;
+    //      //xoffset = xoffsetEE_0;
+    //      //width = 1.0 / widthEE_0;
+    //      //saturation = 0.14;
+    //      phiwidthSuperCluster = 0.55;
+    //      break;
+    //    case 2:  // 1.75 -> 2.0
+    //      //yoffset = yoffsetEE_1;
+    //      //scale = scaleEE_1;
+    //      //xoffset = xoffsetEE_1;
+    //      //width = 1.0 / widthEE_1;
+    //      //saturation = 0.12;
+    //      phiwidthSuperCluster = 0.45;
+    //      break;
+    //    case 3:  // 2.0 and up
+    //      //yoffset = yoffsetEE_2;
+    //      //scale = scaleEE_2;
+    //      //xoffset = xoffsetEE_2;
+    //      //width = 1.0 / widthEE_2;
+    //      //saturation = 0.12;
+    //      phiwidthSuperCluster = 0.30;
+    //      break;
+    //    default:
+    //      throw cms::Exception("InValidEtaBin")
+    //          << "Calculated invalid eta bin = " << etaBin << " in \"inDynamicDPhiWindow\"" << std::endl;
+    //}
     
     const bool passes_dphi = ((!dyn_dphi && dphi < phiwidthSuperCluster) ||
                               (dyn_dphi && reco::MustacheKernel::inDynamicDPhiWindow(
-                                               seed->eta(), seed->phi(), x->energy_nocalib(), x->eta(), x->phi())));
+                                               seed->eta(), seed->phi(), x->energy_nocalib(), x->eta(), x->phi(), useHGCalParam)));
     
     if (type == PFECALSuperClusterAlgo::kBOX) {
       return (std::fabs(seed->eta() - x->eta()) < etawidthSuperCluster && passes_dphi);
@@ -463,7 +464,7 @@ void PFECALSuperClusterAlgo::buildSuperCluster(CalibClusterPtr& seed, CalibClust
       break;
   }
   auto isClusteredWithSeed =
-      std::bind(isClustered, _1, seed, _clustype, useDynamicDPhi_, etawidthSuperCluster, phiwidthSuperCluster);
+      std::bind(isClustered, _1, seed, _clustype, useDynamicDPhi_, useHGCalParam_, etawidthSuperCluster, phiwidthSuperCluster);
   auto matchesSeedByRecHit = std::bind(isLinkedByRecHit, _1, seed, satelliteThreshold_, fractionForMajority_, 0.1, 0.2);
   //auto matchesSeedByRecHit = std::bind(isLinkedByRecHit, _1, seed, satelliteThreshold_, fractionForMajority_, 0.2, 0.4);
 
