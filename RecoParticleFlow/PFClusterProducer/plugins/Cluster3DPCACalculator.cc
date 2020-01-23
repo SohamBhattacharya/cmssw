@@ -60,12 +60,25 @@ void Cluster3DPCACalculator::calculateAndSetPositionActual(reco::PFCluster& clus
   PFLayer::Layer max_e_layer = PFLayer::NONE;
   reco::PFRecHitRef refseed;
   double pcavars[3];
-
+  
+  
+  
+  double cl_x = 0.0;
+  double cl_y = 0.0;
+  double cl_z = 0.0;
+  
   for (const reco::PFRecHitFraction& rhf : cluster.recHitFractions()) {
     const reco::PFRecHitRef& refhit = rhf.recHitRef();
     double rh_energy = refhit->energy();
     double rh_time = refhit->time();
     cl_energy += rh_energy * rhf.fraction();
+    
+    double rhf_energy = rh_energy * rhf.fraction();
+    
+    cl_x += rhf_energy * refhit->position().x();
+    cl_y += rhf_energy * refhit->position().y();
+    cl_z += rhf_energy * refhit->position().z();
+    
     if (rh_time > 0.0) {  // time == -1 means no measurement
       // all times are offset by one nanosecond in digitizer
       // remove that here so all times of flight
@@ -91,6 +104,7 @@ void Cluster3DPCACalculator::calculateAndSetPositionActual(reco::PFCluster& clus
     pcavars[0] = refhit->position().x();
     pcavars[1] = refhit->position().y();
     pcavars[2] = refhit->position().z();
+    
     int nhit = int(rh_energy * 100);  // put rec_hit energy in units of 10 MeV
 
     for (int i = 0; i < nhit; ++i) {
@@ -100,12 +114,21 @@ void Cluster3DPCACalculator::calculateAndSetPositionActual(reco::PFCluster& clus
   cluster.setEnergy(cl_energy);
   cluster.setLayer(max_e_layer);
   // calculate the position
-
+  
+  
+  if(cl_energy)
+  {
+      cl_x /= cl_energy;
+      cl_y /= cl_energy;
+      cl_z /= cl_energy;
+  }
+  
   pca_->MakePrincipals();
   const TVectorD& means = *(pca_->GetMeanValues());
   const TMatrixD& eigens = *(pca_->GetEigenVectors());
 
-  math::XYZPoint barycenter(means[0], means[1], means[2]);
+  //math::XYZPoint barycenter(means[0], means[1], means[2]);
+  math::XYZPoint barycenter(cl_x, cl_y, cl_z);
   math::XYZVector axis(eigens(0, 0), eigens(1, 0), eigens(2, 0));
 
   if (time_norm > 0.0) {
