@@ -1,0 +1,2 @@
+cmsRun EDAnalyzers/TreeMaker/python/ConfFile_cfg.py print inputFiles=file:/eos/cms/store/group/phys_egamma/sobhatta/SingleElectron_PT2to100_PhaseIITDRSpring19DR-PU200_106X_upgrade2023_realistic_v3-v1_GEN-SIM-DIGI-RAW/FF57637B-0567-DD46-9838-CDF532DAF083.root outputDir=./ onRaw=1 storeRecHit=0 storeSimHit=0 storeSuperClusTICLclus=0 debugFile=1 trace=0 eventRange=1:78679-1:78679 maxEvents=20 2>&1 | tee logs/ConfFile_cfg.log
+

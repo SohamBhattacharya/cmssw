@@ -17,9 +17,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-s",
     "--submit",
-    help = "Sumbit the failed jobs",
+    help = "Submit the failed jobs",
+    action = "store_true"
+)
+
+parser.add_argument(
+    "--success",
+    help = "Will also show the jobs that have succeeded",
     action = "store_true"
 )
 
@@ -51,18 +56,40 @@ if (choice != "YES") :
     exit()
 
 
-extension = ".err"
+extension_log = ".log"
+extension_err = ".err"
+extension_out = ".out"
 
 # Case insentitive
 #l_errorStr = ["error", "segmentation", "killed", "SCRAM fatal"]
-l_errorStr = ["Fatal Exception"]
+l_errorStr = ["Fatal Exception", "FatalRootError", "fatal system signal has occurred"]
 l_errorStrSkip = ["unknown branch"]
+
+# The format is: (return value <value>)
+retValStr_start = "(return value "
+retValStr_end = ")"
+
+jobSubStr = "Job submitted"
+
 
 condorConfig_nameTemplate = "condor_config_%s.sub"
 command_template = "condor_submit %s"
 
 
-nJobTotal = 0
+nJob_total = 0
+nJob_succ = 0
+nJob_fail = 0
+
+
+# Check if all the directories exist
+for iDir in range(0, len(l_directory)) :
+    
+    directory = l_directory[iDir]
+    
+    if (not os.path.isdir(directory)) :
+        
+        print "Directory does not exist: %s" %(directory)
+        exit(1)
 
 
 for iDir in range(0, len(l_directory)) :
@@ -74,14 +101,11 @@ for iDir in range(0, len(l_directory)) :
     print "Directory:", directory
     print "**************************************************"
     
-    if (not os.path.isdir(directory)) :
-        
-        print "Directory does not exist."
-        exit(1)
-    
     l_fileName = glob.glob(directory + "/**")
-    l_fileName = [f for f in l_fileName if extension in f]
-    l_fileName.sort(key = lambda l: int(l[l.rfind("_")+1: l.rfind(extension)]))
+    l_fileName = [f for f in l_fileName if extension_log in f]
+    l_fileName.sort(key = lambda l: int(l[l.rfind("_")+1: l.rfind(extension_log)]))
+    
+    nJob_total += len(l_fileName)
     
     count = 0
     
@@ -95,53 +119,87 @@ for iDir in range(0, len(l_directory)) :
             
             fileContent = f.readlines()
         
-        # Case insensitive search
-        #if (not any([errorStr.lower() in line.lower() for line in fileContent])) :
-        #if (not any([(errorStr.lower() in line.lower() and errorStrSkip.lower() not in line.lower()) for line in fileContent])) :
-        #    
-        #    continue
         
+        hasCompleted = False
         hasError = False
+        retVal = 0
         
-        for errorStr in l_errorStr :
-            
-            for errorStrSkip in l_errorStrSkip :
-                
-                if (any([(errorStr.lower() in line.lower() and errorStrSkip.lower() not in line.lower()) for line in fileContent])) :
-                    
-                    hasError = True
-                    
-                    break
-            
-            if (hasError) :
-                
-                break
         
-        if (not hasError) :
+        # N.B. Log files are appended to (not overwritten) on resubmitting the job
+        # Hence use the last occurence of the job summary
+        for line in fileContent :
+            
+            if (retValStr_start in line) :
+                
+                hasCompleted = True
+                retValStr = line
+            
+            # The job must not have been resubmitted
+            if (jobSubStr in line) :
+                
+                hasCompleted = False
+        
+        
+        if (not hasCompleted) :
             
             continue
         
-        count += 1
-        nJobTotal += 1
         
-        number = fileName[fileName.rfind("_")+1: fileName.rfind(extension)]
+        retValStr = retValStr[retValStr.find(retValStr_start) + len(retValStr_start):]
+        retValStr = retValStr[: retValStr.find(retValStr_end)]
+        retVal = int(retValStr)
         
-        condorConfig_name = condorConfig_nameTemplate %(number)
-        condorConfig_name = "%s/%s" %(directory, condorConfig_name)
-        command = command_template %(condorConfig_name)
+        hasError = bool(retVal)
         
-        print "Count:", count
-        print "Total count:", nJobTotal
-        print "File:", fileName
-        print "Condor config:", condorConfig_name
         
-        if (args.submit) :
+        nJob_succ += int(not hasError)
+        nJob_fail += int(hasError)
+        
+        
+        hasPrinted = False
+        
+        if (hasError or args.success) :
+            
+            count += 1
+            
+            number = fileName[fileName.rfind("_")+1: fileName.rfind(extension_log)]
+            
+            condorConfig_name = condorConfig_nameTemplate %(number)
+            condorConfig_name = "%s/%s" %(directory, condorConfig_name)
+            command = command_template %(condorConfig_name)
+            
+            print "Count:", count
+            print "Total count:", nJob_fail
+            print "File:", fileName
+            print "Return value: %d" %(retVal)
+            print "Condor config:", condorConfig_name
+            
+            hasPrinted = True
+        
+        if (hasError and args.submit) :
+            
+            # Delete the err and out files
+            fileName_err = fileName.replace(extension_log, extension_err)
+            print "Deleting error file: %s" %(fileName_err)
+            os.system("rm %s" %(fileName_err))
+            
+            fileName_out = fileName.replace(extension_log, extension_out)
+            print "Deleting output file: %s" %(fileName_out)
+            os.system("rm %s" %(fileName_out))
             
             print "Command:", command
             os.system(command)
+            
+            hasPrinted = True
         
-        print ""
+        if (hasPrinted) :
+            
+            print "\n"
+
+
+nDigit = len(str(nJob_total))
 
 print "\n"
-print "Total number of failed jobs:", nJobTotal
+print "Total number of succeeded jobs: %0*d/%d" %(nDigit, nJob_succ, nJob_total)
+print "Total number of failed jobs   : %0*d/%d" %(nDigit, nJob_fail, nJob_total)
 print "\n"

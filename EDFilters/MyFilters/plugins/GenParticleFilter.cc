@@ -152,6 +152,8 @@ bool GenParticleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup
 {
     using namespace edm;
     
+    long long eventNumber = iEvent.id().event();
+    
     //////////////////// Gen particle ////////////////////
     edm::Handle <std::vector <reco::GenParticle> > v_genParticle;
     iEvent.getByToken(tok_genParticle, v_genParticle);
@@ -170,7 +172,10 @@ bool GenParticleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup
         //if(abs(pdgId) == 11 && status == 1)
         if(abs(pdgId) == _pdgId && (part.isHardProcess() || status == 1))
         {
-            //printf("[%llu] Electron found: E %0.2f, pT %0.2f, eta %+0.2f \n", eventNumber, part.energy(), part.pt(), part.eta());
+            if(_debug)
+            {
+                printf("[%llu] In GenParticleFilter: PDG-ID %+d, E %0.2f, pT %0.2f, eta %+0.2f \n", eventNumber, pdgId, part.energy(), part.pt(), part.eta());
+            }
             
             if(fabs(part.eta()) > _minEta && fabs(part.eta()) < _maxEta)
             {
@@ -182,9 +187,19 @@ bool GenParticleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup
     
     if(genPart_n >= _atLeastN)
     {
+        if(_debug)
+        {
+            printf("Passed GenParticleFilter. \n");
+        }
+        
         return true;
     }
     
+    
+    if(_debug)
+    {
+        printf("Failed GenParticleFilter. \n");
+    }
     
     return false;
     

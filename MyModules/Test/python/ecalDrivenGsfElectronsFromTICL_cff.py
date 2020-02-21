@@ -29,20 +29,20 @@ def ecalDrivenGsfElectronsFromTICL_customizeProcess(process, onReco = False) :
     process.ecalDrivenGsfElectronsFromTICL           = ecalDrivenGsfElectronsFromMultiCl.clone()
     
     
-    #process.particleFlowClusterHGCalFromTICL.initialClusteringStep.clusterSrc = cms.InputTag("MultiClustersFromTracksters", "MultiClustersFromTracksterByCA", "RECO")
+    #####process.particleFlowClusterHGCalFromTICL.initialClusteringStep.clusterSrc = cms.InputTag("MultiClustersFromTracksters", "MultiClustersFromTracksterByCA", "RECO")
     process.particleFlowClusterHGCalFromTICL.initialClusteringStep.clusterSrc = cms.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", "RECO")
-    #process.particleFlowClusterHGCalFromTICL.recHitsSource = cms.InputTag("particleFlowRecHitHGC", "Cleaned", "RECO")
+    #####process.particleFlowClusterHGCalFromTICL.recHitsSource = cms.InputTag("particleFlowRecHitHGC", "Cleaned", "RECO")
     process.particleFlowSuperClusterHGCalFromTICL.PFClusters = cms.InputTag("particleFlowClusterHGCalFromTICL")
     #process.particleFlowSuperClusterHGCalFromTICL.thresh_PFClusterEndcap = cms.double(10.0)
     #process.particleFlowSuperClusterHGCalFromTICL.doSatelliteClusterMerge = cms.bool(True)
     #process.particleFlowSuperClusterHGCalFromTICL.satelliteClusterSeedThreshold = cms.double(1.0)
     process.particleFlowSuperClusterHGCalFromTICL.use_preshower = cms.bool(False)
-    #process.particleFlowSuperClusterHGCalFromTICL.doSatelliteClusterMerge = cms.bool(True)
-    #process.particleFlowSuperClusterHGCalFromTICL.satelliteClusterSeedThreshold = cms.double(1.0)
-    #process.particleFlowSuperClusterHGCalFromTICL.satelliteMajorityFraction = cms.double(0.1)
+    #####process.particleFlowSuperClusterHGCalFromTICL.doSatelliteClusterMerge = cms.bool(True)
+    #####process.particleFlowSuperClusterHGCalFromTICL.satelliteClusterSeedThreshold = cms.double(1.0)
+    #####process.particleFlowSuperClusterHGCalFromTICL.satelliteMajorityFraction = cms.double(0.1)
     process.particleFlowSuperClusterHGCalFromTICL.useDynamicDPhiWindow = cms.bool(True)
-    process.particleFlowSuperClusterHGCalFromTICL.useHGCalParam = cms.bool(True)
-    #process.ecalDrivenElectronSeedsFromTICL.barrelSuperClusters = ""
+    #process.particleFlowSuperClusterHGCalFromTICL.useHGCalParam = cms.bool(True)
+    #####process.ecalDrivenElectronSeedsFromTICL.barrelSuperClusters = ""
     process.ecalDrivenElectronSeedsFromTICL.endcapSuperClusters = cms.InputTag("particleFlowSuperClusterHGCalFromTICL", "")
     process.electronMergedSeedsFromTICL.EcalBasedSeeds = cms.InputTag("ecalDrivenElectronSeedsFromTICL", "")
     process.electronMergedSeedsFromTICL.TkBasedSeeds = ""
@@ -51,18 +51,18 @@ def ecalDrivenGsfElectronsFromTICL_customizeProcess(process, onReco = False) :
     process.ecalDrivenGsfElectronCoresFromTICL.gsfTracks = "electronGsfTracksFromTICL"
     process.ecalDrivenGsfElectronsFromTICL.gsfElectronCoresTag = "ecalDrivenGsfElectronCoresFromTICL"
     process.ecalDrivenGsfElectronsFromTICL.useDefaultEnergyCorrection = cms.bool(False)
-    #process.ecalDrivenGsfElectronsFromTICL.ecalDrivenEcalEnergyFromClassBasedParameterization = cms.bool(False)
-    #process.ecalDrivenGsfElectronsFromTICL.ecalDrivenEcalErrorFromClassBasedParameterization = cms.bool(False)
+    #####process.ecalDrivenGsfElectronsFromTICL.ecalDrivenEcalEnergyFromClassBasedParameterization = cms.bool(False)
+    #####process.ecalDrivenGsfElectronsFromTICL.ecalDrivenEcalErrorFromClassBasedParameterization = cms.bool(False)
     
     
     # Thresholds
-    process.particleFlowSuperClusterHGCalFromTICL.thresh_SCEt = cms.double(5.0)
-    process.particleFlowSuperClusterHGCalFromTICL.seedThresholdIsET = cms.bool(True) # True is the default
-    process.particleFlowSuperClusterHGCalFromTICL.thresh_PFClusterSeedEndcap = cms.double(5.0)
-    process.particleFlowSuperClusterHGCalFromTICL.thresh_PFClusterEndcap = cms.double(2.0) # Cut on E (not ET)
+    #process.particleFlowSuperClusterHGCalFromTICL.thresh_SCEt = cms.double(5.0)
+    #process.particleFlowSuperClusterHGCalFromTICL.seedThresholdIsET = cms.bool(True) # True is the default
+    #process.particleFlowSuperClusterHGCalFromTICL.thresh_PFClusterSeedEndcap = cms.double(5.0)
+    #process.particleFlowSuperClusterHGCalFromTICL.thresh_PFClusterEndcap = cms.double(2.0) # Cut on E (not ET)
     
     
-    process.ecalDrivenGsfElectronsFromTICL_step = cms.Path(
+    process.ecalDrivenGsfElectronsFromTICL_step = cms.Sequence(
         process.particleFlowClusterHGCalFromTICL *
         process.particleFlowSuperClusterHGCalFromTICL *
         process.ecalDrivenElectronSeedsFromTICL *

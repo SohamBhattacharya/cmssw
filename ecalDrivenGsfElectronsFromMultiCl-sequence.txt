@@ -1,0 +1,8 @@
+RecoParticleFlow.PFClusterProducer.particleFlowClusterHGC_cfi               particleFlowClusterHGCalFromMultiCl
+RecoEcal.EgammaClusterProducers.particleFlowSuperClusteringSequence_cff     particleFlowSuperClusterHGCalFromMultiCl
+RecoEgamma.EgammaElectronProducers.ecalDrivenElectronSeeds_cfi              ecalDrivenElectronSeedsFromMultiCl
+RecoParticleFlow.PFTracking.mergedElectronSeeds_cfi                         electronMergedSeedsFromMultiCl
+TrackingTools.GsfTracking.CkfElectronCandidateMaker_cff                     electronCkfTrackCandidatesFromMultiCl
+TrackingTools.GsfTracking.GsfElectronGsfFit_cff                             electronGsfTracksFromMultiCl
+RecoEgamma.EgammaElectronProducers.gsfElectronCores_cfi                     ecalDrivenGsfElectronCoresFromMultiCl
+RecoEgamma.EgammaElectronProducers.gsfElectrons_cfi                         ecalDrivenGsfElectronsFromMultiCl

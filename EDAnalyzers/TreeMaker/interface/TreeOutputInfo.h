@@ -340,15 +340,15 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_E2p8;
         std::vector <double> v_gsfEleFromTICL_R2p8;
         
-        std::vector<double> v_gsfEleFromTICL_superClusSeed_E;
-        std::vector<double> v_gsfEleFromTICL_superClusSeed_ET;
-        std::vector<double> v_gsfEleFromTICL_superClusSeed_eta;
-        std::vector<double> v_gsfEleFromTICL_superClusSeed_phi;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_E;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_ET;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_eta;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_phi;
         
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dEta;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dPhi;
         
-        std::vector<double> v_gsfEleFromTICL_superClus_TICLclus_n;
+        std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_n;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClus_TICLclus_E;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClus_TICLclus_ET;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClus_TICLclus_nClus;

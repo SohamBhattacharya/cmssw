@@ -1,0 +1,11 @@
+gStyle->SetOptStat(11111111)
+gStyle->SetPalette(kRainBow)
+
+tree->Draw("recHit_E", "recHit_layer==27 && recHit_zside > 0", "", 1, 300)
+
+tree->Draw("recHit_y:recHit_x >> h2_temp(200, -100, 100, 200, -100, 100)", "recHit_E * (recHit_layer==27 && recHit_zside > 0)", "colz", 1, 300)
+
+
+https://drive.google.com/viewerng/viewer?embedded=true&url=https://sobhatta.web.cern.ch/sobhatta/HGCal_ele-reco/analysis/CMSSW_10_6_0_pre4/src/plots/recHit/event-300/HGCalEEP/recHit_y-vs-x_HGCalEEP_layer1.pdf
+
+for i in $(find *.pdf | sort -V); do echo "<embed src=\"$i\" width=\"640\" /><br />" >> index.html; done

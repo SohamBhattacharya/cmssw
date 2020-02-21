@@ -80,7 +80,7 @@ options.register("eventRange",
     "", # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
     VarParsing.VarParsing.varType.string, # string, int, or float
-    "Syntax: Run1:Event1-Run2:Event2" # Description
+    "Syntax: Run1:Event1-Run2:Event2 (includes both)" # Description
 )
 
 options.register("debugFile",
@@ -119,17 +119,31 @@ options.register("modTICLeleWithRerunTICL",
 )
 
 options.register("storeSimHit",
-    1, # Default value
+    0, # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
     VarParsing.VarParsing.varType.int, # string, int, or float
     "Store sim-hits" # Description
 )
 
 options.register("storeRecHit",
-    1, # Default value
+    0, # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
     VarParsing.VarParsing.varType.int, # string, int, or float
     "Store rec-hits" # Description
+)
+
+options.register("storeHGCALlayerClus",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Store HGCal layer clusters" # Description
+)
+
+options.register("storeSuperClusTICLclus",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Store info about TICL-electron SC, SC seed, and TICL-cluster matches" # Description
 )
 
 options.register("trace",
@@ -188,6 +202,17 @@ else :
 #fNames = ["file:/afs/cern.ch/work/s/sobhatta/private/HGCal_ele-reco/CMSSW_11_0_0_pre4/src/output_GEN-SIM-RECO_numEvent2000.root"]
 #fNames = ["file:/eos/cms/store/group/phys_egamma/fpantale/output_GEN-SIM-RECO.root"]
 
+
+for iFile, fName in enumerate(fNames) :
+    
+    if (
+        "file:" not in fName and
+        "root:" not in fName
+    ) :
+        
+        fNames[iFile] = "file:%s" %(fName)
+
+
 outFileSuffix = ""
 
 if (options.rerunTICL) :
@@ -234,7 +259,7 @@ process.source = cms.Source("PoolSource",
     # Run1:Event1 to Run2:Event2
     #eventsToProcess = cms.untracked.VEventRange("1:78722-1:78722"),
     
-    duplicateCheckMode = cms.untracked.string("noDuplicateCheck"),
+    #duplicateCheckMode = cms.untracked.string("noDuplicateCheck"),
 )
 
 
@@ -252,99 +277,99 @@ if (len(options.eventRange)) :
 
 if (options.onRaw) :
     
-    from Configuration.StandardSequences.Reconstruction_cff import *
-    
-    # Local reco
-    print "*"*50
-    print "localreco    :", process.localreco
-    localreco_mod = process.localreco.copyAndExclude([
-        muonlocalreco,
-        castorreco,
-    ])
-    print ""
-    print "localreco_mod:", localreco_mod
-    print ""
-    
-    
-    # Global reco
-    #from RecoTracker.IterativeTracking.MuonSeededStep_cff import *
-    from RecoTracker.IterativeTracking.iterativeTk_cff import *
-    from RecoVertex.Configuration.RecoVertex_cff import *
-    
-    print "*"*50
-    print "globalreco_tracking    :", process.globalreco_tracking
-    globalreco_tracking_mod = process.globalreco_tracking.copyAndExclude([
-        standalonemuontracking,
-        muonSeededStepTask,
-        
-        unsortedOfflinePrimaryVertices4Dfastsim,
-        trackWithVertexRefSelectorBeforeSorting4Dfastsim,
-        trackRefsForJetsBeforeSorting4Dfastsim,
-        offlinePrimaryVertices4Dfastsim,
-        offlinePrimaryVertices4DfastsimWithBS,
-        unsortedOfflinePrimaryVertices4Dfastsim,
-        trackWithVertexRefSelectorBeforeSorting4Dfastsim,
-        trackRefsForJetsBeforeSorting4Dfastsim,
-        offlinePrimaryVertices4Dfastsim,
-        offlinePrimaryVertices4DfastsimWithBS,
-    ])
-    print ""
-    print "globalreco_tracking_mod:", globalreco_tracking_mod
-    print ""
-    
-    print "*"*50
-    print "globalreco    :", process.globalreco
-    globalreco_mod = process.globalreco.copyAndExclude([
-        jetGlobalReco,
-        muonGlobalReco,
-        muoncosmicreco,
-        CastorFullReco,
-        
-        #egammaGlobalReco,
-    ])
-    
-    globalreco_mod.replace(globalreco_tracking, globalreco_tracking_mod)
-    print ""
-    print "globalreco_mod:", globalreco_mod
-    print ""
-    
-    
-    # High level reco
-    print "*"*50
-    print "highlevelreco    :", process.highlevelreco
-    highlevelreco_mod = process.highlevelreco.copyAndExclude([
-        particleFlowReco,
-        muoncosmichighlevelreco,
-        muonshighlevelreco,
-        jetHighLevelReco,
-        metrecoPlusHCALNoise,
-        btagging,
-        recoPFMET,
-        PFTau,
-        cosmicDCTracksSeq,
-    ])
-    print ""
-    print "highlevelreco_mod:", highlevelreco_mod
-    print ""
+    #from Configuration.StandardSequences.Reconstruction_cff import *
+    #
+    ## Local reco
+    #print "*"*50
+    #print "localreco    :", process.localreco
+    #localreco_mod = process.localreco.copyAndExclude([
+    #    muonlocalreco,
+    #    castorreco,
+    #])
+    #print ""
+    #print "localreco_mod:", localreco_mod
+    #print ""
+    #
+    #
+    ## Global reco
+    ##from RecoTracker.IterativeTracking.MuonSeededStep_cff import *
+    #from RecoTracker.IterativeTracking.iterativeTk_cff import *
+    #from RecoVertex.Configuration.RecoVertex_cff import *
+    #
+    #print "*"*50
+    #print "globalreco_tracking    :", process.globalreco_tracking
+    #globalreco_tracking_mod = process.globalreco_tracking.copyAndExclude([
+    #    standalonemuontracking,
+    #    muonSeededStepTask,
+    #    
+    #    unsortedOfflinePrimaryVertices4Dfastsim,
+    #    trackWithVertexRefSelectorBeforeSorting4Dfastsim,
+    #    trackRefsForJetsBeforeSorting4Dfastsim,
+    #    offlinePrimaryVertices4Dfastsim,
+    #    offlinePrimaryVertices4DfastsimWithBS,
+    #    unsortedOfflinePrimaryVertices4Dfastsim,
+    #    trackWithVertexRefSelectorBeforeSorting4Dfastsim,
+    #    trackRefsForJetsBeforeSorting4Dfastsim,
+    #    offlinePrimaryVertices4Dfastsim,
+    #    offlinePrimaryVertices4DfastsimWithBS,
+    #])
+    #print ""
+    #print "globalreco_tracking_mod:", globalreco_tracking_mod
+    #print ""
+    #
+    #print "*"*50
+    #print "globalreco    :", process.globalreco
+    #globalreco_mod = process.globalreco.copyAndExclude([
+    #    jetGlobalReco,
+    #    muonGlobalReco,
+    #    muoncosmicreco,
+    #    CastorFullReco,
+    #    
+    #    #egammaGlobalReco,
+    #])
+    #
+    #globalreco_mod.replace(globalreco_tracking, globalreco_tracking_mod)
+    #print ""
+    #print "globalreco_mod:", globalreco_mod
+    #print ""
+    #
+    #
+    ## High level reco
+    #print "*"*50
+    #print "highlevelreco    :", process.highlevelreco
+    #highlevelreco_mod = process.highlevelreco.copyAndExclude([
+    #    particleFlowReco,
+    #    muoncosmichighlevelreco,
+    #    muonshighlevelreco,
+    #    jetHighLevelReco,
+    #    metrecoPlusHCALNoise,
+    #    btagging,
+    #    recoPFMET,
+    #    PFTau,
+    #    cosmicDCTracksSeq,
+    #])
+    #print ""
+    #print "highlevelreco_mod:", highlevelreco_mod
+    #print ""
     
     
     # Reco
-    print "*"*50
-    print "reconstruction    :", process.reconstruction
+    #print "*"*50
+    #print "reconstruction    :", process.reconstruction
     
-    from RecoTracker.IterativeTracking.MuonSeededStep_cff import *
+    #from RecoTracker.IterativeTracking.MuonSeededStep_cff import *
     
-    reconstruction_mod = process.reconstruction.copy()
+    process.reconstruction_mod = process.reconstruction.copy()
     
-    #reconstruction_mod.replace(localreco, localreco_mod)
-    #reconstruction_mod.replace(globalreco, globalreco_mod)
-    ###reconstruction_mod.replace(highlevelreco, highlevelreco_mod)
-    ###reconstruction_mod.replace(highlevelreco, cms.Sequence(process.egammaHighLevelRecoPrePF))
-    #reconstruction_mod.replace(highlevelreco, cms.Sequence())
+    #process.reconstruction_mod.replace(localreco, localreco_mod)
+    #process.reconstruction_mod.replace(globalreco, globalreco_mod)
+    ###process.reconstruction_mod.replace(highlevelreco, highlevelreco_mod)
+    ###process.reconstruction_mod.replace(highlevelreco, cms.Sequence(process.egammaHighLevelRecoPrePF))
+    #process.reconstruction_mod.replace(highlevelreco, cms.Sequence())
     
-    print ""
-    print "reconstruction_mod:", reconstruction_mod
-    print ""
+    #print ""
+    #print "process.reconstruction_mod:", process.reconstruction_mod
+    #print ""
     
     
     options.rerunTICL = 1
@@ -389,11 +414,13 @@ if (options.modTICLele) :
 process.treeMaker = cms.EDAnalyzer(
     "TreeMaker",
     
-    ############################## My stuff  ##############################
+    ############################## My stuff ##############################
     debug = cms.bool(False),
     
     storeSimHit = cms.bool(bool(options.storeSimHit)),
     storeRecHit = cms.bool(bool(options.storeRecHit)),
+    storeHGCALlayerClus = cms.bool(bool(options.storeHGCALlayerClus)),
+    storeSuperClusTICLclus = cms.bool(bool(options.storeSuperClusTICLclus)),
     
     
     ############################## GEN ##############################
@@ -478,10 +505,10 @@ process.filter_seq = cms.Sequence(
 )
 
 
-process.p = cms.Path(
-    process.filter_seq *
-    process.treeMaker
-)
+# Output file name modification
+if (outFile.find("/eos/cms") ==  0) :
+    
+    outFile = outFile.replace("/eos/cms", "root://eoscms.cern.ch//eos/cms")
 
 
 # Output
@@ -491,15 +518,23 @@ process.TFileService = cms.Service(
 )
 
 
-#process.schedule = cms.Schedule()
-process.schedule = cms.Schedule(
-    process.p
-)
+process.schedule = cms.Schedule()
 
 
 # Aging
 from SLHCUpgradeSimulations.Configuration.aging import customise_aging_1000
 customise_aging_1000(process)
+
+
+process.reco_seq = cms.Sequence()
+
+if (options.onRaw) :
+    
+    process.reco_seq = cms.Sequence(
+        process.RawToDigi *
+        process.L1Reco *
+        process.reconstruction_mod
+    )
 
 
 # TICL
@@ -512,22 +547,21 @@ if (options.rerunTICL) :
     TICL_iterations_withReco(process)
 
 
+process.TICLele_seq = cms.Sequence()
+
 if (options.modTICLele) :
     
-    process.schedule.insert(0, process.ecalDrivenGsfElectronsFromTICL_step)
+    process.TICLele_seq = cms.Sequence(process.ecalDrivenGsfElectronsFromTICL_step)
 
 
-if (options.onRaw) :
-    
-    process.raw2digi_step = cms.Path(process.RawToDigi)
-    process.L1Reco_step = cms.Path(process.L1Reco)
-    process.reconstruction_step = cms.Path(reconstruction_mod)
-    
-    
-    process.schedule.insert(0, process.reconstruction_step)
-    process.schedule.insert(0, process.L1Reco_step)
-    process.schedule.insert(0, process.raw2digi_step)
+process.p = cms.Path(
+    process.filter_seq *
+    process.reco_seq *
+    process.TICLele_seq *
+    process.treeMaker
+)
 
+process.schedule.insert(0, process.p)
 
 print "\n"
 print "*"*50

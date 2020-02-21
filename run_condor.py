@@ -202,9 +202,17 @@ if (__name__ == "__main__") :
         cmsRun_cmd += "\t sourceFile=%s" %(inputFileList_mod) + lineBreakStr
         cmsRun_cmd += "\t outputDir=%s" %(outputDir) + lineBreakStr
         cmsRun_cmd += "\t outFileNumber=%d" %(iJob+1) + lineBreakStr
-        cmsRun_cmd += "\t onRaw=1" + lineBreakStr
+        
+        #cmsRun_cmd += "\t onRaw=1" + lineBreakStr
+        
+        cmsRun_cmd += "rerunTICL=1" + lineBreakStr
+        cmsRun_cmd += "modTICLele=1" + lineBreakStr
+        cmsRun_cmd += "modTICLeleWithRerunTICL=1" + lineBreakStr
+        
         cmsRun_cmd += "\t storeRecHit=0" + lineBreakStr
         cmsRun_cmd += "\t storeSimHit=0" + lineBreakStr
+        cmsRun_cmd += "\t storeHGCALlayerClus=0" + lineBreakStr
+        cmsRun_cmd += "\t storeSuperClusTICLclus=0" + lineBreakStr
         cmsRun_cmd += "\t debugFile=0" + lineBreakStr
         
         #cmsRun_cmd += "\t maxEvents=20" + lineBreakStr

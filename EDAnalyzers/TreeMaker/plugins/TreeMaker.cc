@@ -131,6 +131,8 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
     
     bool storeSimHit;
     bool storeRecHit;
+    bool storeHGCALlayerClus;
+    bool storeSuperClusTICLclus;
     
     
     // Gen particles //
@@ -213,6 +215,8 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     
     storeSimHit = iConfig.getParameter <bool>("storeSimHit");
     storeRecHit = iConfig.getParameter <bool>("storeRecHit");
+    storeHGCALlayerClus = iConfig.getParameter <bool>("storeHGCALlayerClus");
+    storeSuperClusTICLclus = iConfig.getParameter <bool>("storeSuperClusTICLclus");
     
     
     // Gen particles //
@@ -331,7 +335,15 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //if(abs(pdgId) == 11 && status == 1)
         if(abs(pdgId) == 11 && (part.isHardProcess() || status == 1))
         {
-            //printf("[%llu] Electron found: E %0.2f, pT %0.2f, eta %+0.2f \n", eventNumber, part.energy(), part.pt(), part.eta());
+            //printf("[%llu] Gen electron found: E %0.2f, pT %0.2f, eta %+0.2f \n", eventNumber, part.energy(), part.pt(), part.eta());
+            
+            printf(
+                "[%llu] "
+                "Gen-ele found: E %0.2f, pT %0.2f, eta %+0.2f, pz %+0.2f, "
+                "\n",
+                eventNumber,
+                part.energy(), part.pt(), part.eta(), part.pz()
+            );
             
             if(fabs(part.eta()) > HGCal_minEta && fabs(part.eta()) < HGCal_maxEta && part.pt() > el_minPt && part.pt() < el_maxPt)
             {
@@ -436,10 +448,10 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     
     
-    if(!treeOutput->genEl_n)
-    {
-        return;
-    }
+    //if(!treeOutput->genEl_n)
+    //{
+    //    return;
+    //}
     
     
     // Sort the electrons
@@ -565,56 +577,59 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     std::map <DetId, int> m_HGCALlayerClusterHit;
     
-    for(int iLayerClus = 0; iLayerClus < nLayerClus; iLayerClus++)
+    if(storeHGCALlayerClus)
     {
-        reco::CaloCluster cluster = v_HGCALlayerCluster->at(iLayerClus);
-        std::vector <std::pair <DetId, float> > v_hit = cluster.hitsAndFractions();
-        
-        CLHEP::Hep3Vector cluster_3vec(
-            cluster.x(),
-            cluster.y(),
-            cluster.z()
-        );
-        
-        int layer = -1;
-        
-        int nHit = v_hit.size();
-        double HGCALlayerClus_sigRecHit_totE = 0;
-        
-        for(int iHit = 0; iHit < nHit; iHit++)
+        for(int iLayerClus = 0; iLayerClus < nLayerClus; iLayerClus++)
         {
-            auto hit = v_hit.at(iHit);
+            reco::CaloCluster cluster = v_HGCALlayerCluster->at(iLayerClus);
+            std::vector <std::pair <DetId, float> > v_hit = cluster.hitsAndFractions();
             
-            DetId id = hit.first;
-            double fraction = hit.second;
+            CLHEP::Hep3Vector cluster_3vec(
+                cluster.x(),
+                cluster.y(),
+                cluster.z()
+            );
             
-            m_HGCALlayerClusterHit[id] = iLayerClus;
+            int layer = -1;
             
-            // Get the layer of the cluster from the hit
-            if(iHit == 0)
+            int nHit = v_hit.size();
+            double HGCALlayerClus_sigRecHit_totE = 0;
+            
+            for(int iHit = 0; iHit < nHit; iHit++)
             {
-                layer = recHitTools.getLayer(id); // Start from 1
+                auto hit = v_hit.at(iHit);
+                
+                DetId id = hit.first;
+                double fraction = hit.second;
+                
+                m_HGCALlayerClusterHit[id] = iLayerClus;
+                
+                // Get the layer of the cluster from the hit
+                if(iHit == 0)
+                {
+                    layer = recHitTools.getLayer(id); // Start from 1
+                }
+                
+                if(m_simHit.find(id) != m_simHit.end())
+                {
+                    HGCALlayerClus_sigRecHit_totE += m_recHit.at(id)->energy() * fraction;
+                }
             }
             
-            if(m_simHit.find(id) != m_simHit.end())
-            {
-                HGCALlayerClus_sigRecHit_totE += m_recHit.at(id)->energy() * fraction;
-            }
+            treeOutput->HGCALlayerClus_n++;
+            
+            treeOutput->v_HGCALlayerClus_E.push_back(cluster.energy());
+            treeOutput->v_HGCALlayerClus_x.push_back(cluster.x());
+            treeOutput->v_HGCALlayerClus_y.push_back(cluster.y());
+            treeOutput->v_HGCALlayerClus_z.push_back(cluster.z());
+            treeOutput->v_HGCALlayerClus_eta.push_back(cluster.eta());
+            treeOutput->v_HGCALlayerClus_phi.push_back(cluster.phi());
+            treeOutput->v_HGCALlayerClus_ET.push_back(cluster.energy() * sin(cluster_3vec.theta()));
+            treeOutput->v_HGCALlayerClus_layer.push_back(layer);
+            
+            treeOutput->v_HGCALlayerClus_sigRecHit_totE.push_back(HGCALlayerClus_sigRecHit_totE);
+            treeOutput->v_HGCALlayerClus_sigRecHit_Efraction.push_back(HGCALlayerClus_sigRecHit_totE / cluster.energy());
         }
-        
-        treeOutput->HGCALlayerClus_n++;
-        
-        treeOutput->v_HGCALlayerClus_E.push_back(cluster.energy());
-        treeOutput->v_HGCALlayerClus_x.push_back(cluster.x());
-        treeOutput->v_HGCALlayerClus_y.push_back(cluster.y());
-        treeOutput->v_HGCALlayerClus_z.push_back(cluster.z());
-        treeOutput->v_HGCALlayerClus_eta.push_back(cluster.eta());
-        treeOutput->v_HGCALlayerClus_phi.push_back(cluster.phi());
-        treeOutput->v_HGCALlayerClus_ET.push_back(cluster.energy() * sin(cluster_3vec.theta()));
-        treeOutput->v_HGCALlayerClus_layer.push_back(layer);
-        
-        treeOutput->v_HGCALlayerClus_sigRecHit_totE.push_back(HGCALlayerClus_sigRecHit_totE);
-        treeOutput->v_HGCALlayerClus_sigRecHit_Efraction.push_back(HGCALlayerClus_sigRecHit_totE / cluster.energy());
     }
     
     
@@ -671,16 +686,16 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             }
         }
         
-        printf(
-            "[%llu] "
-            "Gen-ele found: E %0.2f, pT %0.2f, eta %+0.2f, pz %+0.2f, "
-            //"multiClus n %d, multiClus E %0.2f, "
-            "\n",
-            eventNumber,
-            genEl_4mom.e(), genEl_4mom.perp(), genEl_4mom.eta(), genEl_4mom.pz()
-            //v_genEl_multiClus_n.at(iGenEl),
-            //v_genEl_multiClus_E.at(iGenEl)
-        );
+        //printf(
+        //    "[%llu] "
+        //    "Gen-ele found: E %0.2f, pT %0.2f, eta %+0.2f, pz %+0.2f, "
+        //    //"multiClus n %d, multiClus E %0.2f, "
+        //    "\n",
+        //    eventNumber,
+        //    genEl_4mom.e(), genEl_4mom.perp(), genEl_4mom.eta(), genEl_4mom.pz()
+        //    //v_genEl_multiClus_n.at(iGenEl),
+        //    //v_genEl_multiClus_E.at(iGenEl)
+        //);
         
         treeOutput->v_genEl_multiClus_n.push_back(v_genEl_multiClus_n.at(iGenEl));
         
@@ -941,6 +956,8 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 {
                     treeOutput->v_multiClus_clus_layer.push_back(layer);
                 }
+                
+                break;
                 
                 //bool isDetIdRecorded = false;
                 //
@@ -1701,10 +1718,14 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         int index = v_gsfEleFromMultiClus_matchedGenEl_index.at(iEle);
         
+        double energy = -1;
+        
         if(index >= 0)
         {
-            treeOutput->v_gsfEleFromMultiClus_matchedGenEl_E.push_back(v_genEl_4mom.at(index).e());
+            energy = v_genEl_4mom.at(index).e();
         }
+        
+        treeOutput->v_gsfEleFromMultiClus_matchedGenEl_E.push_back(energy);
     }
     
     
@@ -2165,205 +2186,208 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         
         //
-        std::vector <double> v_gsfEleFromTICL_superClusSeed_clus_dEta;
-        std::vector <double> v_gsfEleFromTICL_superClusSeed_clus_dPhi;
-        
-        // REMEMBER to add the vectors to this!
-        std::vector <std::vector <double>* > vv_gsfEleFromTICL_superClus_clus = {
-            &v_gsfEleFromTICL_superClusSeed_clus_dEta,
-            &v_gsfEleFromTICL_superClusSeed_clus_dPhi,
-        };
-        
-        int superClus_clus_seed_index = -1;
-        double superClus_clus_dEta_min = 9999;
-        double superClus_clus_dPhi_min = 9999;
-        
-        edm::PtrVector <reco::CaloCluster> v_superClus_clus = gsfEle.superCluster()->clusters();
-        
-        for(int iCluster = 0, count = 0; iCluster < (int) v_superClus_clus.size(); iCluster++)
+        if(storeSuperClusTICLclus)
         {
-            const reco::CaloCluster *cluster = v_superClus_clus[iCluster].get();
+            std::vector <double> v_gsfEleFromTICL_superClusSeed_clus_dEta;
+            std::vector <double> v_gsfEleFromTICL_superClusSeed_clus_dPhi;
             
-            // Must be in the same half of the detector
-            if(gsfEle.eta() && cluster->eta()/gsfEle.eta() < 0)
+            // REMEMBER to add the vectors to this!
+            std::vector <std::vector <double>* > vv_gsfEleFromTICL_superClus_clus = {
+                &v_gsfEleFromTICL_superClusSeed_clus_dEta,
+                &v_gsfEleFromTICL_superClusSeed_clus_dPhi,
+            };
+            
+            int superClus_clus_seed_index = -1;
+            double superClus_clus_dEta_min = 9999;
+            double superClus_clus_dPhi_min = 9999;
+            
+            edm::PtrVector <reco::CaloCluster> v_superClus_clus = gsfEle.superCluster()->clusters();
+            
+            for(int iCluster = 0, count = 0; iCluster < (int) v_superClus_clus.size(); iCluster++)
             {
-                continue;
-            }
-            
-            //CLHEP::Hep3Vector cluster_3vec(
-            //    cluster->x(),
-            //    cluster->y(),
-            //    cluster->z()
-            //);
-            
-            double dEta = fabs(cluster->eta()) - fabs(superClus_seed->eta());
-            double dPhi = TVector2::Phi_mpi_pi(cluster->phi() - superClus_seed->phi());
-            
-            if(fabs(dEta) < superClus_clus_dEta_min && fabs(dPhi) < superClus_clus_dPhi_min)
-            {
-                superClus_clus_dEta_min = fabs(dEta);
-                superClus_clus_dPhi_min = fabs(dPhi);
+                const reco::CaloCluster *cluster = v_superClus_clus[iCluster].get();
                 
-                superClus_clus_seed_index = count;
-            }
-            
-            v_gsfEleFromTICL_superClusSeed_clus_dEta.push_back(dEta);
-            v_gsfEleFromTICL_superClusSeed_clus_dPhi.push_back(dPhi);
-            
-            count++;
-        }
-        
-        // Remove the seed
-        if(superClus_clus_seed_index >= 0)
-        {
-            for(int i = 0; i < (int) vv_gsfEleFromTICL_superClus_clus.size(); i++)
-            {
-                if(superClus_clus_seed_index >= (int) vv_gsfEleFromTICL_superClus_clus.at(i)->size())
+                // Must be in the same half of the detector
+                if(gsfEle.eta() && cluster->eta()/gsfEle.eta() < 0)
                 {
-                    printf(
-                        "Error: Invalid index (%d/%d) when deleting seed from vv_gsfEleFromTICL_superClus_clus[%d]. \n",
-                        superClus_clus_seed_index,
-                        (int) vv_gsfEleFromTICL_superClus_clus.at(i)->size()-1,
-                        i
-                    );
-                    exit(EXIT_FAILURE);
+                    continue;
                 }
                 
-                vv_gsfEleFromTICL_superClus_clus.at(i)->erase(
-                    vv_gsfEleFromTICL_superClus_clus.at(i)->begin() + superClus_clus_seed_index
-                );
-            }
-        }
-        
-        treeOutput->vv_gsfEleFromTICL_superClusSeed_clus_dEta.push_back(v_gsfEleFromTICL_superClusSeed_clus_dEta);
-        treeOutput->vv_gsfEleFromTICL_superClusSeed_clus_dPhi.push_back(v_gsfEleFromTICL_superClusSeed_clus_dPhi);
-        
-        
-        
-        //
-        std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_E;
-        std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_ET;
-        std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_nClus;
-        
-        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dX;
-        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dY;
-        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dZ;
-        
-        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dEta;
-        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi;
-        std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dR;
-        
-        // REMEMBER to add the vectors to this!
-        std::vector <std::vector <double>* > vv_gsfEleFromTICL_superClus_TICLclus = {
-            &v_gsfEleFromTICL_superClus_TICLclus_E,
-            &v_gsfEleFromTICL_superClus_TICLclus_ET,
-            &v_gsfEleFromTICL_superClus_TICLclus_nClus,
-            
-            &v_gsfEleFromTICL_superClusSeed_TICLclus_dX,
-            &v_gsfEleFromTICL_superClusSeed_TICLclus_dY,
-            &v_gsfEleFromTICL_superClusSeed_TICLclus_dZ,
-            
-            &v_gsfEleFromTICL_superClusSeed_TICLclus_dEta,
-            &v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi,
-            &v_gsfEleFromTICL_superClusSeed_TICLclus_dR,
-        };
-        
-        int superClus_TICLclus_seed_index = -1;
-        double superClus_TICLclus_dEta_min = 9999;
-        double superClus_TICLclus_dPhi_min = 9999;
-        
-        for(int iTICLmultiCluster = 0, count = 0; iTICLmultiCluster < nTICLmultiCluster; iTICLmultiCluster++)
-        {
-            reco::HGCalMultiCluster TICLmultiCluster = v_TICLmultiCluster->at(iTICLmultiCluster);
-            
-            // Must be in the same half of the detector
-            if(gsfEle.eta() && TICLmultiCluster.eta()/gsfEle.eta() < 0)
-            {
-                continue;
-            }
-            
-            CLHEP::Hep3Vector TICLmultiCluster_3vec(
-                TICLmultiCluster.x(),
-                TICLmultiCluster.y(),
-                TICLmultiCluster.z()
-            );
-            
-            double dX = TICLmultiCluster.x() - superClus_seed->x();
-            double dY = TICLmultiCluster.y() - superClus_seed->y();
-            double dZ = TICLmultiCluster.z() - superClus_seed->z();
-            
-            double dEta = fabs(TICLmultiCluster.eta()) - fabs(superClus_seed->eta());
-            double dPhi = TVector2::Phi_mpi_pi(TICLmultiCluster.phi() - superClus_seed->phi());
-            double dR   = sqrt(dX*dX + dY*dY + dZ*dZ);
-            //double dR = TICLmultiCluster_3vec.r() - superClus_seed->position().r();
-            
-            if(fabs(dEta) < superClus_TICLclus_dEta_min && fabs(dPhi) < superClus_TICLclus_dPhi_min)
-            {
-                superClus_TICLclus_dEta_min = fabs(dEta);
-                superClus_TICLclus_dPhi_min = fabs(dPhi);
+                //CLHEP::Hep3Vector cluster_3vec(
+                //    cluster->x(),
+                //    cluster->y(),
+                //    cluster->z()
+                //);
                 
-                superClus_TICLclus_seed_index = count;
-            }
-            
-            // Skip the same cluster
-            //if(fabs(dEta) < 1e-3 && fabs(dPhi) < 1e-3)
-            //{
-            //    continue;
-            //}
-            
-            v_gsfEleFromTICL_superClus_TICLclus_E.push_back(TICLmultiCluster.energy());
-            v_gsfEleFromTICL_superClus_TICLclus_ET.push_back(TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta()));
-            v_gsfEleFromTICL_superClus_TICLclus_nClus.push_back(TICLmultiCluster.clusters().size());
-            
-            v_gsfEleFromTICL_superClusSeed_TICLclus_dX.push_back(dX);
-            v_gsfEleFromTICL_superClusSeed_TICLclus_dY.push_back(dY);
-            v_gsfEleFromTICL_superClusSeed_TICLclus_dZ.push_back(dZ);
-            
-            v_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(dEta);
-            v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(dPhi);
-            v_gsfEleFromTICL_superClusSeed_TICLclus_dR.push_back(dR);
-            
-            count++;
-        }
-        
-        treeOutput->v_gsfEleFromTICL_superClus_TICLclus_n.push_back(v_gsfEleFromTICL_superClus_TICLclus_E.size());
-        
-        // Remove the seed
-        if(superClus_TICLclus_seed_index >= 0)
-        {
-            for(int i = 0; i < (int) vv_gsfEleFromTICL_superClus_TICLclus.size(); i++)
-            {
-                if(superClus_TICLclus_seed_index >= (int) vv_gsfEleFromTICL_superClus_TICLclus.at(i)->size())
+                double dEta = fabs(cluster->eta()) - fabs(superClus_seed->eta());
+                double dPhi = TVector2::Phi_mpi_pi(cluster->phi() - superClus_seed->phi());
+                
+                if(fabs(dEta) < superClus_clus_dEta_min && fabs(dPhi) < superClus_clus_dPhi_min)
                 {
-                    printf(
-                        "Error: Invalid index (%d/%d) when deleting seed from vv_gsfEleFromTICL_superClus_TICLclus[%d]. \n",
-                        superClus_TICLclus_seed_index,
-                        (int) vv_gsfEleFromTICL_superClus_TICLclus.at(i)->size()-1,
-                        i
-                    );
-                    exit(EXIT_FAILURE);
+                    superClus_clus_dEta_min = fabs(dEta);
+                    superClus_clus_dPhi_min = fabs(dPhi);
+                    
+                    superClus_clus_seed_index = count;
                 }
                 
-                vv_gsfEleFromTICL_superClus_TICLclus.at(i)->erase(
-                    vv_gsfEleFromTICL_superClus_TICLclus.at(i)->begin() + superClus_TICLclus_seed_index
-                );
+                v_gsfEleFromTICL_superClusSeed_clus_dEta.push_back(dEta);
+                v_gsfEleFromTICL_superClusSeed_clus_dPhi.push_back(dPhi);
+                
+                count++;
             }
+            
+            // Remove the seed
+            if(superClus_clus_seed_index >= 0)
+            {
+                for(int i = 0; i < (int) vv_gsfEleFromTICL_superClus_clus.size(); i++)
+                {
+                    if(superClus_clus_seed_index >= (int) vv_gsfEleFromTICL_superClus_clus.at(i)->size())
+                    {
+                        printf(
+                            "Error: Invalid index (%d/%d) when deleting seed from vv_gsfEleFromTICL_superClus_clus[%d]. \n",
+                            superClus_clus_seed_index,
+                            (int) vv_gsfEleFromTICL_superClus_clus.at(i)->size()-1,
+                            i
+                        );
+                        exit(EXIT_FAILURE);
+                    }
+                    
+                    vv_gsfEleFromTICL_superClus_clus.at(i)->erase(
+                        vv_gsfEleFromTICL_superClus_clus.at(i)->begin() + superClus_clus_seed_index
+                    );
+                }
+            }
+            
+            treeOutput->vv_gsfEleFromTICL_superClusSeed_clus_dEta.push_back(v_gsfEleFromTICL_superClusSeed_clus_dEta);
+            treeOutput->vv_gsfEleFromTICL_superClusSeed_clus_dPhi.push_back(v_gsfEleFromTICL_superClusSeed_clus_dPhi);
+            
+            
+            
+            //
+            std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_E;
+            std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_ET;
+            std::vector <double> v_gsfEleFromTICL_superClus_TICLclus_nClus;
+            
+            std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dX;
+            std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dY;
+            std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dZ;
+            
+            std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dEta;
+            std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi;
+            std::vector <double> v_gsfEleFromTICL_superClusSeed_TICLclus_dR;
+            
+            // REMEMBER to add the vectors to this!
+            std::vector <std::vector <double>* > vv_gsfEleFromTICL_superClus_TICLclus = {
+                &v_gsfEleFromTICL_superClus_TICLclus_E,
+                &v_gsfEleFromTICL_superClus_TICLclus_ET,
+                &v_gsfEleFromTICL_superClus_TICLclus_nClus,
+                
+                &v_gsfEleFromTICL_superClusSeed_TICLclus_dX,
+                &v_gsfEleFromTICL_superClusSeed_TICLclus_dY,
+                &v_gsfEleFromTICL_superClusSeed_TICLclus_dZ,
+                
+                &v_gsfEleFromTICL_superClusSeed_TICLclus_dEta,
+                &v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi,
+                &v_gsfEleFromTICL_superClusSeed_TICLclus_dR,
+            };
+            
+            int superClus_TICLclus_seed_index = -1;
+            double superClus_TICLclus_dEta_min = 9999;
+            double superClus_TICLclus_dPhi_min = 9999;
+            
+            for(int iTICLmultiCluster = 0, count = 0; iTICLmultiCluster < nTICLmultiCluster; iTICLmultiCluster++)
+            {
+                reco::HGCalMultiCluster TICLmultiCluster = v_TICLmultiCluster->at(iTICLmultiCluster);
+                
+                // Must be in the same half of the detector
+                if(gsfEle.eta() && TICLmultiCluster.eta()/gsfEle.eta() < 0)
+                {
+                    continue;
+                }
+                
+                CLHEP::Hep3Vector TICLmultiCluster_3vec(
+                    TICLmultiCluster.x(),
+                    TICLmultiCluster.y(),
+                    TICLmultiCluster.z()
+                );
+                
+                double dX = TICLmultiCluster.x() - superClus_seed->x();
+                double dY = TICLmultiCluster.y() - superClus_seed->y();
+                double dZ = TICLmultiCluster.z() - superClus_seed->z();
+                
+                double dEta = fabs(TICLmultiCluster.eta()) - fabs(superClus_seed->eta());
+                double dPhi = TVector2::Phi_mpi_pi(TICLmultiCluster.phi() - superClus_seed->phi());
+                double dR   = sqrt(dX*dX + dY*dY + dZ*dZ);
+                //double dR = TICLmultiCluster_3vec.r() - superClus_seed->position().r();
+                
+                if(fabs(dEta) < superClus_TICLclus_dEta_min && fabs(dPhi) < superClus_TICLclus_dPhi_min)
+                {
+                    superClus_TICLclus_dEta_min = fabs(dEta);
+                    superClus_TICLclus_dPhi_min = fabs(dPhi);
+                    
+                    superClus_TICLclus_seed_index = count;
+                }
+                
+                // Skip the same cluster
+                //if(fabs(dEta) < 1e-3 && fabs(dPhi) < 1e-3)
+                //{
+                //    continue;
+                //}
+                
+                v_gsfEleFromTICL_superClus_TICLclus_E.push_back(TICLmultiCluster.energy());
+                v_gsfEleFromTICL_superClus_TICLclus_ET.push_back(TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta()));
+                v_gsfEleFromTICL_superClus_TICLclus_nClus.push_back(TICLmultiCluster.clusters().size());
+                
+                v_gsfEleFromTICL_superClusSeed_TICLclus_dX.push_back(dX);
+                v_gsfEleFromTICL_superClusSeed_TICLclus_dY.push_back(dY);
+                v_gsfEleFromTICL_superClusSeed_TICLclus_dZ.push_back(dZ);
+                
+                v_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(dEta);
+                v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(dPhi);
+                v_gsfEleFromTICL_superClusSeed_TICLclus_dR.push_back(dR);
+                
+                count++;
+            }
+            
+            treeOutput->v_gsfEleFromTICL_superClus_TICLclus_n.push_back(v_gsfEleFromTICL_superClus_TICLclus_E.size());
+            
+            // Remove the seed
+            if(superClus_TICLclus_seed_index >= 0)
+            {
+                for(int i = 0; i < (int) vv_gsfEleFromTICL_superClus_TICLclus.size(); i++)
+                {
+                    if(superClus_TICLclus_seed_index >= (int) vv_gsfEleFromTICL_superClus_TICLclus.at(i)->size())
+                    {
+                        printf(
+                            "Error: Invalid index (%d/%d) when deleting seed from vv_gsfEleFromTICL_superClus_TICLclus[%d]. \n",
+                            superClus_TICLclus_seed_index,
+                            (int) vv_gsfEleFromTICL_superClus_TICLclus.at(i)->size()-1,
+                            i
+                        );
+                        exit(EXIT_FAILURE);
+                    }
+                    
+                    vv_gsfEleFromTICL_superClus_TICLclus.at(i)->erase(
+                        vv_gsfEleFromTICL_superClus_TICLclus.at(i)->begin() + superClus_TICLclus_seed_index
+                    );
+                }
+            }
+            
+            treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_E.push_back(v_gsfEleFromTICL_superClus_TICLclus_E);
+            treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_ET.push_back(v_gsfEleFromTICL_superClus_TICLclus_ET);
+            treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_nClus.push_back(v_gsfEleFromTICL_superClus_TICLclus_nClus);
+            
+            treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dX.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dX);
+            treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dY.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dY);
+            treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dZ.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dZ);
+            
+            treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dEta);
+            treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi);
+            treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dR.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dR);
         }
-        
-        treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_E.push_back(v_gsfEleFromTICL_superClus_TICLclus_E);
-        treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_ET.push_back(v_gsfEleFromTICL_superClus_TICLclus_ET);
-        treeOutput->vv_gsfEleFromTICL_superClus_TICLclus_nClus.push_back(v_gsfEleFromTICL_superClus_TICLclus_nClus);
-        
-        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dX.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dX);
-        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dY.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dY);
-        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dZ.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dZ);
-        
-        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dEta.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dEta);
-        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dPhi.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dPhi);
-        treeOutput->vv_gsfEleFromTICL_superClusSeed_TICLclus_dR.push_back(v_gsfEleFromTICL_superClusSeed_TICLclus_dR);
     }
     
-    printf("m_gsfEle_superClus.size(): %d \n", (int) m_gsfEle_superClus.size() );
+    //printf("m_gsfEle_superClus.size(): %d \n", (int) m_gsfEle_superClus.size() );
     
     
     // TICL-ele gen-matching
@@ -2384,10 +2408,14 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         int index = v_gsfEleFromTICL_matchedGenEl_index.at(iEle);
         
+        double energy = -1;
+        
         if(index >= 0)
         {
-            treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(v_genEl_4mom.at(index).e());
+            energy = v_genEl_4mom.at(index).e();
         }
+        
+        treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(energy);
     }
     
     

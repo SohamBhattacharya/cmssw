@@ -1,0 +1,36 @@
+sprintf(name, "multiClus_HGCalEEP_clus1_dX");
+tree->Branch(name, &v_multiClus_HGCalEEP_clus1_dX);
+
+sprintf(name, "multiClus_HGCalEEP_clus1_dY");
+tree->Branch(name, &v_multiClus_HGCalEEP_clus1_dY);
+
+sprintf(name, "multiClus_HGCalEEP_clus1_dZ");
+tree->Branch(name, &v_multiClus_HGCalEEP_clus1_dZ);
+
+sprintf(name, "multiClus_HGCalEEP_clus1_dEta");
+tree->Branch(name, &v_multiClus_HGCalEEP_clus1_dEta);
+
+sprintf(name, "multiClus_HGCalEEP_clus1_dPhi");
+tree->Branch(name, &v_multiClus_HGCalEEP_clus1_dPhi);
+
+sprintf(name, "multiClus_HGCalEEP_clus1_dR");
+tree->Branch(name, &v_multiClus_HGCalEEP_clus1_dR);
+
+sprintf(name, "multiClus_HGCalEEM_clus1_dX");
+tree->Branch(name, &v_multiClus_HGCalEEM_clus1_dX);
+
+sprintf(name, "multiClus_HGCalEEM_clus1_dY");
+tree->Branch(name, &v_multiClus_HGCalEEM_clus1_dY);
+
+sprintf(name, "multiClus_HGCalEEM_clus1_dZ");
+tree->Branch(name, &v_multiClus_HGCalEEM_clus1_dZ);
+
+sprintf(name, "multiClus_HGCalEEM_clus1_dEta");
+tree->Branch(name, &v_multiClus_HGCalEEM_clus1_dEta);
+
+sprintf(name, "multiClus_HGCalEEM_clus1_dPhi");
+tree->Branch(name, &v_multiClus_HGCalEEM_clus1_dPhi);
+
+sprintf(name, "multiClus_HGCalEEM_clus1_dR");
+tree->Branch(name, &v_multiClus_HGCalEEM_clus1_dR);
+
