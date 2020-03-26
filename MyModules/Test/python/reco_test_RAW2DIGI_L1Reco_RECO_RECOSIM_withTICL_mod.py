@@ -187,10 +187,15 @@ process.configurationMetadata = cms.untracked.PSet(
     version = cms.untracked.string('$Revision: 1.19 $')
 )
 
+
+print "Deleting existing output file."
+os.system("rm %s" %(outFile))
+
+
 # Output file name modification
-if (outFile.find("/eos/cms") ==  0) :
+if (outFile.find("/eos/cms/") ==  0) :
     
-    outFile = outFile.replace("/eos/cms", "root://eoscms.cern.ch//eos/cms")
+    outFile = outFile.replace("/eos/cms/", "root://eoscms.cern.ch//")
 
 print "Output file: %s" %(outFile)
 
