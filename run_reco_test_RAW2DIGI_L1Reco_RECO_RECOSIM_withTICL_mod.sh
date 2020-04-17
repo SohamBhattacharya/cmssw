@@ -1,0 +1,14 @@
+cmsRun MyModules/Test/python/reco_test_RAW2DIGI_L1Reco_RECO_RECOSIM_withTICL_mod.py \
+    sourceFile=sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_realistic_v3_ext2-v2_GEN-SIM-DIGI-RAW/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_realistic_v3_ext2-v2_GEN-SIM-DIGI-RAW.txt \
+    outputFile=output_modRECO.root \
+    maxEvents=5 \
+    dropList=\
+recoPFClusters_particleFlowClusterHGCal_*_*,\
+PixelDigiSimLinkedmDetSetVector_simSiPixelDigis_Tracker_*,\
+DetIdHGCSampleHGCDataFramesSorted_simHGCalUnsuppressedDigis_EE_*,\
+PixelDigiSimLinkedmDetSetVector_simSiPixelDigis_Pixel_*,\
+Phase2TrackerDigiedmDetSetVectorPhase2TrackerDigiPhase2TrackerDigiedmrefhelperFindForDetSetVectoredmRefTTClusteredmNewDetSetVector_TTClustersFromPhase2TrackerDigis_ClusterInclusive_*,\
+recoGsfPFRecTracks_pfTrackElec_Secondary_*,\
+PixelDigiedmDetSetVector_simSiPixelDigis_Pixel_*,\
+recoCaloClusters_particleFlowSuperClusterHGCal__*
+        

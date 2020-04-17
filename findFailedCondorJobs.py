@@ -24,7 +24,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--success",
-    help = "Will also show the jobs that have succeeded",
+    help = "Will only show the jobs that have succeeded",
     action = "store_true"
 )
 
@@ -70,7 +70,7 @@ retValStr_start = "(return value "
 retValStr_end = ")"
 
 jobSubStr = "Job submitted"
-
+jobRmvStr = "Job removed"
 
 condorConfig_nameTemplate = "condor_config_%s.sub"
 command_template = "condor_submit %s"
@@ -79,7 +79,7 @@ command_template = "condor_submit %s"
 nJob_total = 0
 nJob_succ = 0
 nJob_fail = 0
-
+nJob_rmvd = 0
 
 # Check if all the directories exist
 for iDir in range(0, len(l_directory)) :
@@ -124,6 +124,9 @@ for iDir in range(0, len(l_directory)) :
         hasError = False
         retVal = 0
         
+        isRemoved = False
+        rmvLine = ""
+        
         
         # N.B. Log files are appended to (not overwritten) on resubmitting the job
         # Hence use the last occurence of the job summary
@@ -134,10 +137,19 @@ for iDir in range(0, len(l_directory)) :
                 hasCompleted = True
                 retValStr = line
             
-            # The job must not have been resubmitted
+            # Check for removed jobs
+            if (jobRmvStr in line) :
+                
+                hasCompleted = True
+                isRemoved = True
+                rmvLine = line.strip()
+            
+           # The job must not have been resubmitted
             if (jobSubStr in line) :
                 
+                isRemoved = False
                 hasCompleted = False
+                                                                                                     
         
         
         if (not hasCompleted) :
@@ -145,20 +157,24 @@ for iDir in range(0, len(l_directory)) :
             continue
         
         
-        retValStr = retValStr[retValStr.find(retValStr_start) + len(retValStr_start):]
-        retValStr = retValStr[: retValStr.find(retValStr_end)]
-        retVal = int(retValStr)
+        if (not isRemoved) :
+            
+            retValStr = retValStr[retValStr.find(retValStr_start) + len(retValStr_start):]
+            retValStr = retValStr[: retValStr.find(retValStr_end)]
+            
+            retVal = int(retValStr)
         
-        hasError = bool(retVal)
+        hasError = bool(retVal) or isRemoved
         
         
         nJob_succ += int(not hasError)
-        nJob_fail += int(hasError)
+        nJob_fail += int(hasError and not isRemoved)
+        nJob_rmvd += int(isRemoved)
         
         
         hasPrinted = False
         
-        if (hasError or args.success) :
+        if ((hasError and not args.success) or (not hasError and args.success)) :
             
             count += 1
             
@@ -169,9 +185,17 @@ for iDir in range(0, len(l_directory)) :
             command = command_template %(condorConfig_name)
             
             print "Count:", count
-            print "Total count:", nJob_fail
+            print "Total count:", nJob_fail+nJob_rmvd
             print "File:", fileName
-            print "Return value: %d" %(retVal)
+            
+            if (isRemoved) :
+                
+                print rmvLine
+                
+            else :
+                
+                print "Return value: %d" %(retVal)
+            
             print "Condor config:", condorConfig_name
             
             hasPrinted = True
@@ -202,4 +226,5 @@ nDigit = len(str(nJob_total))
 print "\n"
 print "Total number of succeeded jobs: %0*d/%d" %(nDigit, nJob_succ, nJob_total)
 print "Total number of failed jobs   : %0*d/%d" %(nDigit, nJob_fail, nJob_total)
+print "Total number of removed jobs  : %0*d/%d" %(nDigit, nJob_rmvd, nJob_total)
 print "\n"

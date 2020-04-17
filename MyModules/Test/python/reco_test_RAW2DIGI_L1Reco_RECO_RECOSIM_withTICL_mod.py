@@ -77,6 +77,20 @@ options.register("debugFile",
     "Create debug file" # Description
 )
 
+options.register("keepList",
+    [], # Default value
+    VarParsing.VarParsing.multiplicity.list, # singleton or list
+    VarParsing.VarParsing.varType.string, # string, int, or float
+    "List of products to keep" # Description
+)
+
+options.register("dropList",
+    [], # Default value
+    VarParsing.VarParsing.multiplicity.list, # singleton or list
+    VarParsing.VarParsing.varType.string, # string, int, or float
+    "List of products to drop" # Description
+)
+
 options.register("trace",
     0, # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -348,10 +362,15 @@ customise_aging_1000(process)
 #TICL_iterations_withReco(process)
 
 
+process.FEVTDEBUGHLTEventContent.outputCommands = ["drop *"]
+
+
+"""
 process.FEVTDEBUGHLTEventContent.outputCommands.extend([
-#process.RECOSIMEventContent.outputCommands.extend([
-#process.AODSIMEventContent.outputCommands.extend([
+##process.RECOSIMEventContent.outputCommands.extend([
+##process.AODSIMEventContent.outputCommands.extend([
     "keep *_*particleFlowRecHitHGC*_*_*",
+    "keep *_hbhereco_*_*",
     "keep *_hgcalDigis_*_*",
     "keep *_particleFlowClusterECAL_*_*",
     "keep *_siPhase2Clusters_*_*",
@@ -367,6 +386,31 @@ process.FEVTDEBUGHLTEventContent.outputCommands.extend([
     "keep *_ecalDrivenGsfElectrons*_*_*",
     "keep *_*FromTICL*_*_*",
 ])
+"""
+
+
+for iKeep, keepName in enumerate(options.keepList) :
+    
+    if (not len(keepName)) :
+        
+        continue
+    
+    print "Will keep: %s" %(keepName)
+    
+    keepStr = "keep %s" %(keepName)
+    process.FEVTDEBUGHLTEventContent.outputCommands.extend([keepStr])
+
+
+for iDrop, dropName in enumerate(options.dropList) :
+    
+    if (not len(dropName)) :
+
+        continue
+    
+    print "Will drop: %s" %(dropName)
+    
+    dropStr = "drop %s" %(dropName)
+    process.FEVTDEBUGHLTEventContent.outputCommands.extend([dropStr])
 
 
 #from MyModules.Test.ecalDrivenGsfElectronsFromTICL_cff import ecalDrivenGsfElectronsFromTICL_customizeProcess
