@@ -211,7 +211,7 @@ if (__name__ == "__main__") :
         cmsRun_cmd += "\t outputDir=%s" %(outputDir) + lineBreakStr
         cmsRun_cmd += "\t outFileNumber=%d" %(iJob+1) + lineBreakStr
         
-        cmsRun_cmd += "\t keepList=\
+        cmsRun_cmd += "\t keepList=" + lineBreakStr
         cmsRun_cmd += "*_*BeamSpot*_*_*," + lineBreakStr
         cmsRun_cmd += "*_*FromMultiCl_*_*," + lineBreakStr
         cmsRun_cmd += "*_*FromTICL*_*_*," + lineBreakStr
