@@ -204,6 +204,7 @@ if (__name__ == "__main__") :
         
         # Condor script
         lineBreakStr = " \\\n"
+        lineBreakStr_noSp = "\\\n"
         
         cmsRun_cmd = "cmsRun %s" %(args.cmsRunFile) + lineBreakStr
         cmsRun_cmd += "\t print" + lineBreakStr
@@ -211,38 +212,38 @@ if (__name__ == "__main__") :
         cmsRun_cmd += "\t outputDir=%s" %(outputDir) + lineBreakStr
         cmsRun_cmd += "\t outFileNumber=%d" %(iJob+1) + lineBreakStr
         
-        cmsRun_cmd += "\t keepList=" + lineBreakStr
-        cmsRun_cmd += "*_*BeamSpot*_*_*," + lineBreakStr
-        cmsRun_cmd += "*_*FromMultiCl_*_*," + lineBreakStr
-        cmsRun_cmd += "*_*FromTICL*_*_*," + lineBreakStr
-        cmsRun_cmd += "*_*particleFlowRecHitHGC*_*_*," + lineBreakStr
-        cmsRun_cmd += "*_HGCalRecHit_*_*," + lineBreakStr
-        cmsRun_cmd += "*_addPileupInfo_*_*," + lineBreakStr
-        cmsRun_cmd += "*_allConversions_*_*," + lineBreakStr
-        cmsRun_cmd += "*_ecalDrivenGsfElectrons*_*_*," + lineBreakStr
-        cmsRun_cmd += "*_ecalRecHit_*_*," + lineBreakStr
-        cmsRun_cmd += "*_fixedGridRhoFastjetAll_*_*," + lineBreakStr
-        cmsRun_cmd += "*_g4SimHits_*_*," + lineBreakStr
-        cmsRun_cmd += "*_genParticles_*_*," + lineBreakStr
-        cmsRun_cmd += "*_generalTracks_*_*," + lineBreakStr
-        cmsRun_cmd += "*_generator_*_*," + lineBreakStr
-        cmsRun_cmd += "*_hbhereco_*_*," + lineBreakStr
-        cmsRun_cmd += "*_hfreco_*_*," + lineBreakStr
-        cmsRun_cmd += "*_horeco_*_*," + lineBreakStr
-        cmsRun_cmd += "*_mix_MergedCaloTruth_*," + lineBreakStr
-        cmsRun_cmd += "*_offlinePrimaryVertices_*_*," + lineBreakStr
-        cmsRun_cmd += "*_particleFlowClusterECAL_*_*," + lineBreakStr
-        cmsRun_cmd += "*_particleFlowSuperClusterECAL_*_*," + lineBreakStr
-        cmsRun_cmd += "*_pfTrackElec_*_*," + lineBreakStr
-        cmsRun_cmd += "*_siPhase2Clusters_*_*," + lineBreakStr
-        cmsRun_cmd += "*_siPixelClusterShapeCache_*_*," + lineBreakStr
-        cmsRun_cmd += "*_siPixelClustersCache_*_*," + lineBreakStr
-        cmsRun_cmd += "*_siPixelClusters_*_*," + lineBreakStr
-        cmsRun_cmd += "*_siPixelRecHits*_*_*," + lineBreakStr
-        cmsRun_cmd += "*_siStripDigis_*_*," + lineBreakStr
-        cmsRun_cmd += "*_towerMaker_*_*," + lineBreakStr
-        cmsRun_cmd += "*_trackerDrivenElectronSeeds_*_*," + lineBreakStr
-        cmsRun_cmd += "*_tracksters*_*_*," + lineBreakStr
+        cmsRun_cmd += "\t keepList=" + lineBreakStr_noSp
+        cmsRun_cmd += "*_*BeamSpot*_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_*FromMultiCl_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_*FromTICL*_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_*particleFlowRecHitHGC*_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_HGCalRecHit_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_addPileupInfo_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_allConversions_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_ecalDrivenGsfElectrons*_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_ecalRecHit_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_fixedGridRhoFastjetAll_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_g4SimHits_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_genParticles_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_generalTracks_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_generator_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_hbhereco_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_hfreco_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_horeco_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_mix_MergedCaloTruth_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_offlinePrimaryVertices_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_particleFlowClusterECAL_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_particleFlowSuperClusterECAL_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_pfTrackElec_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_siPhase2Clusters_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_siPixelClusterShapeCache_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_siPixelClustersCache_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_siPixelClusters_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_siPixelRecHits*_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_siStripDigis_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_towerMaker_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_trackerDrivenElectronSeeds_*_*," + lineBreakStr_noSp
+        cmsRun_cmd += "*_tracksters*_*_*," + lineBreakStr_noSp
         
         condorScript_content_mod = condorScript_content
         condorScript_content_mod = condorScript_content_mod.replace("@dir@", cwd)
