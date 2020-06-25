@@ -1,0 +1,12 @@
+sprintf(name, "slimmedEle_sig_pfCand1_deltaTsigni");
+tree->Branch(name, &v_slimmedEle_sig_pfCand1_deltaTsigni);
+
+sprintf(name, "slimmedEle_sig_pfCand2_deltaTsigni");
+tree->Branch(name, &v_slimmedEle_sig_pfCand2_deltaTsigni);
+
+sprintf(name, "slimmedEle_isoDR0p3_pfCand1_deltaTsigni");
+tree->Branch(name, &v_slimmedEle_isoDR0p3_pfCand1_deltaTsigni);
+
+sprintf(name, "slimmedEle_isoDR0p3_pfCand2_deltaTsigni");
+tree->Branch(name, &v_slimmedEle_isoDR0p3_pfCand2_deltaTsigni);
+
