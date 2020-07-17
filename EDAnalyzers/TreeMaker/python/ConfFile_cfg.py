@@ -42,6 +42,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, "auto:phase2_realistic_T15", "")
 #process.GlobalTag = GlobalTag(process.GlobalTag, "94X_mc2017_realistic_v10")
 #process.GlobalTag = GlobalTag(process.GlobalTag, "94X_mc2017_realistic_v11")
+#process.GlobalTag = GlobalTag(process.GlobalTag, "112X_mcRun3_2021_realistic_v2")
 
 
 #process.load('Configuration.Geometry.GeometryExtended2023D41Reco_cff')
@@ -417,7 +418,7 @@ if (options.onRaw) :
     
     #from RecoTracker.IterativeTracking.MuonSeededStep_cff import *
     
-    #process.reconstruction_mod = process.reconstruction.copy()
+    process.reconstruction_mod = process.reconstruction.copy()
     
     #process.reconstruction_mod.replace(localreco, localreco_mod)
     #process.reconstruction_mod.replace(globalreco, globalreco_mod)
@@ -645,8 +646,7 @@ if (options.onRaw) :
     process.reco_seq = cms.Sequence(
         process.RawToDigi *
         process.L1Reco *
-        #process.reconstruction_mod
-        process.reconstruction
+        process.reconstruction_mod
     )
 
 
@@ -737,8 +737,8 @@ if (options.debugFile) :
     process.schedule.extend([process.output_step])
 
 
-from FWCore.ParameterSet.Utilities import convertToUnscheduled
-process = convertToUnscheduled(process)
+#from FWCore.ParameterSet.Utilities import convertToUnscheduled
+#process = convertToUnscheduled(process)
 
 
 # Add early deletion of temporary data products to reduce peak memory need
