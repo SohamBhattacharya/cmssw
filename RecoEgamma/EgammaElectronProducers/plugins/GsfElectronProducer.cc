@@ -135,6 +135,7 @@ void GsfElectronProducer::fillDescriptions(edm::ConfigurationDescriptions& descr
   desc.add<bool>("ecalDrivenEcalEnergyFromClassBasedParameterization", true);
   desc.add<bool>("ecalDrivenEcalErrorFromClassBasedParameterization", true);
   desc.add<bool>("applyPreselection", false);
+  desc.add<bool>("ignoreNotPreselected", true);
   desc.add<bool>("useEcalRegression", false);
   desc.add<bool>("applyAmbResolution", false);
   desc.add<bool>("useGsfPfRecTracks", true);
@@ -307,6 +308,7 @@ GsfElectronProducer::GsfElectronProducer(const edm::ParameterSet& cfg, const Gsf
     inputCfg_.conversions = consumes<reco::ConversionCollection>(cfg.getParameter<edm::InputTag>("conversionsTag"));
 
   strategyCfg_.applyPreselection = cfg.getParameter<bool>("applyPreselection");
+  strategyCfg_.ignoreNotPreselected = cfg.getParameter<bool>("ignoreNotPreselected");
   strategyCfg_.ecalDrivenEcalEnergyFromClassBasedParameterization =
       cfg.getParameter<bool>("ecalDrivenEcalEnergyFromClassBasedParameterization");
   strategyCfg_.ecalDrivenEcalErrorFromClassBasedParameterization =
@@ -572,7 +574,7 @@ void GsfElectronProducer::produce(edm::Event& event, const edm::EventSetup& setu
     logElectrons(electrons, event, "GsfElectronAlgo Info (after preselection)");
   }
   // ambiguity
-  setAmbiguityData(electrons, event);
+  setAmbiguityData(electrons, event, strategyCfg_.ignoreNotPreselected);
   if (strategyCfg_.applyAmbResolution) {
     electrons.erase(std::remove_if(electrons.begin(), electrons.end(), std::mem_fn(&reco::GsfElectron::ambiguous)),
                     electrons.end());

@@ -72,6 +72,7 @@ public:
   struct StrategyConfiguration {
     // if true, electron preselection is applied
     bool applyPreselection;
+    bool ignoreNotPreselected; // ignore preselection during ambiguity resolution
     // if true, electron level escale corrections are
     // used on top of the cluster level corrections
     bool ecalDrivenEcalEnergyFromClassBasedParameterization;

@@ -229,6 +229,7 @@ void PFECALSuperClusterAlgo::run() {
   // clusterize the EB
   buildAllSuperClusters(_clustersEB, threshPFClusterSeedBarrel_);
   // clusterize the EE
+  printf("_clustersEE.size(): %d \n", (int) _clustersEE.size());
   buildAllSuperClusters(_clustersEE, threshPFClusterSeedEndcap_);
 }
 

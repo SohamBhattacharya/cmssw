@@ -1,3 +1,5 @@
+import FWCore.ParameterSet.Config as cms
+
 from RecoEcal.EgammaClusterProducers.hybridSuperClusters_cfi import cleanedHybridSuperClusters
 from RecoEcal.EgammaClusterProducers.multi5x5BasicClusters_cfi import multi5x5BasicClustersCleaned
 
@@ -30,4 +32,17 @@ pp_on_AA_2018.toModify(ecalDrivenGsfElectrons.preselection, minSCEtEndcaps = 15.
 
 ecalDrivenGsfElectronsFromMultiCl = ecalDrivenGsfElectrons.clone(
   gsfElectronCoresTag = "ecalDrivenGsfElectronCoresFromMultiCl",
+)
+
+
+from Configuration.Eras.Modifier_phase2_hgcal_cff import phase2_hgcal
+
+phase2_hgcal.toModify(
+    ecalDrivenGsfElectronsFromMultiCl,
+    
+    useGsfPfRecTracks = cms.bool(False),
+    ambClustersOverlapStrategy = cms.uint32(0),
+    applyAmbResolution = cms.bool(True),
+    applyPreselection = cms.bool(False),
+    ignoreNotPreselected = cms.bool(False),
 )
