@@ -5,7 +5,7 @@
     a) git add .
     b) git commit
     c) git push -u my-cmssw <current local branch>:<remote branch>
-        i) Current lical branch can be checked using "git branch".
+        i) Current local branch can be checked using "git branch".
         ii) Remote branch can be existing or new.
 
 2. Run ecalDrivenGsfElectronsFromTICL:
