@@ -4,7 +4,9 @@
 1. Push changes:
     a) git add .
     b) git commit
-    c) git push -u my-cmssw SohamBhattacharya/HGCal_ele-reco:HGCal_ele-reco 
+    c) git push -u my-cmssw <current local branch>:<remote branch>
+        i) Current lical branch can be checked using "git branch".
+        ii) Remote branch can be existing or new.
 
 2. Run ecalDrivenGsfElectronsFromTICL:
     from MyModules.Test.ecalDrivenGsfElectronsFromTICL_cff import ecalDrivenGsfElectronsFromTICL_customizeProcess
