@@ -41,7 +41,7 @@ sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-NoPU_110X_mcRun4_re
     rerunTICL=0 \
     onRaw=1 \
     debugFile=0 \
-    maxEvents=2000 \
+    maxEvents=5000 \
 
 
 #cmsRun EDAnalyzers/TreeMaker/python/ConfFile_cfg.py \

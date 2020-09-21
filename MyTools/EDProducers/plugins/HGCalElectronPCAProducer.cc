@@ -218,9 +218,9 @@ void HGCalElectronPCAProducer::produce(edm::Event& iEvent, const edm::EventSetup
     
     int nEle = v_electron->size();
     
-    std::vector <double> v_sigmaUU;
-    std::vector <double> v_sigmaVV;
-    std::vector <double> v_sigmaWW;
+    std::vector <double> v_sigma2UU;
+    std::vector <double> v_sigma2VV;
+    std::vector <double> v_sigma2WW;
     
     for(int iEle = 0; iEle < nEle; iEle++)
     {
@@ -440,24 +440,24 @@ void HGCalElectronPCAProducer::produce(edm::Event& iEvent, const edm::EventSetup
         //v_eigenVal.at(2) = v_eigVal(2);
         
         
-        v_sigmaUU.push_back(v_eigVal(1));
-        v_sigmaVV.push_back(v_eigVal(2));
-        v_sigmaWW.push_back(v_eigVal(0));
+        v_sigma2UU.push_back(v_eigVal(1));
+        v_sigma2VV.push_back(v_eigVal(2));
+        v_sigma2WW.push_back(v_eigVal(0));
     }
     
     
     iEvent.put(
-        std::make_unique <std::vector <double> >(v_sigmaUU),
+        std::make_unique <std::vector <double> >(v_sigma2UU),
         _instanceName_UU
     );
     
     iEvent.put(
-        std::make_unique <std::vector <double> >(v_sigmaVV),
+        std::make_unique <std::vector <double> >(v_sigma2VV),
         _instanceName_VV
     );
     
     iEvent.put(
-        std::make_unique <std::vector <double> >(v_sigmaWW),
+        std::make_unique <std::vector <double> >(v_sigma2WW),
         _instanceName_WW
     );
 }
