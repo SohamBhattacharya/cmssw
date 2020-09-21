@@ -30,23 +30,9 @@
 
 
 
-#cmsRun EDAnalyzers/TreeMaker/python/ConfFile_cfg.py \
-#    sourceFile=\
-#sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-NoPU_110X_mcRun4_realistic_v3-v2_GEN-SIM-DIGI-RAW/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-NoPU_110X_mcRun4_realistic_v3-v2_GEN-SIM-DIGI-RAW.txt \
-#    genEleFilter=1 \
-#    genPartonFilter=0 \
-#    isGunSample=1 \
-#    modTICLele=0 \
-#    modTICLeleWithRerunTICL=0 \
-#    rerunTICL=0 \
-#    onRaw=1 \
-#    debugFile=1 \
-#    maxEvents=5 \
-
-
 cmsRun EDAnalyzers/TreeMaker/python/ConfFile_cfg.py \
     sourceFile=\
-sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_realistic_v3_ext2-v2_GEN-SIM-DIGI-RAW/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_realistic_v3_ext2-v2_GEN-SIM-DIGI-RAW.txt \
+sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-NoPU_110X_mcRun4_realistic_v3-v2_GEN-SIM-DIGI-RAW/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-NoPU_110X_mcRun4_realistic_v3-v2_GEN-SIM-DIGI-RAW.txt \
     genEleFilter=1 \
     genPartonFilter=0 \
     isGunSample=1 \
@@ -55,7 +41,21 @@ sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_r
     rerunTICL=0 \
     onRaw=1 \
     debugFile=0 \
-    maxEvents=10 \
+    maxEvents=5000 \
+
+
+#cmsRun EDAnalyzers/TreeMaker/python/ConfFile_cfg.py \
+#    sourceFile=\
+#sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_realistic_v3_ext2-v2_GEN-SIM-DIGI-RAW/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_realistic_v3_ext2-v2_GEN-SIM-DIGI-RAW.txt \
+#    genEleFilter=1 \
+#    genPartonFilter=0 \
+#    isGunSample=1 \
+#    modTICLele=0 \
+#    modTICLeleWithRerunTICL=0 \
+#    rerunTICL=0 \
+#    onRaw=1 \
+#    debugFile=0 \
+#    maxEvents=10 \
 
 
 #cmsRun EDAnalyzers/TreeMaker/python/ConfFile_cfg.py \
@@ -68,4 +68,4 @@ sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_r
 #    rerunTICL=0 \
 #    onRaw=1 \
 #    debugFile=0 \
-#    maxEvents=100 \
+#    maxEvents=2000 \

@@ -50,6 +50,7 @@ _hgcalMultiClusterMapper_HGCal = cms.PSet(
     ),
     
     #clusterSrc = cms.InputTag("hgcalMultiClusters"),
+    #clusterSrc = cms.InputTag("multiClustersFromTrackstersEM"),
     #clusterSrc = cms.InputTag("ticlMultiClustersFromTrackstersEM"),
     clusterSrc = cms.InputTag("ticlMultiClustersFromTrackstersMerge"),
     

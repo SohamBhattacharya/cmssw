@@ -59,6 +59,8 @@ void PFClusterFromHGCalMultiCluster::buildClusters(
             //printf("Trackster %d: total prob %0.4f \n", iMultiClus+1, probTotal);
         }
         
+        //printf("HGCalMultiCluster %d: E %0.2f, pt %0.2f, eta %+0.2f, phi %+0.2f \n", iMultiClus+1, mcl.energy(), mcl.pt(), mcl.eta(), mcl.phi());
+        
         DetId seed;
         double energy = 0.0, highest_energy = 0.0;
         output.emplace_back();

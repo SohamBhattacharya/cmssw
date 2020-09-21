@@ -2,9 +2,9 @@ import FWCore.ParameterSet.Config as cms
 
 
 HoverE = cms.EDProducer(
-    "ProducerHoverE",
+    "HGCalElectronHoverEProducer",
     
-    instanceName = cms.string("HoverE"),
+    instanceName = cms.string("HGCalElectronHoverEProducer"),
     
     electrons = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl"),
     layerClusters = cms.InputTag("hgcalLayerClusters"),
@@ -19,9 +19,9 @@ HoverE = cms.EDProducer(
 
 
 trackIso = cms.EDProducer(
-    "ProducerTrackIso",
+    "HGCalElectronTrackIsoProducer",
     
-    instanceName = cms.string("TrackIso"),
+    instanceName = cms.string("HGCalElectronTrackIsoProducer"),
     
     electrons = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl"),
     tracks = cms.InputTag("generalTracks"),
@@ -32,6 +32,39 @@ trackIso = cms.EDProducer(
     
     minTrackPt = cms.double(1.0),
     maxTrackEleDz = cms.double(0.15),
+    
+    debug = cms.bool(False),
+)
+
+
+Rvar = cms.EDProducer(
+    "HGCalElectronRvarProducer",
+    
+    instanceName = cms.string("HGCalElectronRvarProducer"),
+    
+    electrons = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl"),
+    
+    PFRecHits = cms.InputTag("particleFlowRecHitHGC"),
+    HGCEERecHits = cms.untracked.InputTag("HGCalRecHit", "HGCEERecHits"),
+    HGCHEFRecHits = cms.untracked.InputTag("HGCalRecHit", "HGCHEFRecHits"),
+    HGCHEBRecHits = cms.untracked.InputTag("HGCalRecHit", "HGCHEBRecHits"),
+    
+    cylinderR = cms.double(2.8),
+    nLayer = cms.int32(28),
+    
+    minHitE = cms.double(0.0),
+    minHitET = cms.double(0.0),
+    
+    debug = cms.bool(False),
+)
+
+
+mapProducer = cms.EDProducer(
+    "MapProducer",
+    
+    instanceName = cms.string("MapProducer"),
+    
+    collections = cms.VInputTag(),
     
     debug = cms.bool(False),
 )

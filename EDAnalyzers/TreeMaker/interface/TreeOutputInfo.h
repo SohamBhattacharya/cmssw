@@ -84,6 +84,8 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_matchedGenEl_eta;
         std::vector <double> v_gsfEleFromTICL_matchedGenEl_phi;
         
+        std::vector <double> v_gsfEleFromTICL_R2p8;
+        
         
         char name[500];
         
@@ -185,6 +187,11 @@ namespace TreeOutputInfo
             
             sprintf(name, "gsfEleFromTICL_matchedGenEl_phi");
             tree->Branch(name, &v_gsfEleFromTICL_matchedGenEl_phi);
+            
+            
+            //
+            sprintf(name, "gsfEleFromTICL_R2p8");
+            tree->Branch(name, &v_gsfEleFromTICL_R2p8);
         }
         
         
@@ -232,6 +239,8 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_matchedGenEl_pT.clear();
             v_gsfEleFromTICL_matchedGenEl_eta.clear();
             v_gsfEleFromTICL_matchedGenEl_phi.clear();
+            
+            v_gsfEleFromTICL_R2p8.clear();
         }
     };
 }

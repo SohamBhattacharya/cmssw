@@ -2,13 +2,15 @@ import os
 
 import FWCore.ParameterSet.Config as cms
 
+processName = "Demo"
+
 from Configuration.StandardSequences.Eras import eras
 #process = cms.Process("RECO", eras.Run2_2017)
 #process = cms.Process("RECO", eras.Run2_2018)
 
 #process = cms.Process("Demo", eras.phase2_hgcal)
 #process = cms.Process("Demo", eras.Phase2C8_timing_layer_bar)
-process = cms.Process("Demo", eras.Phase2C9)
+process = cms.Process(processName, eras.Phase2C9)
 
 #process = cms.Process("RECO", eras.Phase2C8_timing_layer_bar)
 
@@ -356,6 +358,40 @@ if (options.modTICLele) :
     label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromMultiCl", "", "Demo")
 
 
+# TICL-ele variables
+from MyTools.EDProducers.producers_cfi import *
+
+process.HGCalElectronHoverE = HoverE.clone(
+    #debug = cms.bool(True),
+)
+
+process.HGCalElectronTrackIso = trackIso.clone(
+    #debug = cms.bool(True),
+)
+
+process.HGCalElectronRvar = Rvar.clone(
+    #debug = cms.bool(True),
+)
+
+process.HGCalElectronVarMap = mapProducer.clone(
+    collections = cms.VInputTag([
+        cms.InputTag("HGCalElectronHoverE", process.HGCalElectronHoverE.instanceName.value(), processName),
+        cms.InputTag("HGCalElectronTrackIso", process.HGCalElectronTrackIso.instanceName.value(), processName),
+        cms.InputTag("HGCalElectronRvar", process.HGCalElectronRvar.instanceName.value(), processName),
+    ]),
+    
+    #debug = cms.bool(True),
+)
+
+process.HGCalvar_seq = cms.Sequence(
+    process.HGCalElectronHoverE *
+    process.HGCalElectronTrackIso *
+    process.HGCalElectronRvar *
+    
+    process.HGCalElectronVarMap
+)
+
+
 process.treeMaker = cms.EDAnalyzer(
     "TreeMaker",
     
@@ -387,6 +423,8 @@ process.treeMaker = cms.EDAnalyzer(
     label_TICLmultiCluster = label_TICLmultiCluster,
     
     label_gsfEleFromTICL = label_gsfEleFromTICL,
+    
+    label_gsfEleFromTICLvarMap = cms.untracked.InputTag("HGCalElectronVarMap", process.HGCalElectronVarMap.instanceName.value(), processName),
 )
 
 
@@ -526,21 +564,8 @@ process.PixelCPEGenericESProducer.Upgrade = cms.bool(True)
 #process.load("RecoEgamma.EgammaElectronProducers.gsfElectronSequence_cff")
 #process.gsfEcalDrivenElectronSequence.associate(iterTICLTask)
 
-
-from MyTools.EDProducers.producers_cfi import *
-
-process.HGCalElectronHoverE = HoverE.clone(
-    #debug = cms.bool(True),
-)
-
-process.HGCalElectronTrackIso = trackIso.clone(
-    #debug = cms.bool(True),
-)
-
-process.HGCalvar_seq = cms.Sequence(
-    process.HGCalElectronHoverE *
-    process.HGCalElectronTrackIso
-)
+from RecoHGCal.TICL.ticl_iterations import TICL_iterations_withReco
+TICL_iterations_withReco(process)
 
 
 process.p = cms.Path(

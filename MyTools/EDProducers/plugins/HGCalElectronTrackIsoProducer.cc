@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    MyTools/ProducerTrackIso
-// Class:      ProducerTrackIso
+// Package:    MyTools/HGCalElectronTrackIsoProducer
+// Class:      HGCalElectronTrackIsoProducer
 //
-/**\class ProducerTrackIso ProducerTrackIso.cc MyTools/ProducerTrackIso/plugins/ProducerTrackIso.cc
+/**\class HGCalElectronTrackIsoProducer HGCalElectronTrackIsoProducer.cc MyTools/HGCalElectronTrackIsoProducer/plugins/HGCalElectronTrackIsoProducer.cc
 
  Description: [one line class summary]
 
@@ -56,12 +56,12 @@
 // class declaration
 //
 
-class ProducerTrackIso : public edm::stream::EDProducer<>
+class HGCalElectronTrackIsoProducer : public edm::stream::EDProducer<>
 {
     public:
     
-    explicit ProducerTrackIso(const edm::ParameterSet&);
-    ~ProducerTrackIso();
+    explicit HGCalElectronTrackIsoProducer(const edm::ParameterSet&);
+    ~HGCalElectronTrackIsoProducer();
     
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     
@@ -106,7 +106,7 @@ class ProducerTrackIso : public edm::stream::EDProducer<>
 //
 // constructors and destructor
 //
-ProducerTrackIso::ProducerTrackIso(const edm::ParameterSet& iConfig)
+HGCalElectronTrackIsoProducer::HGCalElectronTrackIsoProducer(const edm::ParameterSet& iConfig)
 {
     //register your products
     /* Examples
@@ -138,7 +138,7 @@ ProducerTrackIso::ProducerTrackIso(const edm::ParameterSet& iConfig)
     produces <std::vector <double> > (_instanceName);
 }
 
-ProducerTrackIso::~ProducerTrackIso() {
+HGCalElectronTrackIsoProducer::~HGCalElectronTrackIsoProducer() {
   // do anything here that needs to be done at destruction time
   // (e.g. close files, deallocate resources etc.)
   //
@@ -150,7 +150,7 @@ ProducerTrackIso::~ProducerTrackIso() {
 //
 
 // ------------ method called to produce the data  ------------
-void ProducerTrackIso::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
+void HGCalElectronTrackIsoProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     using namespace edm;
     /* This is an event example
@@ -234,7 +234,7 @@ void ProducerTrackIso::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
         
         if(_debug)
         {
-            printf("In ProducerTrackIso --> Ele %d/%d: isoTrack %0.4f \n", iEle+1, nEle, trackIso);
+            printf("In HGCalElectronTrackIsoProducer --> Ele %d/%d: isoTrack %0.4f \n", iEle+1, nEle, trackIso);
         }
         
         v_trackIso.push_back(trackIso);
@@ -248,19 +248,19 @@ void ProducerTrackIso::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 }
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------
-void ProducerTrackIso::beginStream(edm::StreamID) {
+void HGCalElectronTrackIsoProducer::beginStream(edm::StreamID) {
   // please remove this method if not needed
 }
 
 // ------------ method called once each stream after processing all runs, lumis and events  ------------
-void ProducerTrackIso::endStream() {
+void HGCalElectronTrackIsoProducer::endStream() {
   // please remove this method if not needed
 }
 
 // ------------ method called when starting to processes a run  ------------
 /*
 void
-ProducerTrackIso::beginRun(edm::Run const&, edm::EventSetup const&)
+HGCalElectronTrackIsoProducer::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -268,7 +268,7 @@ ProducerTrackIso::beginRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when ending the processing of a run  ------------
 /*
 void
-ProducerTrackIso::endRun(edm::Run const&, edm::EventSetup const&)
+HGCalElectronTrackIsoProducer::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -276,7 +276,7 @@ ProducerTrackIso::endRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
 void
-ProducerTrackIso::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+HGCalElectronTrackIsoProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
@@ -284,13 +284,13 @@ ProducerTrackIso::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSe
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
 void
-ProducerTrackIso::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+HGCalElectronTrackIsoProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-void ProducerTrackIso::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void HGCalElectronTrackIsoProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -299,4 +299,4 @@ void ProducerTrackIso::fillDescriptions(edm::ConfigurationDescriptions& descript
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(ProducerTrackIso);
+DEFINE_FWK_MODULE(HGCalElectronTrackIsoProducer);

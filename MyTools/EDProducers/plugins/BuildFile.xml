@@ -39,6 +39,8 @@
 <use name="SimDataFormats/TrackingHit"/>
 <use name="TrackingTools/TrackAssociator"/>
 
+<use name="MyDataFormats/Common"/>
+
 <use name="boost"/>
 <use name="hepmc"/>
 <use name="root"/>

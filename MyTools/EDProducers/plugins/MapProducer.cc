@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    MyTools/ProducerHoverE
-// Class:      ProducerHoverE
+// Package:    MyTools/MapProducer
+// Class:      MapProducer
 //
-/**\class ProducerHoverE ProducerHoverE.cc MyTools/ProducerHoverE/plugins/ProducerHoverE.cc
+/**\class MapProducer MapProducer.cc MyTools/MapProducer/plugins/MapProducer.cc
 
  Description: [one line class summary]
 
@@ -21,11 +21,18 @@
 
 // user include files
 # include "DataFormats/CaloRecHit/interface/CaloCluster.h"
+# include "DataFormats/Common/interface/MapOfVectors.h"
 # include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 # include "DataFormats/FWLite/interface/ESHandle.h"
 # include "DataFormats/ForwardDetId/interface/HGCEEDetId.h"
 # include "DataFormats/ForwardDetId/interface/HGCalDetId.h"
+# include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+# include "DataFormats/HGCRecHit/interface/HGCRecHit.h"
 # include "DataFormats/Math/interface/LorentzVector.h"
+# include "DataFormats/ParticleFlowReco/interface/PFRecHit.h"
+# include "DataFormats/ParticleFlowReco/interface/PFRecHitFraction.h"
+# include "DataFormats/TrackReco/interface/Track.h"
+# include "DataFormats/TrackReco/interface/TrackFwd.h"
 # include "FWCore/Framework/interface/Event.h"
 # include "FWCore/Framework/interface/Frameworkfwd.h"
 # include "FWCore/Framework/interface/MakerMacros.h"
@@ -35,8 +42,10 @@
 # include "Geometry/CaloTopology/interface/HGCalTopology.h"
 # include "Geometry/Records/interface/IdealGeometryRecord.h"
 # include "RecoLocalCalo/HGCalRecAlgos/interface/RecHitTools.h"
+# include "RecoParticleFlow/PFClusterProducer/interface/InitialClusteringStepBase.h"
 
 # include <CLHEP/Vector/LorentzVector.h>
+# include <Math/VectorUtil.h>
 
 # include <algorithm>
 # include <iostream>
@@ -47,17 +56,20 @@
 # include <utility>
 # include <vector>
 
+//# include "MyTools/EDProducers/plugins/CommonUtilities.h"
+
+
 
 //
 // class declaration
 //
 
-class ProducerHoverE : public edm::stream::EDProducer<>
+class MapProducer : public edm::stream::EDProducer<>
 {
     public:
     
-    explicit ProducerHoverE(const edm::ParameterSet&);
-    ~ProducerHoverE();
+    explicit MapProducer(const edm::ParameterSet&);
+    ~MapProducer();
     
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     
@@ -79,12 +91,14 @@ class ProducerHoverE : public edm::stream::EDProducer<>
     
     bool _debug;
     
-    double _coneDR;
-    double _minClusE;
-    double _minClusET;
+    int _nLayer;
+    double _cylinderR;
+    double _minHitE;
+    double _minHitET;
     
-    edm::EDGetTokenT <std::vector <reco::GsfElectron> > _tok_electron;
-    edm::EDGetTokenT <std::vector <reco::CaloCluster> > _tok_layerCluster;
+    std::vector <edm::InputTag> _v_inputTag;
+    
+    std::vector <edm::EDGetTokenT <std::vector <double> > > _v_tok_collection;
 };
 
 //
@@ -99,7 +113,7 @@ class ProducerHoverE : public edm::stream::EDProducer<>
 //
 // constructors and destructor
 //
-ProducerHoverE::ProducerHoverE(const edm::ParameterSet& iConfig)
+MapProducer::MapProducer(const edm::ParameterSet& iConfig)
 {
     //register your products
     /* Examples
@@ -115,21 +129,24 @@ ProducerHoverE::ProducerHoverE(const edm::ParameterSet& iConfig)
     
     _instanceName = iConfig.getParameter <std::string>("instanceName");
     
-    _tok_electron = consumes <std::vector <reco::GsfElectron> >(iConfig.getParameter <edm::InputTag>("electrons"));
-    _tok_layerCluster = consumes <std::vector <reco::CaloCluster> >(iConfig.getParameter <edm::InputTag>("layerClusters"));
-    
-    _coneDR = iConfig.getParameter <double>("coneDR");
-    
-    _minClusE = iConfig.getParameter <double>("minClusE");
-    _minClusET = iConfig.getParameter <double>("minClusET");
-    
     _debug = iConfig.getParameter <bool>("debug");
     
+    _v_inputTag = iConfig.getParameter <std::vector <edm::InputTag> >("collections");
     
-    produces <std::vector <double> > (_instanceName);
+    for(int iTag = 0; iTag < (int) _v_inputTag.size(); iTag++)
+    {
+        edm::InputTag tag = _v_inputTag.at(iTag);
+        
+        _v_tok_collection.push_back(
+            consumes <std::vector <double> >(tag)
+        );
+    }
+    
+    
+    produces <edm::MapOfVectors <std::string, double> > (_instanceName);
 }
 
-ProducerHoverE::~ProducerHoverE() {
+MapProducer::~MapProducer() {
   // do anything here that needs to be done at destruction time
   // (e.g. close files, deallocate resources etc.)
   //
@@ -141,7 +158,7 @@ ProducerHoverE::~ProducerHoverE() {
 //
 
 // ------------ method called to produce the data  ------------
-void ProducerHoverE::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
+void MapProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     using namespace edm;
     /* This is an event example
@@ -158,101 +175,67 @@ void ProducerHoverE::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     SetupData& setup = iSetup.getData(setupToken_);
     */
     
-    edm::Handle <std::vector <reco::GsfElectron> > v_electron;
-    iEvent.getByToken(_tok_electron, v_electron);
+    std::map <std::string, std::vector <double> > m_collection;
     
-    edm::Handle <std::vector <reco::CaloCluster> > v_layerCluster;
-    iEvent.getByToken(_tok_layerCluster, v_layerCluster);
-    
-    
-    int nEle = v_electron->size();
-    int nLayerClus = v_layerCluster->size();
-    
-    std::vector <double> v_HoverE;
-    
-    for(int iEle = 0; iEle < nEle; iEle++)
+    for(int iTag = 0; iTag < (int) _v_inputTag.size(); iTag++)
     {
-        reco::GsfElectron ele = v_electron->at(iEle);
+        edm::Handle <std::vector <double> > v_value;
+        iEvent.getByToken(_v_tok_collection.at(iTag), v_value);
         
-        CLHEP::HepLorentzVector ele_4mom;
-        ele_4mom.setT(ele.energy());
-        ele_4mom.setX(ele.px());
-        ele_4mom.setY(ele.py());
-        ele_4mom.setZ(ele.pz());
+        edm::InputTag tag = _v_inputTag.at(iTag);
         
-        double HoverE = 0;
+        std::string key = tag.label();
         
-        for(int iClus = 0; iClus < nLayerClus; iClus++)
+        if(!tag.instance().empty())
         {
-            reco::CaloCluster cluster = v_layerCluster->at(iClus);
-            
-            // E cut
-            if(cluster.energy() < _minClusE)
-            {
-                continue;
-            }
-            
-            // ET cut
-            double clusET = cluster.energy() * std::sin(cluster.position().theta());
-            
-            if(clusET < _minClusET)
-            {
-                continue;
-            }
-            
-            CLHEP::Hep3Vector cluster_3vec(
-                cluster.x(),
-                cluster.y(),
-                cluster.z()
-            );
-            
-            // dR cut
-            double dR = cluster_3vec.deltaR(ele_4mom.v());
-            
-            if(dR > _coneDR)
-            {
-                continue;
-            }
-            
-            
-            if(cluster.seed().det() == DetId::HGCalHSi || cluster.seed().det() == DetId::HGCalHSc)
-            {
-                HoverE += cluster.energy();
-            }
+            key += "_" + tag.instance();
         }
         
-        
-        HoverE /= ele.energy();
+        if(!tag.process().empty())
+        {
+            key += "_" + tag.process();
+        }
         
         if(_debug)
         {
-            printf("In ProducerHoverE --> Ele %d/%d: H/E %0.4f \n", iEle+1, nEle, HoverE);
+            printf("In MapProducer::produce(...): Adding collection \"%s\" to map. \n", key.c_str());
+            
+            printf("Values: ");
+            for(int idx = 0; idx < (int) v_value->size(); idx++)
+            {
+                printf("%0.4f, ", v_value->at(idx));
+            }
+            printf("\n");
         }
         
-        v_HoverE.push_back(HoverE);
+        
+        m_collection[key] = *v_value;
     }
     
     
+    edm::MapOfVectors <std::string, double> outputMap(m_collection);
+    
+    
     iEvent.put(
-        std::make_unique <std::vector <double> >(v_HoverE),
+        std::make_unique <edm::MapOfVectors <std::string, double> >(outputMap),
         _instanceName
     );
 }
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------
-void ProducerHoverE::beginStream(edm::StreamID) {
+void MapProducer::beginStream(edm::StreamID) {
   // please remove this method if not needed
 }
 
 // ------------ method called once each stream after processing all runs, lumis and events  ------------
-void ProducerHoverE::endStream() {
+void MapProducer::endStream() {
   // please remove this method if not needed
 }
 
 // ------------ method called when starting to processes a run  ------------
 /*
 void
-ProducerHoverE::beginRun(edm::Run const&, edm::EventSetup const&)
+MapProducer::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -260,7 +243,7 @@ ProducerHoverE::beginRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when ending the processing of a run  ------------
 /*
 void
-ProducerHoverE::endRun(edm::Run const&, edm::EventSetup const&)
+MapProducer::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -268,7 +251,7 @@ ProducerHoverE::endRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
 void
-ProducerHoverE::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+MapProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
@@ -276,13 +259,13 @@ ProducerHoverE::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetu
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
 void
-ProducerHoverE::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+MapProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-void ProducerHoverE::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void MapProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -291,4 +274,4 @@ void ProducerHoverE::fillDescriptions(edm::ConfigurationDescriptions& descriptio
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(ProducerHoverE);
+DEFINE_FWK_MODULE(MapProducer);

@@ -26,6 +26,7 @@
 
 # include "CommonTools/UtilAlgos/interface/TFileService.h"
 # include "DataFormats/CaloTowers/interface/CaloTowerDefs.h"
+# include "DataFormats/Common/interface/MapOfVectors.h"
 # include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 # include "DataFormats/ForwardDetId/interface/HGCEEDetId.h"
 # include "DataFormats/ForwardDetId/interface/HGCalDetId.h"
@@ -161,6 +162,8 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
     
     // Gsf electrons from TICL //
     edm::EDGetTokenT <std::vector <reco::GsfElectron> > tok_gsfEleFromTICL;
+    
+    edm::EDGetTokenT <edm::MapOfVectors <std::string, double> > tok_gsfEleFromTICLvarMap;
 };
 
 //
@@ -222,6 +225,8 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     
     // Gsf electrons from TICL //
     tok_gsfEleFromTICL = consumes <std::vector <reco::GsfElectron> >(iConfig.getUntrackedParameter <edm::InputTag>("label_gsfEleFromTICL"));
+    
+    tok_gsfEleFromTICLvarMap = consumes <edm::MapOfVectors <std::string, double> >(iConfig.getUntrackedParameter <edm::InputTag>("label_gsfEleFromTICLvarMap"));
 }
 
 
@@ -337,6 +342,9 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     edm::Handle <std::vector <reco::GsfElectron> > v_gsfEleFromTICL;
     iEvent.getByToken(tok_gsfEleFromTICL, v_gsfEleFromTICL);
     
+    edm::Handle <edm::MapOfVectors <std::string, double> > m_gsfEleFromTICLvarMap;
+    iEvent.getByToken(tok_gsfEleFromTICLvarMap, m_gsfEleFromTICLvarMap);
+    
     int nEleFromTICL = v_gsfEleFromTICL->size();
     
     std::vector <CLHEP::HepLorentzVector> v_gsfEleFromTICL_4mom;
@@ -415,7 +423,9 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //
             //"\n"
             //"\t trackMomentumAtVtx p %0.2f, "// (%0.2f), "
+            
             //"pT %0.2f, "// (%0.2f), "
+            "R2.8 %0.2f, "
             
             "\n",
             
@@ -427,7 +437,7 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             gsfEle.eta(),
             //gsfEle.ambiguous(),
             
-            gsfEle.superCluster()->energy()
+            gsfEle.superCluster()->energy(),
             //(int) gsfEle.superCluster()->size(),
             //(long long) centroid_detId.rawId(),
             ////centroid_HGCEEDetId.cell(), centroidCell_pos.x(), centroidCell_pos.y(),
@@ -444,6 +454,8 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //gsfEle.gsfTrack()->p(),
             //gsfEle.trackMomentumAtVtx().r(),// std::sqrt(gsfEle.trackMomentumAtVtx().mag2()),
             //gsfEle.trackMomentumAtVtx().rho()//, std::sqrt(gsfEle.trackMomentumAtVtx().perp2())
+            
+            m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvarProducer_Demo")[iEle]
         );
         
         int matchedGenEl_idx = v_gsfEleFromTICL_matchedGenEl_idx.at(iEle);
@@ -482,6 +494,9 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->v_gsfEleFromTICL_ET.push_back(gsfEle.et());
         
         treeOutput->gsfEleFromTICL_n++;
+        
+        
+        treeOutput->v_gsfEleFromTICL_R2p8.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvarProducer_Demo")[iEle]);
         
         
         //std::vector <DetId> v_SC_seedId = gsfEle.superCluster()->getSeedIds();
