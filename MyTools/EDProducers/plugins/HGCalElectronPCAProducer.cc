@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    MyTools/HGCalElectronRvarProducer
-// Class:      HGCalElectronRvarProducer
+// Package:    MyTools/HGCalElectronPCAProducer
+// Class:      HGCalElectronPCAProducer
 //
-/**\class HGCalElectronRvarProducer HGCalElectronRvarProducer.cc MyTools/HGCalElectronRvarProducer/plugins/HGCalElectronRvarProducer.cc
+/**\class HGCalElectronPCAProducer HGCalElectronPCAProducer.cc MyTools/HGCalElectronPCAProducer/plugins/HGCalElectronPCAProducer.cc
 
  Description: [one line class summary]
 
@@ -62,12 +62,12 @@
 // class declaration
 //
 
-class HGCalElectronRvarProducer : public edm::stream::EDProducer<>
+class HGCalElectronPCAProducer : public edm::stream::EDProducer<>
 {
     public:
     
-    explicit HGCalElectronRvarProducer(const edm::ParameterSet&);
-    ~HGCalElectronRvarProducer();
+    explicit HGCalElectronPCAProducer(const edm::ParameterSet&);
+    ~HGCalElectronPCAProducer();
     
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     
@@ -86,6 +86,9 @@ class HGCalElectronRvarProducer : public edm::stream::EDProducer<>
     // ----------member data ---------------------------
     
     std::string _instanceName;
+    std::string _instanceName_UU;
+    std::string _instanceName_VV;
+    std::string _instanceName_WW;
     
     bool _debug;
     
@@ -117,7 +120,7 @@ class HGCalElectronRvarProducer : public edm::stream::EDProducer<>
 //
 // constructors and destructor
 //
-HGCalElectronRvarProducer::HGCalElectronRvarProducer(const edm::ParameterSet& iConfig)
+HGCalElectronPCAProducer::HGCalElectronPCAProducer(const edm::ParameterSet& iConfig)
 {
     //register your products
     /* Examples
@@ -150,10 +153,16 @@ HGCalElectronRvarProducer::HGCalElectronRvarProducer(const edm::ParameterSet& iC
     _debug = iConfig.getParameter <bool>("debug");
     
     
-    produces <std::vector <double> > (_instanceName);
+    _instanceName_UU = _instanceName + "Sigma2UU";
+    _instanceName_VV = _instanceName + "Sigma2VV";
+    _instanceName_WW = _instanceName + "Sigma2WW";
+    
+    produces <std::vector <double> > (_instanceName_UU);
+    produces <std::vector <double> > (_instanceName_VV);
+    produces <std::vector <double> > (_instanceName_WW);
 }
 
-HGCalElectronRvarProducer::~HGCalElectronRvarProducer() {
+HGCalElectronPCAProducer::~HGCalElectronPCAProducer() {
   // do anything here that needs to be done at destruction time
   // (e.g. close files, deallocate resources etc.)
   //
@@ -165,7 +174,7 @@ HGCalElectronRvarProducer::~HGCalElectronRvarProducer() {
 //
 
 // ------------ method called to produce the data  ------------
-void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
+void HGCalElectronPCAProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     using namespace edm;
     /* This is an event example
@@ -209,7 +218,9 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
     
     int nEle = v_electron->size();
     
-    std::vector <double> v_Rvar;
+    std::vector <double> v_sigmaUU;
+    std::vector <double> v_sigmaVV;
+    std::vector <double> v_sigmaWW;
     
     for(int iEle = 0; iEle < nEle; iEle++)
     {
@@ -223,6 +234,7 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
         
         std::vector <double> v_superClus_isHitValid(v_superClus_HandF.size(), false);
         
+        ROOT::Math::XYZVector centroid_xyz(0, 0, 0);
         std::vector <ROOT::Math::XYZVector> v_layerCentroid;
         
         for(int iLayer = 0; iLayer < _nLayer; iLayer++)
@@ -285,6 +297,8 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
             v_layerEnergy.at(hitLayer) += hitE;
             
             v_layerCentroid.at(hitLayer) += hitE * hit_xyz;
+            
+            centroid_xyz += hitE * hit_xyz;
         }
         
         for(int iLayer = 0; iLayer < _nLayer; iLayer++)
@@ -297,14 +311,29 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
             //printf("Layer %d: energy %0.2f \n", iLayer+1, v_layerEnergy.at(iLayer));
         }
         
+        if(totalE)
+        {
+            centroid_xyz /= totalE;
+        }
         
-        // Compute the Rvar per layer
+        
+        TMatrixD mat_cov(3, 3);
+        //TMatrixD mat_dist(3, nValidHit);
+        
+        double dxdx = 0;
+        double dydy = 0;
+        double dzdz = 0;
+
+        double dxdy = 0;
+        double dydz = 0;
+        double dzdx = 0;
+        
+        double weightTot = 0;
+        
         for(int iHit = 0; iHit < (int) v_superClus_HandF.size(); iHit++)
         {
             DetId hitId = v_superClus_HandF.at(iHit).first;
             DetId hitEfrac = v_superClus_HandF.at(iHit).second;
-            
-            int hitLayer = recHitTools.getLayer(hitId) - 1;
             
             if(!v_superClus_isHitValid.at(iHit))
             {
@@ -312,71 +341,141 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
             }
             
             int hitIdx = m_recHitIdx.at(hitId);
-            double hitE = v_PFRecHit->at(hitIdx).energy() * hitEfrac;
+            int hitLayer = recHitTools.getLayer(hitId) - 1;
             
-            //const HGCRecHit *recHit = m_recHitPtr.at(hitId);
-            //double hitE = recHit->energy() * hitEfrac;
+            double hitE = v_PFRecHit->at(hitIdx).energy() * hitEfrac;
             
             auto hitPos = recHitTools.getPosition(hitId);
             ROOT::Math::XYZVector hit_xyz(hitPos.x(), hitPos.y(), hitPos.z());
             
-            auto dist_xyz = hit_xyz - v_layerCentroid.at(hitLayer);
+            ROOT::Math::XYZVector distCyl_xyz = hit_xyz - v_layerCentroid.at(hitLayer);
             
-            double R = std::sqrt(dist_xyz.x()*dist_xyz.x() + dist_xyz.y()*dist_xyz.y());
+            double rCyl = std::sqrt(distCyl_xyz.x()*distCyl_xyz.x() + distCyl_xyz.y()*distCyl_xyz.y());
             
-            if(R > _cylinderR)
+            // Compute in a cylinder
+            if(rCyl > _cylinderR)
             {
                 continue;
             }
             
-            v_layerEnergyInR.at(hitLayer) += hitE;
+            ROOT::Math::XYZVector dist_xyz = hit_xyz - centroid_xyz;
+            
+            double weight = hitE;
+            weightTot += weight;
+            
+            dxdx += weight * dist_xyz.x() * dist_xyz.x();
+            dydy += weight * dist_xyz.y() * dist_xyz.y();
+            dzdz += weight * dist_xyz.z() * dist_xyz.z();
+            
+            dxdy += weight * dist_xyz.x() * dist_xyz.y();
+            dydz += weight * dist_xyz.y() * dist_xyz.z();
+            dzdx += weight * dist_xyz.z() * dist_xyz.x();
+            
+            
+            //mat_dist(0, hitCount) = dist_xyz.x();
+            //mat_dist(1, hitCount) = dist_xyz.y();
+            //mat_dist(2, hitCount) = dist_xyz.z();
+            //
+            //
+            //hitCount++;
         }
         
-        double Rvar = 0;
+        dxdx /= weightTot;
+        dydy /= weightTot;
+        dzdz /= weightTot;
         
-        for(int iLayer = 0; iLayer < _nLayer; iLayer++)
+        dxdy /= weightTot;
+        dydz /= weightTot;
+        dzdx /= weightTot;
+        
+        mat_cov(0, 0) = dxdx;
+        mat_cov(1, 1) = dydy;
+        mat_cov(2, 2) = dzdz;
+        
+        mat_cov(0, 1) = mat_cov(1, 0) = dxdy;
+        mat_cov(0, 2) = mat_cov(2, 0) = dzdx;
+        mat_cov(1, 2) = mat_cov(2, 1) = dydz;
+        
+        // Get eigen values and vectors
+        TVectorD v_eigVal(3);
+        TMatrixD mat_eigVec(3, 3);
+        
+        if(weightTot > 0)// && ele.superCluster()->energy() > 0)
         {
-            if(v_layerEnergy.at(iLayer))
+            try
             {
-                Rvar += v_layerEnergyInR.at(iLayer);
+                mat_eigVec = mat_cov.EigenVectors(v_eigVal);
+            }
+            
+            catch(...)
+            {
+                printf("Warning in HGCalElectronPCAProducer::produce(...): Cannot get eigen values and vectors. \n");
                 
-                v_layerRvar.at(iLayer) = v_layerEnergyInR.at(iLayer) / v_layerEnergy.at(iLayer);
+                printf("Cov. matrix: \n");
+                mat_cov.Print();
+                
+                fflush(stdout);
+                fflush(stderr);
             }
         }
         
-        Rvar /= ele.energy();
-        
-        
         if(_debug)
         {
-            printf("In HGCalElectronRvarProducer::produce(...) --> Ele %d/%d: Rvar %0.4f, totalE %0.4f \n", iEle+1, nEle, Rvar, totalE);
+            printf(
+                "In HGCalElectronPCAProducer::produce(...) --> Ele %d/%d: eig vals (%0.4f, %0.4f, %0.4f) "
+                "\n",
+                
+                iEle+1, nEle,
+                v_eigVal(0),
+                v_eigVal(1),
+                v_eigVal(2)
+            );
+            
+            printf("Cov. matrix: \n");
+            mat_cov.Print();
         }
         
+        //v_eigenVal.at(0) = v_eigVal(0);
+        //v_eigenVal.at(1) = v_eigVal(1);
+        //v_eigenVal.at(2) = v_eigVal(2);
         
-        v_Rvar.push_back(Rvar);
+        
+        v_sigmaUU.push_back(v_eigVal(1));
+        v_sigmaVV.push_back(v_eigVal(2));
+        v_sigmaWW.push_back(v_eigVal(0));
     }
     
     
     iEvent.put(
-        std::make_unique <std::vector <double> >(v_Rvar),
-        _instanceName
+        std::make_unique <std::vector <double> >(v_sigmaUU),
+        _instanceName_UU
+    );
+    
+    iEvent.put(
+        std::make_unique <std::vector <double> >(v_sigmaVV),
+        _instanceName_VV
+    );
+    
+    iEvent.put(
+        std::make_unique <std::vector <double> >(v_sigmaWW),
+        _instanceName_WW
     );
 }
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------
-void HGCalElectronRvarProducer::beginStream(edm::StreamID) {
+void HGCalElectronPCAProducer::beginStream(edm::StreamID) {
   // please remove this method if not needed
 }
 
 // ------------ method called once each stream after processing all runs, lumis and events  ------------
-void HGCalElectronRvarProducer::endStream() {
+void HGCalElectronPCAProducer::endStream() {
   // please remove this method if not needed
 }
 
 // ------------ method called when starting to processes a run  ------------
 /*
 void
-HGCalElectronRvarProducer::beginRun(edm::Run const&, edm::EventSetup const&)
+HGCalElectronPCAProducer::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -384,7 +483,7 @@ HGCalElectronRvarProducer::beginRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when ending the processing of a run  ------------
 /*
 void
-HGCalElectronRvarProducer::endRun(edm::Run const&, edm::EventSetup const&)
+HGCalElectronPCAProducer::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -392,7 +491,7 @@ HGCalElectronRvarProducer::endRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
 void
-HGCalElectronRvarProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+HGCalElectronPCAProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
@@ -400,13 +499,13 @@ HGCalElectronRvarProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
 void
-HGCalElectronRvarProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+HGCalElectronPCAProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-void HGCalElectronRvarProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void HGCalElectronPCAProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -415,4 +514,4 @@ void HGCalElectronRvarProducer::fillDescriptions(edm::ConfigurationDescriptions&
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(HGCalElectronRvarProducer);
+DEFINE_FWK_MODULE(HGCalElectronPCAProducer);

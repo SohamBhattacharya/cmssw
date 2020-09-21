@@ -65,15 +65,13 @@ void PFClusterFromHGCalMultiCluster::buildClusters(
         double energy = 0.0, highest_energy = 0.0;
         output.emplace_back();
         reco::PFCluster& back = output.back();
-        //for (const auto& cl : mcl) {
-        //const auto& hitsAndFractions = cl->hitsAndFractions();
         const auto& hitsAndFractions_mcl = mcl.hitsAndFractions();
         
         std::vector <std::pair <DetId, float> > hitsAndFractions;
         hitsAndFractions.insert(hitsAndFractions.end(), hitsAndFractions_mcl.begin(), hitsAndFractions_mcl.end());
         
         // Use the H&F of the clusters inside the multicluster if the latter's H&F are not stored
-        if(!hitsAndFractions.size())
+        if(hitsAndFractions.empty())
         {
             for (const auto& cl : mcl)
             {
@@ -118,5 +116,5 @@ void PFClusterFromHGCalMultiCluster::buildClusters(
     }  // end of loop over hgcalMulticlusters (3D)
     
     
-    printf("In PFClusterFromHGCalMultiCluster: output size %d \n", (int) output.size());
+    //printf("In PFClusterFromHGCalMultiCluster: output size %d \n", (int) output.size());
 }

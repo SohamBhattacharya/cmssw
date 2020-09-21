@@ -56,6 +56,44 @@
 
 namespace CommonUtilities
 {
+    // SFINAE test
+    // From https://stackoverflow.com/questions/257288/templated-check-for-the-existence-of-a-class-member-function
+    //template <typename T>
+    //class RecHitTools_has_getEventSetup
+    //{
+    //    private :
+    //    
+    //    typedef char one;
+    //    
+    //    struct two
+    //    {
+    //        char x[2];
+    //    };
+    //    
+    //    template <typename C> static one test(decltype(&C::getEventSetup));
+    //    template <typename C> static two test(...);
+    //    
+    //    
+    //    public:
+    //    
+    //    enum
+    //    {
+    //        value = sizeof(test<T>(0)) == sizeof(char)
+    //    };
+    //};
+    //
+    //template<class T>
+    //auto runFunction(T* obj)
+    //-> decltype(  obj->toString()  )
+    //{
+    //    return     obj->toString();
+    //}
+    //auto optionalToString(...) -> string
+    //{
+    //    return "toString not defined";
+    //}
+    
+    
     //typedef std::map <std::string, std::vector <double> > MyVarMap;
     
     

@@ -361,15 +361,19 @@ if (options.modTICLele) :
 # TICL-ele variables
 from MyTools.EDProducers.producers_cfi import *
 
-process.HGCalElectronHoverE = HoverE.clone(
+process.HGCalElectronHoverE = HoverEProducer.clone(
     #debug = cms.bool(True),
 )
 
-process.HGCalElectronTrackIso = trackIso.clone(
+process.HGCalElectronTrackIso = trackIsoProducer.clone(
     #debug = cms.bool(True),
 )
 
-process.HGCalElectronRvar = Rvar.clone(
+process.HGCalElectronRvar = RvarProducer.clone(
+    #debug = cms.bool(True),
+)
+
+process.HGCalElectronPCA = PCAProducer.clone(
     #debug = cms.bool(True),
 )
 
@@ -378,6 +382,10 @@ process.HGCalElectronVarMap = mapProducer.clone(
         cms.InputTag("HGCalElectronHoverE", process.HGCalElectronHoverE.instanceName.value(), processName),
         cms.InputTag("HGCalElectronTrackIso", process.HGCalElectronTrackIso.instanceName.value(), processName),
         cms.InputTag("HGCalElectronRvar", process.HGCalElectronRvar.instanceName.value(), processName),
+        
+        cms.InputTag("HGCalElectronPCA", process.HGCalElectronPCA.instanceName.value()+"Sigma2UU", processName),
+        cms.InputTag("HGCalElectronPCA", process.HGCalElectronPCA.instanceName.value()+"Sigma2VV", processName),
+        cms.InputTag("HGCalElectronPCA", process.HGCalElectronPCA.instanceName.value()+"Sigma2WW", processName),
     ]),
     
     #debug = cms.bool(True),
@@ -387,6 +395,7 @@ process.HGCalvar_seq = cms.Sequence(
     process.HGCalElectronHoverE *
     process.HGCalElectronTrackIso *
     process.HGCalElectronRvar *
+    process.HGCalElectronPCA *
     
     process.HGCalElectronVarMap
 )
@@ -564,8 +573,8 @@ process.PixelCPEGenericESProducer.Upgrade = cms.bool(True)
 #process.load("RecoEgamma.EgammaElectronProducers.gsfElectronSequence_cff")
 #process.gsfEcalDrivenElectronSequence.associate(iterTICLTask)
 
-from RecoHGCal.TICL.ticl_iterations import TICL_iterations_withReco
-TICL_iterations_withReco(process)
+#from RecoHGCal.TICL.ticl_iterations import TICL_iterations_withReco
+#TICL_iterations_withReco(process)
 
 
 process.p = cms.Path(

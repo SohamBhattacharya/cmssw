@@ -498,6 +498,10 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         treeOutput->v_gsfEleFromTICL_R2p8.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvarProducer_Demo")[iEle]);
         
+        treeOutput->v_gsfEleFromTICL_sigma2uu.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2UU_Demo")[iEle]);
+        treeOutput->v_gsfEleFromTICL_sigma2vv.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2VV_Demo")[iEle]);
+        treeOutput->v_gsfEleFromTICL_sigma2ww.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2WW_Demo")[iEle]);
+        
         
         //std::vector <DetId> v_SC_seedId = gsfEle.superCluster()->getSeedIds();
         //
