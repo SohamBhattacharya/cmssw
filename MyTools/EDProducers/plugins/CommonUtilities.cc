@@ -4,6 +4,27 @@
 
 namespace CommonUtilities
 {
+    void initRecHitTools(
+        hgcal::RecHitTools &recHitTools,
+        const edm::EventSetup *iSetup
+    )
+    {
+        // In 11_1
+        if(RecHitTools_has_getEventSetup<hgcal::RecHitTools>::value)
+        {
+            RecHitTools_has_getEventSetup<hgcal::RecHitTools>::eval(recHitTools, iSetup);
+        }
+        
+        // In 11_2
+        else
+        {
+            edm::ESHandle <CaloGeometry> geom;
+            iSetup->get<CaloGeometryRecord>().get(geom);
+            recHitTools.setGeometry(*(geom.product()));
+        }
+    }
+    
+    
     std::map <DetId, int> getPFRecHitIndexMap(edm::Handle <std::vector <reco::PFRecHit> > v_recHit)
     {
         std::map <DetId, int> m_recHitIdx;

@@ -182,10 +182,7 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
     SetupData& setup = iSetup.getData(setupToken_);
     */
     
-    edm::ESHandle <CaloGeometry> geom;
-    iSetup.get<CaloGeometryRecord>().get(geom);
-    recHitTools.setGeometry(*(geom.product()));
-    //recHitTools.getEventSetup(iSetup);
+    CommonUtilities::initRecHitTools(recHitTools, &iSetup);
     
     
     edm::Handle <std::vector <reco::PFRecHit> > v_PFRecHit;

@@ -94,7 +94,71 @@ namespace CommonUtilities
     //}
     
     
-    //typedef std::map <std::string, std::vector <double> > MyVarMap;
+    // Shamelessly copied from:
+    // https://stackoverflow.com/questions/12015195/how-to-call-member-function-only-if-object-happens-to-have-it
+    /*! The template `has_void_foo_no_args_const<T>` exports a
+        boolean constant `value` that is true iff `T` provides
+        `void foo() const`
+    
+        It also provides `static void eval(T const & t)`, which
+        invokes void `T::foo() const` upon `t` if such a public member
+        function exists and is a no-op if there is no such member.
+    */ 
+    template< typename T>
+    struct RecHitTools_has_getEventSetup
+    {
+        /* SFINAE foo-has-correct-sig :) */
+        template<typename A>
+        static std::true_type test(void (A::*)() const) {
+            return std::true_type();
+        }
+        
+        /* SFINAE getEventSetup-exists :) */
+        template <typename A> 
+        static decltype(test(&A::getEventSetup)) 
+        test(decltype(&A::getEventSetup),void *) {
+            /* getEventSetup exists. What about sig? */
+            typedef decltype(test(&A::getEventSetup)) return_type; 
+            return return_type();
+        }
+        
+        /* SFINAE game over :( */
+        template<typename A>
+        static std::false_type test(...) {
+            return std::false_type(); 
+        }
+        
+        /* This will be either `std::true_type` or `std::false_type` */
+        typedef decltype(test<T>(0,0)) type;
+        
+        static const bool value = type::value; /* Which is it? */
+        
+        /*  `eval(T const &,std::true_type)` 
+            delegates to `T::getEventSetup()` when `type` == `std::true_type`
+        */
+        static void eval(T const & t, const edm::EventSetup *iSetup, std::true_type) {
+            t.getEventSetup(*iSetup);
+        }
+        /* `eval(...)` is a no-op for otherwise unmatched arguments */ 
+        static void eval(...){
+            // This output for demo purposes. Delete
+            //std::cout << "T::getEventSetup() not called" << std::endl;        
+        }
+    
+        /* `eval(T const & t)` delegates to :-
+            - `eval(t,type()` when `type` == `std::true_type`
+            - `eval(...)` otherwise
+        */  
+        static void eval(T const & t, const edm::EventSetup *iSetup) {
+            eval(t, iSetup, type());
+        }
+    };
+    
+    // This is the desired implementation of `void f(T const& val)` 
+    void initRecHitTools(
+        hgcal::RecHitTools &recHitTools,
+        const edm::EventSetup *iSetup
+    );
     
     
     std::map <DetId, int> getPFRecHitIndexMap(
