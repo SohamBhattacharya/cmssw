@@ -250,12 +250,13 @@ void HGCalElectronPCAProducer::produce(edm::Event& iEvent, const edm::EventSetup
             DetId hitId = v_superClus_HandF.at(iHit).first;
             DetId hitEfrac = v_superClus_HandF.at(iHit).second;
             
+            int hitLayer = recHitTools.getLayer(hitId) - 1;
+            
             if(hitId.det() != DetId::HGCalEE)
             {
+                printf("Det %d, layer %d \n", (int) hitId.det(), hitLayer);
                 continue;
             }
-            
-            int hitLayer = recHitTools.getLayer(hitId) - 1;
             
             if(hitLayer+1 > _nLayer)
             {
