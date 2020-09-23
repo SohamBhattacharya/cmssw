@@ -84,6 +84,7 @@ mapProducer = cms.EDProducer(
     "MapProducer",
     
     instanceName = cms.string("MapProducer"),
+    useProcessName = cms.bool(False),
     
     collections = cms.VInputTag(),
     

@@ -27,6 +27,7 @@
 # include "FWCore/ServiceRegistry/interface/Service.h"
 # include "FWCore/Utilities/interface/InputTag.h"
 # include "Geometry/CaloTopology/interface/HGCalTopology.h"
+# include "Geometry/Records/interface/CaloGeometryRecord.h"
 # include "Geometry/Records/interface/IdealGeometryRecord.h"
 # include "RecoLocalCalo/HGCalRecAlgos/interface/RecHitTools.h"
 # include "SimDataFormats/CaloAnalysis/interface/CaloParticle.h"
@@ -56,55 +57,9 @@
 
 namespace CommonUtilities
 {
-    // SFINAE test
-    // From https://stackoverflow.com/questions/257288/templated-check-for-the-existence-of-a-class-member-function
-    //template <typename T>
-    //class RecHitTools_has_getEventSetup
-    //{
-    //    private :
-    //    
-    //    typedef char one;
-    //    
-    //    struct two
-    //    {
-    //        char x[2];
-    //    };
-    //    
-    //    template <typename C> static one test(decltype(&C::getEventSetup));
-    //    template <typename C> static two test(...);
-    //    
-    //    
-    //    public:
-    //    
-    //    enum
-    //    {
-    //        value = sizeof(test<T>(0)) == sizeof(char)
-    //    };
-    //};
-    //
-    //template<class T>
-    //auto runFunction(T* obj)
-    //-> decltype(  obj->toString()  )
-    //{
-    //    return     obj->toString();
-    //}
-    //auto optionalToString(...) -> string
-    //{
-    //    return "toString not defined";
-    //}
-    
-    
     // Shamelessly copied from:
     // https://stackoverflow.com/questions/12015195/how-to-call-member-function-only-if-object-happens-to-have-it
-    /*! The template `has_void_foo_no_args_const<T>` exports a
-        boolean constant `value` that is true iff `T` provides
-        `void foo() const`
-    
-        It also provides `static void eval(T const & t)`, which
-        invokes void `T::foo() const` upon `t` if such a public member
-        function exists and is a no-op if there is no such member.
-    */ 
-    template< typename T>
+    template<typename T>
     struct RecHitTools_has_getEventSetup
     {
         /* SFINAE foo-has-correct-sig :) */
@@ -154,11 +109,63 @@ namespace CommonUtilities
         }
     };
     
-    // This is the desired implementation of `void f(T const& val)` 
+    template<typename T>
+    struct RecHitTools_has_setGeometry
+    {
+        /* SFINAE foo-has-correct-sig :) */
+        template<typename A>
+        static std::true_type test(void (A::*)() const) {
+            return std::true_type();
+        }
+        
+        /* SFINAE setGeometry-exists :) */
+        template <typename A> 
+        static decltype(test(&A::setGeometry)) 
+        test(decltype(&A::setGeometry),void *) {
+            /* setGeometry exists. What about sig? */
+            typedef decltype(test(&A::setGeometry)) return_type; 
+            return return_type();
+        }
+        
+        /* SFINAE game over :( */
+        template<typename A>
+        static std::false_type test(...) {
+            return std::false_type(); 
+        }
+        
+        /* This will be either `std::true_type` or `std::false_type` */
+        typedef decltype(test<T>(0,0)) type;
+        
+        static const bool value = type::value; /* Which is it? */
+        
+        /*  `eval(T const &,std::true_type)` 
+            delegates to `T::setGeometry()` when `type` == `std::true_type`
+        */
+        static void eval(T const & t, const edm::EventSetup *iSetup, std::true_type) {
+            edm::ESHandle <CaloGeometry> geom;
+            iSetup->get<CaloGeometryRecord>().get(geom);
+            t.setGeometry(*(geom.product()));
+        }
+        /* `eval(...)` is a no-op for otherwise unmatched arguments */ 
+        static void eval(...){
+            // This output for demo purposes. Delete
+            //std::cout << "T::setGeometry() not called" << std::endl;        
+        }
+    
+        /* `eval(T const & t)` delegates to :-
+            - `eval(t,type()` when `type` == `std::true_type`
+            - `eval(...)` otherwise
+        */  
+        static void eval(T const & t, const edm::EventSetup *iSetup) {
+            eval(t, iSetup, type());
+        }
+    };
+    
     void initRecHitTools(
         hgcal::RecHitTools &recHitTools,
         const edm::EventSetup *iSetup
     );
+    
     
     
     std::map <DetId, int> getPFRecHitIndexMap(

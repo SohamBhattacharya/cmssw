@@ -16,11 +16,9 @@ namespace CommonUtilities
         }
         
         // In 11_2
-        else
+        else if(RecHitTools_has_setGeometry<hgcal::RecHitTools>::value)
         {
-            edm::ESHandle <CaloGeometry> geom;
-            iSetup->get<CaloGeometryRecord>().get(geom);
-            recHitTools.setGeometry(*(geom.product()));
+            RecHitTools_has_setGeometry<hgcal::RecHitTools>::eval(recHitTools, iSetup);
         }
     }
     

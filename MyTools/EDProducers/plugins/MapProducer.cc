@@ -90,6 +90,7 @@ class MapProducer : public edm::stream::EDProducer<>
     std::string _instanceName;
     
     bool _debug;
+    bool _useProcessName;
     
     int _nLayer;
     double _cylinderR;
@@ -130,6 +131,7 @@ MapProducer::MapProducer(const edm::ParameterSet& iConfig)
     _instanceName = iConfig.getParameter <std::string>("instanceName");
     
     _debug = iConfig.getParameter <bool>("debug");
+    _useProcessName = iConfig.getParameter <bool>("useProcessName");
     
     _v_inputTag = iConfig.getParameter <std::vector <edm::InputTag> >("collections");
     
@@ -191,7 +193,7 @@ void MapProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             key += "_" + tag.instance();
         }
         
-        if(!tag.process().empty())
+        if(!tag.process().empty() && _useProcessName)
         {
             key += "_" + tag.process();
         }

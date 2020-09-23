@@ -52,6 +52,7 @@
 # include "FWCore/ServiceRegistry/interface/Service.h"
 # include "FWCore/Utilities/interface/InputTag.h"
 # include "Geometry/CaloTopology/interface/HGCalTopology.h"
+# include "Geometry/Records/interface/CaloGeometryRecord.h"
 # include "Geometry/Records/interface/IdealGeometryRecord.h"
 # include "RecoLocalCalo/HGCalRecAlgos/interface/RecHitTools.h"
 # include "SimDataFormats/CaloAnalysis/interface/CaloParticle.h"
@@ -496,11 +497,11 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->gsfEleFromTICL_n++;
         
         
-        treeOutput->v_gsfEleFromTICL_R2p8.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvarProducer_Demo")[iEle]);
+        treeOutput->v_gsfEleFromTICL_R2p8.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvarProducer")[iEle]);
         
-        treeOutput->v_gsfEleFromTICL_sigma2uu.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2UU_Demo")[iEle]);
-        treeOutput->v_gsfEleFromTICL_sigma2vv.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2VV_Demo")[iEle]);
-        treeOutput->v_gsfEleFromTICL_sigma2ww.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2WW_Demo")[iEle]);
+        treeOutput->v_gsfEleFromTICL_sigma2uu.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2UU")[iEle]);
+        treeOutput->v_gsfEleFromTICL_sigma2vv.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2VV")[iEle]);
+        treeOutput->v_gsfEleFromTICL_sigma2ww.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2WW")[iEle]);
         
         
         //std::vector <DetId> v_SC_seedId = gsfEle.superCluster()->getSeedIds();
