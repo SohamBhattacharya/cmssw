@@ -64,7 +64,7 @@ namespace CommonUtilities
     {
         /* SFINAE foo-has-correct-sig :) */
         template<typename A>
-        static std::true_type test(void (A::*)() const) {
+        static std::true_type test(void (A::*)(const edm::EventSetup &)) {
             return std::true_type();
         }
         
@@ -91,7 +91,7 @@ namespace CommonUtilities
         /*  `eval(T const &,std::true_type)` 
             delegates to `T::getEventSetup()` when `type` == `std::true_type`
         */
-        static void eval(T const & t, const edm::EventSetup *iSetup, std::true_type) {
+        static void eval(T &t, const edm::EventSetup *iSetup, std::true_type) {
             t.getEventSetup(*iSetup);
         }
         /* `eval(...)` is a no-op for otherwise unmatched arguments */ 
@@ -104,7 +104,7 @@ namespace CommonUtilities
             - `eval(t,type()` when `type` == `std::true_type`
             - `eval(...)` otherwise
         */  
-        static void eval(T const & t, const edm::EventSetup *iSetup) {
+        static void eval(T &t, const edm::EventSetup *iSetup) {
             eval(t, iSetup, type());
         }
     };
@@ -114,7 +114,7 @@ namespace CommonUtilities
     {
         /* SFINAE foo-has-correct-sig :) */
         template<typename A>
-        static std::true_type test(void (A::*)() const) {
+        static std::true_type test(void (A::*)(CaloGeometry const &)) {
             return std::true_type();
         }
         
@@ -141,7 +141,7 @@ namespace CommonUtilities
         /*  `eval(T const &,std::true_type)` 
             delegates to `T::setGeometry()` when `type` == `std::true_type`
         */
-        static void eval(T const & t, const edm::EventSetup *iSetup, std::true_type) {
+        static void eval(T &t, const edm::EventSetup *iSetup, std::true_type) {
             edm::ESHandle <CaloGeometry> geom;
             iSetup->get<CaloGeometryRecord>().get(geom);
             t.setGeometry(*(geom.product()));
@@ -156,7 +156,7 @@ namespace CommonUtilities
             - `eval(t,type()` when `type` == `std::true_type`
             - `eval(...)` otherwise
         */  
-        static void eval(T const & t, const edm::EventSetup *iSetup) {
+        static void eval(T &t, const edm::EventSetup *iSetup) {
             eval(t, iSetup, type());
         }
     };

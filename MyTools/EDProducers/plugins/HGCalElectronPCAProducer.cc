@@ -254,7 +254,7 @@ void HGCalElectronPCAProducer::produce(edm::Event& iEvent, const edm::EventSetup
             
             if(hitId.det() != DetId::HGCalEE)
             {
-                printf("Det %d, layer %d \n", (int) hitId.det(), hitLayer);
+                //printf("Det %d, layer %d \n", (int) hitId.det(), hitLayer);
                 continue;
             }
             

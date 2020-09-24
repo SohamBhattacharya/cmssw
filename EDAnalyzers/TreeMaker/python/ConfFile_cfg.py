@@ -361,19 +361,19 @@ if (options.modTICLele) :
 # TICL-ele variables
 from MyTools.EDProducers.producers_cfi import *
 
-process.HGCalElectronHoverE = HoverEProducer.clone(
+process.HGCalElectronHoverE = HGCalElectronHoverEProducer.clone(
     #debug = cms.bool(True),
 )
 
-process.HGCalElectronTrackIso = trackIsoProducer.clone(
+process.HGCalElectronTrackIso = HGCalElectronTrackIsoProducer.clone(
     #debug = cms.bool(True),
 )
 
-process.HGCalElectronRvar = RvarProducer.clone(
+process.HGCalElectronRvar = HGCalElectronRvarProducer.clone(
     #debug = cms.bool(True),
 )
 
-process.HGCalElectronPCA = PCAProducer.clone(
+process.HGCalElectronPCA = HGCalElectronPCAProducer.clone(
     #debug = cms.bool(True),
 )
 
@@ -391,7 +391,7 @@ process.HGCalElectronVarMap = mapProducer.clone(
     #debug = cms.bool(True),
 )
 
-process.HGCalvar_seq = cms.Sequence(
+process.HGCalVar_seq = cms.Sequence(
     process.HGCalElectronHoverE *
     process.HGCalElectronTrackIso *
     process.HGCalElectronRvar *
@@ -589,7 +589,7 @@ process.p = cms.Path(
     
     #process.TICLele_seq# *
     
-    process.HGCalvar_seq *
+    process.HGCalVar_seq *
     
     process.treeMaker
 )

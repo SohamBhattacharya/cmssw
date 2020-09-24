@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
 
-HoverEProducer = cms.EDProducer(
+HGCalElectronHoverEProducer = cms.EDProducer(
     "HGCalElectronHoverEProducer",
     
-    instanceName = cms.string("HGCalElectronHoverEProducer"),
+    instanceName = cms.string("HGCalElectronHoverE"),
     
     electrons = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl"),
     layerClusters = cms.InputTag("hgcalLayerClusters"),
@@ -18,10 +18,10 @@ HoverEProducer = cms.EDProducer(
 )
 
 
-trackIsoProducer = cms.EDProducer(
+HGCalElectronTrackIsoProducer = cms.EDProducer(
     "HGCalElectronTrackIsoProducer",
     
-    instanceName = cms.string("HGCalElectronTrackIsoProducer"),
+    instanceName = cms.string("HGCalElectronTrackIso"),
     
     electrons = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl"),
     tracks = cms.InputTag("generalTracks"),
@@ -37,10 +37,10 @@ trackIsoProducer = cms.EDProducer(
 )
 
 
-RvarProducer = cms.EDProducer(
+HGCalElectronRvarProducer = cms.EDProducer(
     "HGCalElectronRvarProducer",
     
-    instanceName = cms.string("HGCalElectronRvarProducer"),
+    instanceName = cms.string("HGCalElectronRvar"),
     
     electrons = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl"),
     
@@ -58,10 +58,10 @@ RvarProducer = cms.EDProducer(
     debug = cms.bool(False),
 )
 
-PCAProducer = cms.EDProducer(
+HGCalElectronPCAProducer = cms.EDProducer(
     "HGCalElectronPCAProducer",
     
-    instanceName = cms.string("HGCalElectronPCAProducer"),
+    instanceName = cms.string("HGCalElectronPCA"),
     
     electrons = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl"),
     
