@@ -205,7 +205,7 @@ void MapProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             printf("Values: ");
             for(int idx = 0; idx < (int) v_value->size(); idx++)
             {
-                printf("%0.4f, ", v_value->at(idx));
+                printf("%0.4e, ", v_value->at(idx));
             }
             printf("\n");
         }
