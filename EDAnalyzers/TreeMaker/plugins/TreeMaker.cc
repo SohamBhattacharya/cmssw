@@ -456,7 +456,7 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //gsfEle.trackMomentumAtVtx().r(),// std::sqrt(gsfEle.trackMomentumAtVtx().mag2()),
             //gsfEle.trackMomentumAtVtx().rho()//, std::sqrt(gsfEle.trackMomentumAtVtx().perp2())
             
-            m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvarProducer_Demo")[iEle]
+            m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvar")[iEle]
         );
         
         int matchedGenEl_idx = v_gsfEleFromTICL_matchedGenEl_idx.at(iEle);
