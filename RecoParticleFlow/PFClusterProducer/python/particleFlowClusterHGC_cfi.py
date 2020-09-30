@@ -50,8 +50,8 @@ _hgcalMultiClusterMapper_HGCal = cms.PSet(
     ),
     clusterSrc = cms.InputTag("ticlMultiClustersFromTrackstersMerge"),
     tracksterSrc = cms.InputTag("ticlTrackstersMerge"),
-    filterByTracksterPID = cms.bool(False),
-    pid_threshold = cms.double(0.8),
+    filterByTracksterPID = cms.bool(True),
+    pid_threshold = cms.double(0.5),
     filter_on_categories = cms.vint32([0, 1]),
 )
 

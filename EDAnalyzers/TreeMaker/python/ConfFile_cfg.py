@@ -159,6 +159,13 @@ options.register("TICLeleGenMatchDR",
     "DeltaR to use for TICL-electron gen-matching (will store only the gen-matched ones)" # Description
 )
 
+options.register("TICLphoGenMatchDR",
+    99999, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.float, # string, int, or float
+    "DeltaR to use for TICL-photon gen-matching (will store only the gen-matched ones)" # Description
+)
+
 options.register("isGunSample",
     0, # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -171,6 +178,13 @@ options.register("genEleFilter",
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
     VarParsing.VarParsing.varType.int, # string, int, or float
     "Apply gen-electron filter" # Description
+)
+
+options.register("genPhoFilter",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Apply gen-photon filter" # Description
 )
 
 options.register("genPartonFilter",
@@ -340,29 +354,32 @@ if (options.onRaw) :
 
 
 # Rerun TICL
-label_TICLtrackster = cms.untracked.InputTag("ticlTrackstersMerge", "", "RECO")
-label_TICLmultiCluster = cms.untracked.InputTag("ticlMultiClustersFromTrackstersMerge", "", "RECO")
+label_TICLtrackster = cms.InputTag("ticlTrackstersMerge", "", "RECO")
+label_TICLmultiCluster = cms.InputTag("ticlMultiClustersFromTrackstersMerge", "", "RECO")
 
 if (options.rerunTICL) :
     
-    label_TICLtrackster = cms.untracked.InputTag("ticlTrackstersMerge", "", "Demo")
-    label_TICLmultiCluster = cms.untracked.InputTag("ticlMultiClustersFromTrackstersMerge", "", "Demo")
+    label_TICLtrackster = cms.InputTag("ticlTrackstersMerge", "", "Demo")
+    label_TICLmultiCluster = cms.InputTag("ticlMultiClustersFromTrackstersMerge", "", "Demo")
 
 
 # Mod TICL-ele
-#label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromTICL", "", "RECO")
-label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromMultiCl", "", "RECO")
+#label_gsfEleFromTICL = cms.InputTag("ecalDrivenGsfElectronsFromTICL", "", "RECO")
+label_gsfEleFromTICL = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl", "", "RECO")
 
 if (options.modTICLele) :
     
-    label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromMultiCl", "", "Demo")
+    label_gsfEleFromTICL = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl", "", "Demo")
+
+
+label_phoFromTICL = cms.InputTag("photonsFromMultiCl", "", "Demo")
 
 
 # TICL-ele variables
 from MyTools.EDProducers.producers_cfi import *
 
 process.HGCalElectronHoverE = HGCalElectronHoverEProducer.clone(
-    #debug = cms.bool(True),
+    debug = cms.bool(True),
 )
 
 process.HGCalElectronTrackIso = HGCalElectronTrackIsoProducer.clone(
@@ -392,12 +409,12 @@ process.HGCalElectronVarMap = mapProducer.clone(
 )
 
 process.HGCalVar_seq = cms.Sequence(
-    process.HGCalElectronHoverE *
-    process.HGCalElectronTrackIso *
-    process.HGCalElectronRvar *
-    process.HGCalElectronPCA *
-    
-    process.HGCalElectronVarMap
+    process.HGCalElectronHoverE
+    #process.HGCalElectronTrackIso *
+    #process.HGCalElectronRvar *
+    #process.HGCalElectronPCA *
+    #
+    #process.HGCalElectronVarMap
 )
 
 
@@ -415,25 +432,29 @@ process.treeMaker = cms.EDAnalyzer(
     storeSuperClusTICLclus = cms.bool(bool(options.storeSuperClusTICLclus)),
     
     TICLeleGenMatchDR = cms.double(options.TICLeleGenMatchDR),
+    TICLphoGenMatchDR = cms.double(options.TICLphoGenMatchDR),
     
     
     ############################## GEN ##############################
     
-    label_generator = cms.untracked.InputTag("generator"),
-    label_genParticle = cms.untracked.InputTag("genParticles"),
+    label_generator = cms.InputTag("generator"),
+    label_genParticle = cms.InputTag("genParticles"),
     
     
     ############################## RECO ##############################
     
-    label_pileup = cms.untracked.InputTag("addPileupInfo"),
-    label_rho = cms.untracked.InputTag("fixedGridRhoFastjetAll"),
+    label_pileup = cms.InputTag("addPileupInfo"),
+    label_rho = cms.InputTag("fixedGridRhoFastjetAll"),
     
     label_TICLtrackster = label_TICLtrackster,
     label_TICLmultiCluster = label_TICLmultiCluster,
     
+    label_gsfEleFromMultiClus = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl", "", "RECO"),
     label_gsfEleFromTICL = label_gsfEleFromTICL,
+    label_gsfEleFromTICLvarMap = cms.InputTag("HGCalElectronVarMap", process.HGCalElectronVarMap.instanceName.value(), processName),
     
-    label_gsfEleFromTICLvarMap = cms.untracked.InputTag("HGCalElectronVarMap", process.HGCalElectronVarMap.instanceName.value(), processName),
+    label_phoFromMultiClus = cms.InputTag("photonsFromMultiCl", "", "RECO"),
+    label_phoFromTICL = label_phoFromTICL,
 )
 
 
@@ -477,6 +498,22 @@ process.filter_seq_genEle = cms.Sequence()
 if (options.genEleFilter) :
 
     process.filter_seq_genEle = cms.Sequence(process.GenParticleFilter_ele)
+
+
+process.GenParticleFilter_pho = GenParticleFilter.clone()
+process.GenParticleFilter_pho.atLeastN = cms.int32(1)
+process.GenParticleFilter_pho.pdgIds = cms.vint32(22)
+process.GenParticleFilter_pho.minPt = cms.double(10)
+process.GenParticleFilter_pho.minEta = cms.double(1.479)
+process.GenParticleFilter_pho.maxEta = cms.double(3.1)
+process.GenParticleFilter_pho.isGunSample = cms.bool(bool(options.isGunSample))
+#process.GenParticleFilter_pho.debug = cms.bool(True)
+
+process.filter_seq_genPho = cms.Sequence()
+
+if (options.genPhoFilter) :
+
+    process.filter_seq_genPho = cms.Sequence(process.GenParticleFilter_pho)
 
 
 process.GenParticleFilter_part = GenParticleFilter.clone()
@@ -581,6 +618,7 @@ process.p = cms.Path(
     #process.filter_seq *
     
     process.filter_seq_genEle *
+    process.filter_seq_genPho *
     process.filter_seq_genPart *
     
     process.reco_seq *
@@ -595,6 +633,15 @@ process.p = cms.Path(
 )
 
 process.schedule.insert(0, process.p)
+
+#process.load("RecoEgamma.EgammaElectronProducers.gsfElectronSequence_cff")
+#process.p.associate(process.gsfEcalDrivenElectronTask)
+#
+#process.load("RecoEgamma.EgammaPhotonProducers.photonSequence_cff")
+#process.p.associate(process.photonTask)
+#
+#process.load("RecoJets.JetProducers.CaloTowerSchemeB_cfi")
+#process.p.associate(cms.Task(process.towerMaker))
 
 print "\n"
 print "*"*50

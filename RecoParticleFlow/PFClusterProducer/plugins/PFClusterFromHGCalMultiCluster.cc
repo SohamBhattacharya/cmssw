@@ -38,11 +38,12 @@ void PFClusterFromHGCalMultiCluster::buildClusters(const edm::Handle<reco::PFRec
         probTotal += tracksters[iMultiClus].id_probabilities(cat);
       }
 
-      if (probTotal < pid_threshold_) {
+      //if (probTotal < pid_threshold_) {
+      if (probTotal < pid_threshold_ && tracksters[iMultiClus].raw_em_energy() < 0.8*tracksters[iMultiClus].raw_energy()) {
         continue;
       }
     }
-
+    
     DetId seed;
     double energy = 0.0, highest_energy = 0.0;
     output.emplace_back();
