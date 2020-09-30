@@ -20,11 +20,17 @@ double HGCalAlgoSuperClusterHoverE::getClusterBasedHoverE(
     const std::vector <reco::CaloCluster> &layerClusters
 )
 {
-    double HoverE = 0;
-    
     double superClus_E = superClus->energy();
+    
+    if(!superClus_E)
+    {
+        return std::numeric_limits<double>::max();
+    }
+    
     double superClus_eta = superClus->eta();
     double superClus_phi = superClus->phi();
+    
+    double HoverE = 0;
     
     for(auto &cluster : layerClusters)
     {
@@ -60,15 +66,7 @@ double HGCalAlgoSuperClusterHoverE::getClusterBasedHoverE(
     }
     
     
-    if(superClus_E)
-    {
-        HoverE /= superClus_E;
-    }
-    
-    else
-    {
-        HoverE = std::numeric_limits<double>::max();
-    }
+    HoverE /= superClus_E;
     
     
     return HoverE;
