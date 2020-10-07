@@ -173,6 +173,11 @@ namespace CommonUtilities
     );
     
     
+    std::map <DetId, const reco::PFRecHit*> getPFRecHitPtrMap(
+        const std::vector <reco::PFRecHit> &v_recHit
+    );
+    
+    
     std::map <DetId, const HGCRecHit*> getHGCRecHitPtrMap(
         edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCEERecHit,
         edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEFRecHit,

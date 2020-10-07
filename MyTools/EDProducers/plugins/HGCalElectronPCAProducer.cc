@@ -248,7 +248,7 @@ void HGCalElectronPCAProducer::produce(edm::Event& iEvent, const edm::EventSetup
         for(int iHit = 0; iHit < (int) v_superClus_HandF.size(); iHit++)
         {
             DetId hitId = v_superClus_HandF.at(iHit).first;
-            DetId hitEfrac = v_superClus_HandF.at(iHit).second;
+            double hitEfrac = v_superClus_HandF.at(iHit).second;
             
             int hitLayer = recHitTools_.getLayer(hitId) - 1;
             
@@ -331,7 +331,7 @@ void HGCalElectronPCAProducer::produce(edm::Event& iEvent, const edm::EventSetup
         for(int iHit = 0; iHit < (int) v_superClus_HandF.size(); iHit++)
         {
             DetId hitId = v_superClus_HandF.at(iHit).first;
-            DetId hitEfrac = v_superClus_HandF.at(iHit).second;
+            double hitEfrac = v_superClus_HandF.at(iHit).second;
             
             if(!v_superClus_isHitValid.at(iHit))
             {

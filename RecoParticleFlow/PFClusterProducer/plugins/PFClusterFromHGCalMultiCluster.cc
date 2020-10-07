@@ -18,7 +18,14 @@ void PFClusterFromHGCalMultiCluster::buildClusters(const edm::Handle<reco::PFRec
   auto const& hits = *input;
 
   const auto& tracksters = *trackstersH_;
-
+  
+  printf("hgcalMultiClusters.size() %d, tracksters.size() %d \n", (int) hgcalMultiClusters.size(), (int) tracksters.size());
+  
+  //if (filterByTracksterPID_) {
+  //  printf("hgcalMultiClusters.size() %d, tracksters.size() %d \n", (int) hgcalMultiClusters.size(), (int) tracksters.size());
+  //  assert(hgcalMultiClusters.size() == tracksters.size());
+  //}
+  
   // for quick indexing back to hit energy
   std::unordered_map<uint32_t, size_t> detIdToIndex(hits.size());
   for (uint32_t i = 0; i < hits.size(); ++i) {
@@ -29,7 +36,11 @@ void PFClusterFromHGCalMultiCluster::buildClusters(const edm::Handle<reco::PFRec
 
   for (const auto& mcl : hgcalMultiClusters) {
     iMultiClus++;
-
+    
+    if (!mcl.energy()){
+      continue;
+    }
+    
     // Filter using trackster PID
     if (filterByTracksterPID_) {
       float probTotal = 0.0f;
@@ -39,7 +50,9 @@ void PFClusterFromHGCalMultiCluster::buildClusters(const edm::Handle<reco::PFRec
       }
 
       //if (probTotal < pid_threshold_) {
-      if (probTotal < pid_threshold_ && tracksters[iMultiClus].raw_em_energy() < 0.8*tracksters[iMultiClus].raw_energy()) {
+      if(probTotal < pid_threshold_ &&
+        tracksters[iMultiClus].raw_em_energy() < (energy_em_over_total_threshold_*tracksters[iMultiClus].raw_energy())
+      ){
         continue;
       }
     }
@@ -86,8 +99,9 @@ void PFClusterFromHGCalMultiCluster::buildClusters(const edm::Handle<reco::PFRec
       back.setEnergy(energy);
       back.setCorrectedEnergy(energy);
     } else {
-      back.setSeed(0);
-      back.setEnergy(0.f);
+      //back.setSeed(0);
+      //back.setEnergy(0.f);
+      output.pop_back();
     }
   }  // end of loop over hgcalMulticlusters (3D)
 }

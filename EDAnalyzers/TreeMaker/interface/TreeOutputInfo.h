@@ -115,6 +115,12 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_matchedGenEl_eta;
         std::vector <double> v_gsfEleFromTICL_matchedGenEl_phi;
         
+        std::vector <double> v_gsfEleFromTICL_superClus_nClus;
+        std::vector <std::vector <double> > vv_gsfEleFromTICL_superClus_clus_eleIdx;
+        std::vector <std::vector <double> > vv_gsfEleFromTICL_superClus_clus_idx;
+        std::vector <std::vector <double> > vv_gsfEleFromTICL_superClus_clus_E;
+        std::vector <std::vector <double> > vv_gsfEleFromTICL_superClus_clus_ET;
+        
         std::vector <double> v_gsfEleFromTICL_R2p8;
         
         std::vector <double> v_gsfEleFromTICL_sigma2uu;
@@ -335,6 +341,22 @@ namespace TreeOutputInfo
             tree->Branch(name, &v_gsfEleFromTICL_matchedGenEl_phi);
             
             //
+            sprintf(name, "gsfEleFromTICL_superClus_nClus");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_nClus);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_clus_eleIdx");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClus_clus_eleIdx);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_clus_idx");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClus_clus_idx);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_clus_E");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClus_clus_E);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_clus_ET");
+            tree->Branch(name, &vv_gsfEleFromTICL_superClus_clus_ET);
+            
+            //
             sprintf(name, "gsfEleFromTICL_R2p8");
             tree->Branch(name, &v_gsfEleFromTICL_R2p8);
             
@@ -517,6 +539,12 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_matchedGenEl_pT.clear();
             v_gsfEleFromTICL_matchedGenEl_eta.clear();
             v_gsfEleFromTICL_matchedGenEl_phi.clear();
+            
+            v_gsfEleFromTICL_superClus_nClus.clear();
+            vv_gsfEleFromTICL_superClus_clus_eleIdx.clear();
+            vv_gsfEleFromTICL_superClus_clus_idx.clear();
+            vv_gsfEleFromTICL_superClus_clus_E.clear();
+            vv_gsfEleFromTICL_superClus_clus_ET.clear();
             
             v_gsfEleFromTICL_R2p8.clear();
             

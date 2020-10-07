@@ -49,9 +49,12 @@ _hgcalMultiClusterMapper_HGCal = cms.PSet(
     thresholdsByDetector = cms.VPSet(
     ),
     clusterSrc = cms.InputTag("ticlMultiClustersFromTrackstersMerge"),
+    #clusterSrc = cms.InputTag("multiClustersFromTrackstersEM"),
     tracksterSrc = cms.InputTag("ticlTrackstersMerge"),
     filterByTracksterPID = cms.bool(True),
     pid_threshold = cms.double(0.5),
+    #pid_threshold = cms.double(0.8),
+    energy_em_over_total_threshold = cms.double(0.85),
     filter_on_categories = cms.vint32([0, 1]),
 )
 

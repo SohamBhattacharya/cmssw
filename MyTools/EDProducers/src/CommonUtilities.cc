@@ -52,6 +52,21 @@ namespace CommonUtilities
     }
     
     
+    std::map <DetId, const reco::PFRecHit*> getPFRecHitPtrMap(
+        const std::vector <reco::PFRecHit> &v_recHit
+    )
+    {
+        std::map <DetId, const reco::PFRecHit*> m_recHitPtr;
+        
+        for(auto &recHit : v_recHit)
+        {
+            m_recHitPtr[recHit.detId()] = &recHit;
+        }
+        
+        return m_recHitPtr;
+    }
+    
+    
     std::map <DetId, const HGCRecHit*> getHGCRecHitPtrMap(
         edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCEERecHit,
         edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEFRecHit,

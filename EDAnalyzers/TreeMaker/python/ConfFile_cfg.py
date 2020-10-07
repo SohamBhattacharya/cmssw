@@ -14,14 +14,10 @@ process = cms.Process(processName, eras.Phase2C9)
 
 #process = cms.Process("RECO", eras.Phase2C8_timing_layer_bar)
 
-process.load("FWCore.MessageService.MessageLogger_cfi")
-MessageLogger = cms.Service("MessageLogger")
-
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
-##process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 ##process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 ##process.load('Configuration.Geometry.GeometryExtended2023D41Reco_cff')
@@ -379,7 +375,7 @@ label_phoFromTICL = cms.InputTag("photonsFromMultiCl", "", "Demo")
 from MyTools.EDProducers.producers_cfi import *
 
 process.HGCalElectronHoverE = HGCalElectronHoverEProducer.clone(
-    debug = cms.bool(True),
+    #debug = cms.bool(True),
 )
 
 process.HGCalElectronTrackIso = HGCalElectronTrackIsoProducer.clone(
@@ -454,7 +450,8 @@ process.treeMaker = cms.EDAnalyzer(
     label_gsfEleFromTICLvarMap = cms.InputTag("HGCalElectronVarMap", process.HGCalElectronVarMap.instanceName.value(), processName),
     
     label_phoFromMultiClus = cms.InputTag("photonsFromMultiCl", "", "RECO"),
-    label_phoFromTICL = label_phoFromTICL,
+    #label_phoFromTICL = label_phoFromTICL,
+    label_phoFromTICL = cms.InputTag("xxx"),
 )
 
 
@@ -582,17 +579,17 @@ process.TICLele_seq = cms.Sequence()
 #    process.TICLele_seq = cms.Sequence(process.ecalDrivenGsfElectronsFromTICL_step)
 
 
-# TICL
+## TICL
 #if (options.rerunTICL) :
 #    
 #    #from RecoHGCal.TICL.ticl_iterations import TICL_iterations
 #    #TICL_iterations(process)
 #    
-#    #from RecoHGCal.TICL.ticl_iterations import TICL_iterations_withReco
-#    #TICL_iterations_withReco(process)
+#    from RecoHGCal.TICL.ticl_iterations import TICL_iterations_withReco
+#    TICL_iterations_withReco(process)
 #    
-#    from RecoHGCal.TICL.iterativeTICL_cff import iterTICLTask
-#    process.TICLele_seq.associate(iterTICLTask)
+#    #from RecoHGCal.TICL.iterativeTICL_cff import iterTICLTask
+#    #process.TICLele_seq.associate(iterTICLTask)
 
 
 ###### PixelCPE issue
@@ -684,6 +681,23 @@ if (options.debugFile) :
     
     process.output_step = cms.EndPath(process.out)
     process.schedule.extend([process.output_step])
+
+
+#process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger = cms.Service(
+    "MessageLogger",
+    destinations = cms.untracked.vstring(
+        "cerr",
+    ),
+    cerr = cms.untracked.PSet(
+        #threshold  = cms.untracked.string("ERROR"),
+        DEBUG = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+        WARNING = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+        ERROR = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+    )
+)
+
+#process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 
 #from FWCore.ParameterSet.Utilities import convertToUnscheduled

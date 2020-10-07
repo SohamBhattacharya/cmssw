@@ -12,6 +12,7 @@ public:
       : InitialClusteringStepBase(conf, sumes) {
     filterByTracksterPID_ = conf.getParameter<bool>("filterByTracksterPID");
     pid_threshold_ = conf.getParameter<double>("pid_threshold");
+    energy_em_over_total_threshold_ = conf.getParameter<double>("energy_em_over_total_threshold");
     filter_on_categories_ = conf.getParameter<std::vector<int> >("filter_on_categories");
 
     clusterToken_ =
@@ -33,6 +34,7 @@ public:
 private:
   bool filterByTracksterPID_;
   float pid_threshold_;
+  float energy_em_over_total_threshold_;
   std::vector<int> filter_on_categories_;
 
   edm::EDGetTokenT<std::vector<reco::HGCalMultiCluster> > clusterToken_;

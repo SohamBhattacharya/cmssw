@@ -18,7 +18,10 @@
 
 
 // system include files
+# include <algorithm>
+# include <list>
 # include <memory>
+# include <numeric>
 
 // user include files
 
@@ -540,158 +543,223 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //////////////////// Gsf electrons from TICL ////////////////////
     /////////////////////////////////////////////////////////////////
     edm::Handle <std::vector <reco::GsfElectron> > v_gsfEleFromTICL;
-    iEvent.getByToken(tok_gsfEleFromTICL, v_gsfEleFromTICL);
     
-    //edm::Handle <edm::MapOfVectors <std::string, double> > m_gsfEleFromTICLvarMap;
-    //iEvent.getByToken(tok_gsfEleFromTICLvarMap, m_gsfEleFromTICLvarMap);
-    
-    int nEleFromTICL = v_gsfEleFromTICL->size();
-    
-    std::vector <CLHEP::HepLorentzVector> v_gsfEleFromTICL_4mom;
-    
-    
-    for(int iEle = 0; iEle < nEleFromTICL; iEle++)
+    try
     {
-        reco::GsfElectron gsfEle = v_gsfEleFromTICL->at(iEle);
         
-        CLHEP::HepLorentzVector gsfEleFromTICL_4mom;
-        gsfEleFromTICL_4mom.setT(gsfEle.energy());
-        gsfEleFromTICL_4mom.setX(gsfEle.px());
-        gsfEleFromTICL_4mom.setY(gsfEle.py());
-        gsfEleFromTICL_4mom.setZ(gsfEle.pz());
-        
-        v_gsfEleFromTICL_4mom.push_back(gsfEleFromTICL_4mom);
+        iEvent.getByToken(tok_gsfEleFromTICL, v_gsfEleFromTICL);
     }
     
-    
-    // TICL-ele gen-matching
-    TMatrixD mat_gsfEleFromTICL_genEl_deltaR;
-    
-    std::vector <int> v_gsfEleFromTICL_matchedGenEl_idx;
-    
-    std::vector <double> v_gsfEleFromTICL_genEl_minDeltaR = Common::getMinDeltaR(
-        v_gsfEleFromTICL_4mom,
-        v_genEl_4mom,
-        mat_gsfEleFromTICL_genEl_deltaR,
-        v_gsfEleFromTICL_matchedGenEl_idx
-    );
-    
-    
-    for(int iEle = 0; iEle < nEleFromTICL; iEle++)
+    catch(...)
     {
-        reco::GsfElectron gsfEle = v_gsfEleFromTICL->at(iEle);
-        CLHEP::HepLorentzVector gsfEleFromTICL_4mom = v_gsfEleFromTICL_4mom.at(iEle);
+    }
+    
+    if(v_gsfEleFromTICL.isValid())
+    {
+        //edm::Handle <edm::MapOfVectors <std::string, double> > m_gsfEleFromTICLvarMap;
+        //iEvent.getByToken(tok_gsfEleFromTICLvarMap, m_gsfEleFromTICLvarMap);
+        
+        int nEleFromTICL = v_gsfEleFromTICL->size();
+        
+        std::vector <CLHEP::HepLorentzVector> v_gsfEleFromTICL_4mom;
         
         
-        if(gsfEle.pt() < el_minPt || fabs(gsfEle.eta()) < HGCal_minEta || fabs(gsfEle.eta()) > HGCal_maxEta)
+        for(int iEle = 0; iEle < nEleFromTICL; iEle++)
         {
-            continue;
+            reco::GsfElectron gsfEle = v_gsfEleFromTICL->at(iEle);
+            
+            CLHEP::HepLorentzVector gsfEleFromTICL_4mom;
+            gsfEleFromTICL_4mom.setT(gsfEle.energy());
+            gsfEleFromTICL_4mom.setX(gsfEle.px());
+            gsfEleFromTICL_4mom.setY(gsfEle.py());
+            gsfEleFromTICL_4mom.setZ(gsfEle.pz());
+            
+            v_gsfEleFromTICL_4mom.push_back(gsfEleFromTICL_4mom);
         }
         
         
-        double matchedGenEl_deltaR = v_gsfEleFromTICL_genEl_minDeltaR.at(iEle);
+        // TICL-ele gen-matching
+        TMatrixD mat_gsfEleFromTICL_genEl_deltaR;
         
-        if(matchedGenEl_deltaR > TICLeleGenMatchDR)
-        {
-            continue;
-        }
+        std::vector <int> v_gsfEleFromTICL_matchedGenEl_idx;
         
-        printf(
-            "[%llu] "
-            
-            "gsfEleFromTICL %d/%d: "
-            "E %0.4f, "
-            "pT %0.2f, "
-            "eta %+0.2f, "
-            
-            //"\n"
-            "superClus E %0.2f, "
-            //"R2.8 %0.2f, "
-            
-            "\n",
-            
-            eventNumber,
-            
-            iEle+1, nEleFromTICL,
-            gsfEle.energy(),
-            gsfEle.pt(),
-            gsfEle.eta(),
-            //gsfEle.ambiguous(),
-            
-            gsfEle.superCluster()->energy()
-            
-            //m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvar")[iEle]
+        std::vector <double> v_gsfEleFromTICL_genEl_minDeltaR = Common::getMinDeltaR(
+            v_gsfEleFromTICL_4mom,
+            v_genEl_4mom,
+            mat_gsfEleFromTICL_genEl_deltaR,
+            v_gsfEleFromTICL_matchedGenEl_idx
         );
         
-        int matchedGenEl_idx = v_gsfEleFromTICL_matchedGenEl_idx.at(iEle);
         
-        treeOutput->v_gsfEleFromTICL_genEl_minDeltaR.push_back(matchedGenEl_deltaR);
-        treeOutput->v_gsfEleFromTICL_nearestGenEl_idx.push_back(matchedGenEl_idx);
-        
-        double matchedGenEl_energy = -99;
-        double matchedGenEl_pT = -99;
-        double matchedGenEl_eta = -99;
-        double matchedGenEl_phi = -99;
-        
-        if(matchedGenEl_idx >= 0)
+        for(int iEle = 0; iEle < nEleFromTICL; iEle++)
         {
-            matchedGenEl_energy = v_genEl_4mom.at(matchedGenEl_idx).e();
-            matchedGenEl_pT = v_genEl_4mom.at(matchedGenEl_idx).perp();
-            matchedGenEl_eta = v_genEl_4mom.at(matchedGenEl_idx).eta();
-            matchedGenEl_phi = v_genEl_4mom.at(matchedGenEl_idx).phi();
+            reco::GsfElectron gsfEle = v_gsfEleFromTICL->at(iEle);
+            CLHEP::HepLorentzVector gsfEleFromTICL_4mom = v_gsfEleFromTICL_4mom.at(iEle);
+            
+            
+            if(gsfEle.pt() < el_minPt || fabs(gsfEle.eta()) < HGCal_minEta || fabs(gsfEle.eta()) > HGCal_maxEta)
+            {
+                continue;
+            }
+            
+            
+            double matchedGenEl_deltaR = v_gsfEleFromTICL_genEl_minDeltaR.at(iEle);
+            
+            if(matchedGenEl_deltaR > TICLeleGenMatchDR)
+            {
+                continue;
+            }
+            
+            printf(
+                "[%llu] "
+                
+                "gsfEleFromTICL %d/%d: "
+                "E %0.4f, "
+                "pT %0.2f, "
+                "eta %+0.2f, "
+                
+                "dR(w.r.t. gen) %0.4e, "
+                
+                //"\n"
+                "superClus E %0.2f, "
+                "superClus nClus %d, "
+                //"R2.8 %0.2f, "
+                
+                "\n",
+                
+                eventNumber,
+                
+                iEle+1, nEleFromTICL,
+                gsfEle.energy(),
+                gsfEle.pt(),
+                gsfEle.eta(),
+                
+                matchedGenEl_deltaR,
+                
+                gsfEle.superCluster()->energy(),
+                (int) gsfEle.superCluster()->clusters().size()
+                
+                //m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvar")[iEle]
+            );
+            
+            int matchedGenEl_idx = v_gsfEleFromTICL_matchedGenEl_idx.at(iEle);
+            
+            treeOutput->v_gsfEleFromTICL_genEl_minDeltaR.push_back(matchedGenEl_deltaR);
+            treeOutput->v_gsfEleFromTICL_nearestGenEl_idx.push_back(matchedGenEl_idx);
+            
+            double matchedGenEl_energy = -99;
+            double matchedGenEl_pT = -99;
+            double matchedGenEl_eta = -99;
+            double matchedGenEl_phi = -99;
+            
+            if(matchedGenEl_idx >= 0)
+            {
+                matchedGenEl_energy = v_genEl_4mom.at(matchedGenEl_idx).e();
+                matchedGenEl_pT = v_genEl_4mom.at(matchedGenEl_idx).perp();
+                matchedGenEl_eta = v_genEl_4mom.at(matchedGenEl_idx).eta();
+                matchedGenEl_phi = v_genEl_4mom.at(matchedGenEl_idx).phi();
+            }
+            
+            treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(matchedGenEl_energy);
+            treeOutput->v_gsfEleFromTICL_matchedGenEl_pT.push_back(matchedGenEl_pT);
+            treeOutput->v_gsfEleFromTICL_matchedGenEl_eta.push_back(matchedGenEl_eta);
+            treeOutput->v_gsfEleFromTICL_matchedGenEl_phi.push_back(matchedGenEl_phi);
+            
+            
+            treeOutput->v_gsfEleFromTICL_E.push_back(gsfEle.energy());
+            treeOutput->v_gsfEleFromTICL_px.push_back(gsfEle.px());
+            treeOutput->v_gsfEleFromTICL_py.push_back(gsfEle.py());
+            treeOutput->v_gsfEleFromTICL_pz.push_back(gsfEle.pz());
+            
+            treeOutput->v_gsfEleFromTICL_pT.push_back(gsfEle.pt());
+            treeOutput->v_gsfEleFromTICL_eta.push_back(gsfEle.eta());
+            treeOutput->v_gsfEleFromTICL_phi.push_back(gsfEle.phi());
+            
+            treeOutput->v_gsfEleFromTICL_ET.push_back(gsfEle.et());
+            
+            treeOutput->gsfEleFromTICL_n++;
+            
+            int gsfEle_superClus_nClus = gsfEle.superCluster()->clusters().size();
+            treeOutput->v_gsfEleFromTICL_superClus_nClus.push_back(gsfEle_superClus_nClus);
+            
+            edm::PtrVector <reco::CaloCluster> v_superClus_clus = gsfEle.superCluster()->clusters();
+            
+            std::vector <int> v_superClus_clus_sortedIdx(gsfEle_superClus_nClus);
+            std::iota(v_superClus_clus_sortedIdx.begin(), v_superClus_clus_sortedIdx.end(), 0);
+            
+            std::sort(
+                v_superClus_clus_sortedIdx.begin(), v_superClus_clus_sortedIdx.end(),
+                [&](int idx1, int idx2)
+                {
+                    return (v_superClus_clus[idx1].get()->energy() > v_superClus_clus[idx2].get()->energy());
+                }
+            );
+            
+            std::vector <double> v_gsfEleFromTICL_superClus_clus_eleIdx;
+            std::vector <double> v_gsfEleFromTICL_superClus_clus_idx;
+            std::vector <double> v_gsfEleFromTICL_superClus_clus_E;
+            std::vector <double> v_gsfEleFromTICL_superClus_clus_ET;
+            
+            int iClus = -1;
+            
+            for(auto idx : v_superClus_clus_sortedIdx)
+            {
+                iClus++;
+                
+                const reco::CaloCluster cluster = *v_superClus_clus[idx].get();
+                
+                v_gsfEleFromTICL_superClus_clus_eleIdx.push_back(treeOutput->gsfEleFromTICL_n-1);
+                v_gsfEleFromTICL_superClus_clus_idx.push_back(iClus);
+                v_gsfEleFromTICL_superClus_clus_E.push_back(cluster.energy());
+                v_gsfEleFromTICL_superClus_clus_ET.push_back(cluster.energy() * std::sin(cluster.position().theta()));
+            }
+            
+            treeOutput->vv_gsfEleFromTICL_superClus_clus_eleIdx.push_back(v_gsfEleFromTICL_superClus_clus_eleIdx);
+            treeOutput->vv_gsfEleFromTICL_superClus_clus_idx.push_back(v_gsfEleFromTICL_superClus_clus_idx);
+            treeOutput->vv_gsfEleFromTICL_superClus_clus_E.push_back(v_gsfEleFromTICL_superClus_clus_E);
+            treeOutput->vv_gsfEleFromTICL_superClus_clus_ET.push_back(v_gsfEleFromTICL_superClus_clus_ET);
+            
+            printf("SC clus E (%d): ", gsfEle_superClus_nClus);
+            iClus = -1;
+            for(auto E : treeOutput->vv_gsfEleFromTICL_superClus_clus_E.back())
+            {
+                iClus++;
+                printf("(%d) %0.2f, ", iClus+1, E);
+            }
+            printf("\n");
+            
+            //treeOutput->v_gsfEleFromTICL_R2p8.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvarProducer")[iEle]);
+            //
+            //treeOutput->v_gsfEleFromTICL_sigma2uu.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2UU")[iEle]);
+            //treeOutput->v_gsfEleFromTICL_sigma2vv.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2VV")[iEle]);
+            //treeOutput->v_gsfEleFromTICL_sigma2ww.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2WW")[iEle]);
+            
+            
+            //std::vector <DetId> v_SC_seedId = gsfEle.superCluster()->getSeedIds();
+            //
+            //printf("SC_nCluster %d, SC_nSeed %d \n", (int) gsfEle.superCluster()->clusters().size(), (int) v_SC_seedId.size());
+            //printf("SC_seedIds: ");
+            //
+            //for(int iSeed = 0; iSeed < (int) v_SC_seedId.size(); iSeed++)
+            //{
+            //    printf("[%u] ", v_SC_seedId.at(iSeed).rawId());
+            //}
+            //
+            //printf("\n");
+            
+            //edm::PtrVector <reco::CaloCluster> v_superClus_clus = gsfEle.superCluster()->clusters();
+            //
+            //printf("SC_clusterIds: ");
+            //
+            //for(int iCluster = 0; iCluster < (int) v_superClus_clus.size(); iCluster++)
+            //{
+            //    const reco::CaloCluster *cluster = v_superClus_clus[iCluster].get();
+            //    
+            //    printf("[%u] ", cluster->seed().rawId());
+            //}
+            //
+            //printf("\n");
         }
-        
-        treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(matchedGenEl_energy);
-        treeOutput->v_gsfEleFromTICL_matchedGenEl_pT.push_back(matchedGenEl_pT);
-        treeOutput->v_gsfEleFromTICL_matchedGenEl_eta.push_back(matchedGenEl_eta);
-        treeOutput->v_gsfEleFromTICL_matchedGenEl_phi.push_back(matchedGenEl_phi);
-        
-        
-        treeOutput->v_gsfEleFromTICL_E.push_back(gsfEle.energy());
-        treeOutput->v_gsfEleFromTICL_px.push_back(gsfEle.px());
-        treeOutput->v_gsfEleFromTICL_py.push_back(gsfEle.py());
-        treeOutput->v_gsfEleFromTICL_pz.push_back(gsfEle.pz());
-        
-        treeOutput->v_gsfEleFromTICL_pT.push_back(gsfEle.pt());
-        treeOutput->v_gsfEleFromTICL_eta.push_back(gsfEle.eta());
-        treeOutput->v_gsfEleFromTICL_phi.push_back(gsfEle.phi());
-        
-        treeOutput->v_gsfEleFromTICL_ET.push_back(gsfEle.et());
-        
-        treeOutput->gsfEleFromTICL_n++;
-        
-        
-        //treeOutput->v_gsfEleFromTICL_R2p8.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronRvar_HGCalElectronRvarProducer")[iEle]);
-        //
-        //treeOutput->v_gsfEleFromTICL_sigma2uu.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2UU")[iEle]);
-        //treeOutput->v_gsfEleFromTICL_sigma2vv.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2VV")[iEle]);
-        //treeOutput->v_gsfEleFromTICL_sigma2ww.push_back(m_gsfEleFromTICLvarMap->find("HGCalElectronPCA_HGCalElectronPCAProducerSigma2WW")[iEle]);
-        
-        
-        //std::vector <DetId> v_SC_seedId = gsfEle.superCluster()->getSeedIds();
-        //
-        //printf("SC_nCluster %d, SC_nSeed %d \n", (int) gsfEle.superCluster()->clusters().size(), (int) v_SC_seedId.size());
-        //printf("SC_seedIds: ");
-        //
-        //for(int iSeed = 0; iSeed < (int) v_SC_seedId.size(); iSeed++)
-        //{
-        //    printf("[%u] ", v_SC_seedId.at(iSeed).rawId());
-        //}
-        //
-        //printf("\n");
-        
-        //edm::PtrVector <reco::CaloCluster> v_superClus_clus = gsfEle.superCluster()->clusters();
-        //
-        //printf("SC_clusterIds: ");
-        //
-        //for(int iCluster = 0; iCluster < (int) v_superClus_clus.size(); iCluster++)
-        //{
-        //    const reco::CaloCluster *cluster = v_superClus_clus[iCluster].get();
-        //    
-        //    printf("[%u] ", cluster->seed().rawId());
-        //}
-        //
-        //printf("\n");
     }
     
     
@@ -826,115 +894,126 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //////////////////// Photons from TICL ////////////////////
     ///////////////////////////////////////////////////////////
     edm::Handle <std::vector <reco::Photon> > v_phoFromTICL;
-    iEvent.getByToken(tok_phoFromTICL, v_phoFromTICL);
     
-    int nPhoFromTICL = v_phoFromTICL->size();
-    
-    std::vector <CLHEP::HepLorentzVector> v_phoFromTICL_4mom;
-    
-    
-    for(int iPho = 0; iPho < nPhoFromTICL; iPho++)
+    try
     {
-        reco::Photon pho = v_phoFromTICL->at(iPho);
-        
-        CLHEP::HepLorentzVector phoFromTICL_4mom;
-        phoFromTICL_4mom.setT(pho.energy());
-        phoFromTICL_4mom.setX(pho.px());
-        phoFromTICL_4mom.setY(pho.py());
-        phoFromTICL_4mom.setZ(pho.pz());
-        
-        v_phoFromTICL_4mom.push_back(phoFromTICL_4mom);
+        iEvent.getByToken(tok_phoFromTICL, v_phoFromTICL);
     }
     
-    
-    // TICL-pho gen-matching
-    TMatrixD mat_phoFromTICL_genPh_deltaR;
-    
-    std::vector <int> v_phoFromTICL_matchedGenPh_idx;
-    
-    std::vector <double> v_phoFromTICL_genPh_minDeltaR = Common::getMinDeltaR(
-        v_phoFromTICL_4mom,
-        v_genPh_4mom,
-        mat_phoFromTICL_genPh_deltaR,
-        v_phoFromTICL_matchedGenPh_idx
-    );
-    
-    
-    for(int iPho = 0; iPho < nPhoFromTICL; iPho++)
+    catch(...)
     {
-        reco::Photon pho = v_phoFromTICL->at(iPho);
-        CLHEP::HepLorentzVector phoFromTICL_4mom = v_phoFromTICL_4mom.at(iPho);
+    }
+    
+    if(v_phoFromTICL.isValid())
+    {
+        int nPhoFromTICL = v_phoFromTICL->size();
+        
+        std::vector <CLHEP::HepLorentzVector> v_phoFromTICL_4mom;
         
         
-        if(pho.pt() < el_minPt || fabs(pho.eta()) < HGCal_minEta || fabs(pho.eta()) > HGCal_maxEta)
+        for(int iPho = 0; iPho < nPhoFromTICL; iPho++)
         {
-            continue;
+            reco::Photon pho = v_phoFromTICL->at(iPho);
+            
+            CLHEP::HepLorentzVector phoFromTICL_4mom;
+            phoFromTICL_4mom.setT(pho.energy());
+            phoFromTICL_4mom.setX(pho.px());
+            phoFromTICL_4mom.setY(pho.py());
+            phoFromTICL_4mom.setZ(pho.pz());
+            
+            v_phoFromTICL_4mom.push_back(phoFromTICL_4mom);
         }
         
         
-        double matchedGenPh_deltaR = v_phoFromTICL_genPh_minDeltaR.at(iPho);
+        // TICL-pho gen-matching
+        TMatrixD mat_phoFromTICL_genPh_deltaR;
         
-        if(matchedGenPh_deltaR > TICLphoGenMatchDR)
-        {
-            continue;
-        }
+        std::vector <int> v_phoFromTICL_matchedGenPh_idx;
         
-        printf(
-            "[%llu] "
-            
-            "phoFromTICL %d/%d: "
-            "E %0.4f, "
-            "pT %0.2f, "
-            "eta %+0.2f, "
-            "superClus E %0.2f, "
-            
-            "\n",
-            
-            eventNumber,
-            
-            iPho+1, nPhoFromTICL,
-            pho.energy(),
-            pho.pt(),
-            pho.eta(),
-            pho.superCluster()->energy()
+        std::vector <double> v_phoFromTICL_genPh_minDeltaR = Common::getMinDeltaR(
+            v_phoFromTICL_4mom,
+            v_genPh_4mom,
+            mat_phoFromTICL_genPh_deltaR,
+            v_phoFromTICL_matchedGenPh_idx
         );
         
-        int matchedGenPh_idx = v_phoFromTICL_matchedGenPh_idx.at(iPho);
         
-        treeOutput->v_phoFromTICL_genPh_minDeltaR.push_back(matchedGenPh_deltaR);
-        treeOutput->v_phoFromTICL_nearestGenPh_idx.push_back(matchedGenPh_idx);
-        
-        double matchedGenPh_energy = -99;
-        double matchedGenPh_pT = -99;
-        double matchedGenPh_eta = -99;
-        double matchedGenPh_phi = -99;
-        
-        if(matchedGenPh_idx >= 0)
+        for(int iPho = 0; iPho < nPhoFromTICL; iPho++)
         {
-            matchedGenPh_energy = v_genPh_4mom.at(matchedGenPh_idx).e();
-            matchedGenPh_pT = v_genPh_4mom.at(matchedGenPh_idx).perp();
-            matchedGenPh_eta = v_genPh_4mom.at(matchedGenPh_idx).eta();
-            matchedGenPh_phi = v_genPh_4mom.at(matchedGenPh_idx).phi();
+            reco::Photon pho = v_phoFromTICL->at(iPho);
+            CLHEP::HepLorentzVector phoFromTICL_4mom = v_phoFromTICL_4mom.at(iPho);
+            
+            
+            if(pho.pt() < el_minPt || fabs(pho.eta()) < HGCal_minEta || fabs(pho.eta()) > HGCal_maxEta)
+            {
+                continue;
+            }
+            
+            
+            double matchedGenPh_deltaR = v_phoFromTICL_genPh_minDeltaR.at(iPho);
+            
+            if(matchedGenPh_deltaR > TICLphoGenMatchDR)
+            {
+                continue;
+            }
+            
+            printf(
+                "[%llu] "
+                
+                "phoFromTICL %d/%d: "
+                "E %0.4f, "
+                "pT %0.2f, "
+                "eta %+0.2f, "
+                "superClus E %0.2f, "
+                
+                "\n",
+                
+                eventNumber,
+                
+                iPho+1, nPhoFromTICL,
+                pho.energy(),
+                pho.pt(),
+                pho.eta(),
+                pho.superCluster()->energy()
+            );
+            
+            int matchedGenPh_idx = v_phoFromTICL_matchedGenPh_idx.at(iPho);
+            
+            treeOutput->v_phoFromTICL_genPh_minDeltaR.push_back(matchedGenPh_deltaR);
+            treeOutput->v_phoFromTICL_nearestGenPh_idx.push_back(matchedGenPh_idx);
+            
+            double matchedGenPh_energy = -99;
+            double matchedGenPh_pT = -99;
+            double matchedGenPh_eta = -99;
+            double matchedGenPh_phi = -99;
+            
+            if(matchedGenPh_idx >= 0)
+            {
+                matchedGenPh_energy = v_genPh_4mom.at(matchedGenPh_idx).e();
+                matchedGenPh_pT = v_genPh_4mom.at(matchedGenPh_idx).perp();
+                matchedGenPh_eta = v_genPh_4mom.at(matchedGenPh_idx).eta();
+                matchedGenPh_phi = v_genPh_4mom.at(matchedGenPh_idx).phi();
+            }
+            
+            treeOutput->v_phoFromTICL_matchedGenPh_E.push_back(matchedGenPh_energy);
+            treeOutput->v_phoFromTICL_matchedGenPh_pT.push_back(matchedGenPh_pT);
+            treeOutput->v_phoFromTICL_matchedGenPh_eta.push_back(matchedGenPh_eta);
+            treeOutput->v_phoFromTICL_matchedGenPh_phi.push_back(matchedGenPh_phi);
+            
+            
+            treeOutput->v_phoFromTICL_E.push_back(pho.energy());
+            treeOutput->v_phoFromTICL_px.push_back(pho.px());
+            treeOutput->v_phoFromTICL_py.push_back(pho.py());
+            treeOutput->v_phoFromTICL_pz.push_back(pho.pz());
+            
+            treeOutput->v_phoFromTICL_pT.push_back(pho.pt());
+            treeOutput->v_phoFromTICL_eta.push_back(pho.eta());
+            treeOutput->v_phoFromTICL_phi.push_back(pho.phi());
+            
+            treeOutput->v_phoFromTICL_ET.push_back(pho.et());
+            
+            treeOutput->phoFromTICL_n++;
         }
-        
-        treeOutput->v_phoFromTICL_matchedGenPh_E.push_back(matchedGenPh_energy);
-        treeOutput->v_phoFromTICL_matchedGenPh_pT.push_back(matchedGenPh_pT);
-        treeOutput->v_phoFromTICL_matchedGenPh_eta.push_back(matchedGenPh_eta);
-        treeOutput->v_phoFromTICL_matchedGenPh_phi.push_back(matchedGenPh_phi);
-        
-        
-        treeOutput->v_phoFromTICL_E.push_back(pho.energy());
-        treeOutput->v_phoFromTICL_px.push_back(pho.px());
-        treeOutput->v_phoFromTICL_py.push_back(pho.py());
-        treeOutput->v_phoFromTICL_pz.push_back(pho.pz());
-        
-        treeOutput->v_phoFromTICL_pT.push_back(pho.pt());
-        treeOutput->v_phoFromTICL_eta.push_back(pho.eta());
-        treeOutput->v_phoFromTICL_phi.push_back(pho.phi());
-        
-        treeOutput->v_phoFromTICL_ET.push_back(pho.et());
-        
-        treeOutput->phoFromTICL_n++;
     }
     
     
