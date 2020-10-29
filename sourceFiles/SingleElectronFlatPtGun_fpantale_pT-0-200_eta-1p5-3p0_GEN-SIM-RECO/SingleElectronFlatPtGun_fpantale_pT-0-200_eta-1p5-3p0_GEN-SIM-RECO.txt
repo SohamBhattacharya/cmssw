@@ -1,0 +1,8 @@
+file:/eos/cms/store/group/phys_egamma/fpantale/output_GEN-SIM-RECO_01.root
+file:/eos/cms/store/group/phys_egamma/fpantale/output_GEN-SIM-RECO_02.root
+file:/eos/cms/store/group/phys_egamma/fpantale/output_GEN-SIM-RECO_03.root
+file:/eos/cms/store/group/phys_egamma/fpantale/output_GEN-SIM-RECO_04.root
+file:/eos/cms/store/group/phys_egamma/fpantale/output_GEN-SIM-RECO_05.root
+file:/eos/cms/store/group/phys_egamma/fpantale/output_GEN-SIM-RECO_06.root
+file:/eos/cms/store/group/phys_egamma/fpantale/output_GEN-SIM-RECO_07.root
+file:/eos/cms/store/group/phys_egamma/fpantale/output_GEN-SIM-RECO_08.root

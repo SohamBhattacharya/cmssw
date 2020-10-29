@@ -4,3 +4,11 @@ __init__.py
 .#*
 #*#
 *~
+*.root
+*condorJobs*
+*logs*
+*.fuse
+*.pdf
+*.png
+*temp/*
+*plots/*
