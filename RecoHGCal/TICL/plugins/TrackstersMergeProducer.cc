@@ -10,6 +10,7 @@
 #include "DataFormats/HGCalReco/interface/TICLLayerTile.h"
 #include "DataFormats/HGCalReco/interface/Trackster.h"
 #include "DataFormats/HGCalReco/interface/TICLSeedingRegion.h"
+#include "DataFormats/TrackReco/interface/HitPattern.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "RecoLocalCalo/HGCalRecAlgos/interface/RecHitTools.h"
 #include "RecoHGCal/TICL/plugins/GlobalCache.h"
@@ -47,7 +48,7 @@ private:
   const edm::EDGetTokenT<std::vector<TICLSeedingRegion>> seedingTrk_token_;
   const edm::EDGetTokenT<std::vector<reco::CaloCluster>> clusters_token_;
   const edm::EDGetTokenT<std::vector<reco::Track>> tracks_token_;
-  const edm::ESGetToken<CaloGeometry, CaloGeometryRecord> geometry_token_;
+  //const edm::ESGetToken<CaloGeometry, CaloGeometryRecord> geometry_token_;
   const bool optimiseAcrossTracksters_;
   const int eta_bin_window_;
   const int phi_bin_window_;
@@ -87,7 +88,7 @@ TrackstersMergeProducer::TrackstersMergeProducer(const edm::ParameterSet &ps, co
       seedingTrk_token_(consumes<std::vector<TICLSeedingRegion>>(ps.getParameter<edm::InputTag>("seedingTrk"))),
       clusters_token_(consumes<std::vector<reco::CaloCluster>>(ps.getParameter<edm::InputTag>("layer_clusters"))),
       tracks_token_(consumes<std::vector<reco::Track>>(ps.getParameter<edm::InputTag>("tracks"))),
-      geometry_token_(esConsumes<CaloGeometry, CaloGeometryRecord>()),
+      //geometry_token_(esConsumes<CaloGeometry, CaloGeometryRecord>()),
       optimiseAcrossTracksters_(ps.getParameter<bool>("optimiseAcrossTracksters")),
       eta_bin_window_(ps.getParameter<int>("eta_bin_window")),
       phi_bin_window_(ps.getParameter<int>("phi_bin_window")),
@@ -163,8 +164,9 @@ void TrackstersMergeProducer::dumpTrackster(const Trackster &t) const {
 }
 
 void TrackstersMergeProducer::produce(edm::Event &evt, const edm::EventSetup &es) {
-  edm::ESHandle<CaloGeometry> geom = es.getHandle(geometry_token_);
-  rhtools_.setGeometry(*geom);
+  //edm::ESHandle<CaloGeometry> geom = es.getHandle(geometry_token_);
+  //rhtools_.setGeometry(*geom);
+  rhtools_.getEventSetup(es);
   auto resultTrackstersMerged = std::make_unique<std::vector<Trackster>>();
   auto resultCandidates = std::make_unique<std::vector<TICLCandidate>>();
 
@@ -512,7 +514,8 @@ void TrackstersMergeProducer::produce(edm::Event &evt, const edm::EventSetup &es
   for (unsigned i = 0; i < tracks.size(); ++i) {
     auto const &track = tracks[i];
     if (track.pt() > track_min_pt_ and track.quality(reco::TrackBase::highPurity) and
-        track.missingOuterHits() < track_max_missing_outerhits_ and std::abs(track.outerEta()) > track_min_eta_ and
+        //track.missingOuterHits() < track_max_missing_outerhits_ and std::abs(track.outerEta()) > track_min_eta_ and
+        track.hitPattern().numberOfLostHits(reco::HitPattern::MISSING_OUTER_HITS) < track_max_missing_outerhits_ and std::abs(track.outerEta()) > track_min_eta_ and
         std::abs(track.outerEta()) < track_max_eta_ and usedSeeds[i] == false) {
       // emit a charged hadron
       TICLCandidate tmpCandidate;

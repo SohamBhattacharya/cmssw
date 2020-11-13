@@ -70,8 +70,9 @@ void PatternRecognitionbyCA<TILES>::makeTracksters(
 
   edm::ESHandle<CaloGeometry> geom;
   edm::EventSetup const &es = input.es;
-  es.get<CaloGeometryRecord>().get(geom);
-  rhtools_.setGeometry(*geom);
+  //es.get<CaloGeometryRecord>().get(geom);
+  //rhtools_.setGeometry(*geom);
+  rhtools_.getEventSetup(es);
 
   theGraph_->setVerbosity(PatternRecognitionAlgoBaseT<TILES>::algo_verbosity_);
   theGraph_->clear();

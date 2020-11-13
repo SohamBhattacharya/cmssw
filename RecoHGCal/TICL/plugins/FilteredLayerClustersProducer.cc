@@ -31,7 +31,7 @@ public:
 private:
   edm::EDGetTokenT<std::vector<reco::CaloCluster>> clusters_token_;
   edm::EDGetTokenT<std::vector<float>> clustersMask_token_;
-  edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometry_token_;
+  //edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometry_token_;
   std::string clusterFilter_;
   std::string iteration_label_;
   std::unique_ptr<const ticl::ClusterFilterBase> theFilter_;
@@ -43,7 +43,7 @@ DEFINE_FWK_MODULE(FilteredLayerClustersProducer);
 FilteredLayerClustersProducer::FilteredLayerClustersProducer(const edm::ParameterSet& ps) {
   clusters_token_ = consumes<std::vector<reco::CaloCluster>>(ps.getParameter<edm::InputTag>("LayerClusters"));
   clustersMask_token_ = consumes<std::vector<float>>(ps.getParameter<edm::InputTag>("LayerClustersInputMask"));
-  caloGeometry_token_ = esConsumes<CaloGeometry, CaloGeometryRecord, edm::Transition::BeginRun>();
+  //caloGeometry_token_ = esConsumes<CaloGeometry, CaloGeometryRecord, edm::Transition::BeginRun>();
   clusterFilter_ = ps.getParameter<std::string>("clusterFilter");
   theFilter_ = ClusterFilterFactory::get()->create(clusterFilter_, ps);
   iteration_label_ = ps.getParameter<std::string>("iteration_label");
@@ -51,8 +51,8 @@ FilteredLayerClustersProducer::FilteredLayerClustersProducer(const edm::Paramete
 }
 
 void FilteredLayerClustersProducer::beginRun(edm::Run const&, edm::EventSetup const& es) {
-  edm::ESHandle<CaloGeometry> geom = es.getHandle(caloGeometry_token_);
-  rhtools_.setGeometry(*geom);
+  //edm::ESHandle<CaloGeometry> geom = es.getHandle(caloGeometry_token_);
+  //rhtools_.setGeometry(*geom);
 }
 
 void FilteredLayerClustersProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
