@@ -19,15 +19,13 @@ filteredLayerClustersTrk = _filteredLayerClustersProducer.clone(
 # CA - PATTERN RECOGNITION
 
 ticlTrackstersTrk = _trackstersProducer.clone(
-  filtered_mask = cms.InputTag("filteredLayerClustersTrk", "Trk"),
+  filtered_mask = "filteredLayerClustersTrk:Trk",
   seeding_regions = "ticlSeedingTrk",
   original_mask = 'ticlTrackstersEM',
   filter_on_categories = [2, 4], # filter muons and charged hadrons
   pid_threshold = 0.0,
-  missing_layers = 3,
-  min_clusters_per_ntuplet = 10,
-#  min_cos_theta = 0.978, # same as em
-#  min_cos_pointing = 0.9, # same as em
+  skip_layers = 3,
+  min_layers_per_trackster = 10,
   min_cos_theta = 0.866, # ~30 degrees
   min_cos_pointing = 0.798, # ~ 37 degrees
   max_delta_time = -1.,

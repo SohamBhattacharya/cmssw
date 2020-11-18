@@ -19,14 +19,14 @@ filteredLayerClustersHAD = _filteredLayerClustersProducer.clone(
 # CA - PATTERN RECOGNITION
 
 ticlTrackstersHAD = _trackstersProducer.clone(
-    filtered_mask = cms.InputTag("filteredLayerClustersHAD", "HAD"),
+    filtered_mask = "filteredLayerClustersHAD:HAD",
     original_mask = 'ticlTrackstersTrk',
     seeding_regions = "ticlSeedingGlobal",
     # For the moment we mask everything w/o requirements since we are last
 #    filter_on_categories = [5], # filter neutral hadrons
 #    pid_threshold = 0.7,
-    missing_layers = 1,
-    min_clusters_per_ntuplet = 12,
+    skip_layers = 1,
+    min_layers_per_trackster = 12,
     min_cos_theta = 0.866,    # ~30 degrees
     min_cos_pointing = 0.819, # ~35 degrees
     max_delta_time = -1,
