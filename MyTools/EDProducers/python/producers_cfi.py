@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 
 HGCalElectronClusIsoProducer = cms.EDProducer(
-    "HGCalElectronClusIsoProducer",
+    "HGCalElectronClusterIsoProducer",
     
     instanceName = cms.string("HGCalElectronClusIso"),
     
@@ -25,7 +25,7 @@ HGCalElectronClusIsoProducer = cms.EDProducer(
 
 
 HGCalPhotonClusIsoProducer = cms.EDProducer(
-    "HGCalPhotonClusIsoProducer",
+    "HGCalPhotonClusterIsoProducer",
     
     instanceName = cms.string("HGCalPhotonClusIso"),
     

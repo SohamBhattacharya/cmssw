@@ -27,6 +27,13 @@ process.load('Configuration.Geometry.GeometryExtended2026D49_cff')
 import FWCore.ParameterSet.VarParsing as VarParsing
 options = VarParsing.VarParsing("analysis")
 
+options.register("debugFile",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Create debug file" # Description
+)
+
 options.parseArguments()
 
 
@@ -79,7 +86,7 @@ process.HGCalVar_seq = cms.Sequence(
     process.HGCalElectronClusIso *
     process.HGCalElectronHoverE *
     process.HGCalElectronRvar *
-    process.HGCalElectronPCA *
+    process.HGCalElectronPCA
 )
 
 # Output
@@ -123,3 +130,14 @@ process.p = cms.Path(
 
 process.schedule = cms.Schedule()
 process.schedule.insert(0, process.p)
+
+
+# Debug
+if (options.debugFile) :
+    
+    process.out = cms.OutputModule("PoolOutputModule",
+        fileName = cms.untracked.string("debug.root")
+    )
+    
+    process.output_step = cms.EndPath(process.out)
+    process.schedule.extend([process.output_step])
