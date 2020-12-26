@@ -89,6 +89,15 @@ process.HGCalVar_seq = cms.Sequence(
     process.HGCalElectronPCA
 )
 
+
+# EB photon ID
+from MyTools.EDProducers.photonIDProducerEB_cfi import *
+process.photonPhaseIImvaIdEB = photonMVAIDProducerEB.clone(
+    debug = False,
+)
+process.photonID_seq = cms.Sequence(process.photonPhaseIImvaIdEB)
+
+
 # Output
 process.TFileService = cms.Service(
     "TFileService",
@@ -124,7 +133,8 @@ process.PixelCPEGenericESProducer.Upgrade = cms.bool(True)
 
 process.p = cms.Path(
     process.reco_seq *
-    process.HGCalVar_seq
+    process.HGCalVar_seq *
+    process.photonID_seq
 )
 
 
