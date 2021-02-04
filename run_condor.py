@@ -222,9 +222,9 @@ if (__name__ == "__main__") :
         
         cmsRun_cmd += "\t %s" %(args.cmsRunOptions) + lineBreakStr
         
-        cmsRun_cmd += "\t rerunTICL=1" + lineBreakStr
-        cmsRun_cmd += "\t modTICLele=1" + lineBreakStr
-        cmsRun_cmd += "\t modTICLeleWithRerunTICL=1" + lineBreakStr
+        #cmsRun_cmd += "\t rerunTICL=1" + lineBreakStr
+        #cmsRun_cmd += "\t modTICLele=1" + lineBreakStr
+        #cmsRun_cmd += "\t modTICLeleWithRerunTICL=1" + lineBreakStr
         
         cmsRun_cmd += "\t storeRecHit=0" + lineBreakStr
         cmsRun_cmd += "\t storeSimHit=0" + lineBreakStr

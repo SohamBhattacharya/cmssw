@@ -211,7 +211,8 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
         
         double Rvar = showerShapeHelper_.getRvar(
             cylinderR_,
-            ele.superCluster()->energy()
+            ele.superCluster()->rawEnergy(),
+            true
         );
         
         if(debug_)

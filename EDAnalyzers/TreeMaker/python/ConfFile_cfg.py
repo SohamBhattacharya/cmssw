@@ -83,10 +83,10 @@ options.register("outFileNumber",
 )
 
 options.register("eventRange",
-    "", # Default value
-    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    [], # Default value
+    VarParsing.VarParsing.multiplicity.list, # singleton or list
     VarParsing.VarParsing.varType.string, # string, int, or float
-    "Syntax: Run1:Event1-Run2:Event2 (includes both)" # Description
+    "Syntax: Run1:Event1-Run2:Event2 Run3:Event3-Run4:Event4(includes both)" # Description
 )
 
 options.register("debugFile",
@@ -718,6 +718,7 @@ setattr(
 )
 
 TICLeleVar_task.add(getattr(process, prodLabel))
+l_mapProdVars_TICLele.append(cms.InputTag(prodLabel, getattr(process, prodLabel).instanceName.value(), processName))
 l_var_TICLele.append("%s_%s" %(prodLabel, getattr(process, prodLabel).instanceName.value()))
 
 
@@ -734,6 +735,7 @@ setattr(
 )
 
 TICLphoVar_task.add(getattr(process, prodLabel))
+l_mapProdVars_TICLpho.append(cms.InputTag(prodLabel, getattr(process, prodLabel).instanceName.value(), processName))
 l_var_TICLpho.append("%s_%s" %(prodLabel, getattr(process, prodLabel).instanceName.value()))
 
 

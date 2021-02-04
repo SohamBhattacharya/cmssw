@@ -112,6 +112,7 @@ HGCalElectronRvarProducer = cms.EDProducer(
     electrons = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl"),
     
     PFRecHits = cms.InputTag("particleFlowRecHitHGC"),
+    #PFRecHits = cms.InputTag("particleFlowRecHitHGC", "Cleaned", "Demo"),
     HGCEERecHits = cms.untracked.InputTag("HGCalRecHit", "HGCEERecHits"),
     HGCHEFRecHits = cms.untracked.InputTag("HGCalRecHit", "HGCHEFRecHits"),
     HGCHEBRecHits = cms.untracked.InputTag("HGCalRecHit", "HGCHEBRecHits"),

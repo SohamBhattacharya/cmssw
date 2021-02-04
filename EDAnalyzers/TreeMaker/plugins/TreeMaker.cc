@@ -2222,11 +2222,20 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         treeOutput->v_gsfEleFromTICL_dr03TkSumPt.push_back(gsfEle.dr03TkSumPt());
         
-        treeOutput->v_gsfEleFromTICL_superClus_E.push_back(gsfEle.superCluster()->energy());
-        treeOutput->v_gsfEleFromTICL_superClus_rawE.push_back(gsfEle.superCluster()->rawEnergy());
+        math::XYZPoint superClus_xyz = gsfEle.superCluster()->position();
         
+        treeOutput->v_gsfEleFromTICL_superClus_E.push_back(gsfEle.superCluster()->energy());
+        treeOutput->v_gsfEleFromTICL_superClus_ET.push_back(gsfEle.superCluster()->energy() * std::sin(superClus_xyz.theta()));
+        treeOutput->v_gsfEleFromTICL_superClus_rawE.push_back(gsfEle.superCluster()->rawEnergy());
+        treeOutput->v_gsfEleFromTICL_superClus_rawET.push_back(gsfEle.superCluster()->rawEnergy() * std::sin(superClus_xyz.theta()));
+        
+        treeOutput->v_gsfEleFromTICL_superClus_theta.push_back(superClus_xyz.theta());
         treeOutput->v_gsfEleFromTICL_superClus_eta.push_back(gsfEle.superCluster()->eta());
         treeOutput->v_gsfEleFromTICL_superClus_phi.push_back(gsfEle.superCluster()->phi());
+        treeOutput->v_gsfEleFromTICL_superClus_x.push_back(superClus_xyz.x());
+        treeOutput->v_gsfEleFromTICL_superClus_y.push_back(superClus_xyz.y());
+        treeOutput->v_gsfEleFromTICL_superClus_z.push_back(superClus_xyz.z());
+        treeOutput->v_gsfEleFromTICL_superClus_r.push_back(std::sqrt(superClus_xyz.mag2()));
         
         treeOutput->v_gsfEleFromTICL_superClus_etaWidth.push_back(gsfEle.superCluster()->etaWidth());
         treeOutput->v_gsfEleFromTICL_superClus_phiWidth.push_back(gsfEle.superCluster()->phiWidth());
@@ -2238,7 +2247,6 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->v_gsfEleFromTICL_superClus_clusMaxDR.push_back(std::sqrt(p_clusMaxDR.first));
         
         std::vector <std::pair <DetId, float> > v_superClus_HandF = gsfEle.superCluster()->hitsAndFractions();
-        math::XYZPoint superClus_xyz = gsfEle.superCluster()->position();
         
         std::vector <std::vector <std::pair <DetId, float> > > vv_superClus_layerHandF = Common::getLayerwiseHandF(
             v_superClus_HandF,
@@ -2365,10 +2373,18 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             "[%llu] "
             
             "gsfEleFromTICL %d/%d: "
-            "E %0.4f, "
-            "pT %0.2f, "
-            "eta %+0.2f, "
-            "dr03TkSumPt %0.4f, "
+            "E %0.8f, "
+            "pT %0.8f, "
+            "eta %+0.8f, "
+            "SCrawE %0.10f, "
+            "SCeta %0.8f, "
+            //"dr03TkSumPt %0.4f, "
+            "maxDR %0.8f, "
+            "R2p8 %0.8f, "
+            "sUU %0.8f, "
+            "sVV %0.8f, "
+            "sWW %0.8f, "
+            
             //"ambiguous %d, "
             
             //"\n"
@@ -2399,7 +2415,15 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             gsfEle.energy(),
             gsfEle.pt(),
             gsfEle.eta(),
-            gsfEle.dr03TkSumPt()
+            gsfEle.superCluster()->rawEnergy(),
+            gsfEle.superCluster()->eta(),
+            //gsfEle.dr03TkSumPt(),
+            std::sqrt(p_clusMaxDR.first),
+            m_gsfEleFromTICLvarMap->find("TICLeleRvarProducerR2p8En0p0_HGCalElectronRvar")[iEle],
+            std::sqrt(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p8En0p0_HGCalElectronPCASigma2UU")[iEle]),
+            std::sqrt(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p8En0p0_HGCalElectronPCASigma2UU")[iEle]),
+            std::sqrt(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p8En0p0_HGCalElectronPCASigma2UU")[iEle])
+            
             //gsfEle.ambiguous(),
             
             //gsfEle.superCluster()->energy(),
@@ -2966,6 +2990,12 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         for(auto &key : v_gsfEleFromTICLvar)
         {
+            if(m_gsfEleFromTICLvarMap->find(key) == m_gsfEleFromTICLvarMap->emptyRange())
+            {
+                printf("Error: Cannot find key \"%s\" in gsfEleFromTICL variable map. \n", key.c_str());
+                exit(EXIT_FAILURE);
+            }
+            
             double val = m_gsfEleFromTICLvarMap->find(key)[iEle];
             //printf("Storing \"%s\": %0.4e. \n", key.c_str(), val);
             treeOutput->m_customVarContent.at("gsfEleFromTICL_"+key).push_back(val);
@@ -3389,11 +3419,21 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         treeOutput->phoFromTICL_n++;
         
-        treeOutput->v_phoFromTICL_superClus_E.push_back(pho.superCluster()->energy());
-        treeOutput->v_phoFromTICL_superClus_rawE.push_back(pho.superCluster()->rawEnergy());
         
+        math::XYZPoint superClus_xyz = pho.superCluster()->position();
+        
+        treeOutput->v_phoFromTICL_superClus_E.push_back(pho.superCluster()->energy());
+        treeOutput->v_phoFromTICL_superClus_ET .push_back(pho.superCluster()->energy() * std::sin(superClus_xyz.theta()));
+        treeOutput->v_phoFromTICL_superClus_rawE.push_back(pho.superCluster()->rawEnergy());
+        treeOutput->v_phoFromTICL_superClus_rawET.push_back(pho.superCluster()->rawEnergy() * std::sin(superClus_xyz.theta()));
+        
+        treeOutput->v_phoFromTICL_superClus_theta.push_back(superClus_xyz.theta());
         treeOutput->v_phoFromTICL_superClus_eta.push_back(pho.superCluster()->eta());
         treeOutput->v_phoFromTICL_superClus_phi.push_back(pho.superCluster()->phi());
+        treeOutput->v_phoFromTICL_superClus_x.push_back(superClus_xyz.x());
+        treeOutput->v_phoFromTICL_superClus_y.push_back(superClus_xyz.y());
+        treeOutput->v_phoFromTICL_superClus_z.push_back(superClus_xyz.z());
+        treeOutput->v_phoFromTICL_superClus_r.push_back(std::sqrt(superClus_xyz.mag2()));
         
         treeOutput->v_phoFromTICL_superClus_etaWidth.push_back(pho.superCluster()->etaWidth());
         treeOutput->v_phoFromTICL_superClus_phiWidth.push_back(pho.superCluster()->phiWidth());
@@ -3499,6 +3539,12 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         for(auto &key : v_phoFromTICLvar)
         {
+            if(m_phoFromTICLvarMap->find(key) == m_phoFromTICLvarMap->emptyRange())
+            {
+                printf("Error: Cannot find key \"%s\" in phoFromTICL variable map. \n", key.c_str());
+                exit(EXIT_FAILURE);
+            }
+            
             double val = m_phoFromTICLvarMap->find(key)[iPho];
             //printf("Storing \"%s\": %0.4e. \n", key.c_str(), val);
             treeOutput->m_customVarContent.at("phoFromTICL_"+key).push_back(val);

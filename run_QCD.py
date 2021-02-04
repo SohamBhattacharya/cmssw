@@ -11,7 +11,6 @@ cwd = os.getcwd()
 # Argument parser
 parser = argparse.ArgumentParser(formatter_class = argparse.RawTextHelpFormatter)
 
-# TreeMaker_SingleElectron_PT2to100_PhaseIITDRSpring19DR-PU200_106X_upgrade2023_realistic_v3-v1_GEN-SIM-DIGI-RAW
 parser.add_argument(
     "--samples",
     help = "Names of the samples",

@@ -1347,8 +1347,10 @@ namespace Common
         const reco::SuperCluster *sc
     )
     {
-        double refEta = sc->eta();
-        double refPhi = sc->phi();
+        const edm::Ptr <reco::CaloCluster> &theseed = sc->seed();
+        
+        double refEta = theseed->eta();
+        double refPhi = theseed->phi();
         
         edm::PtrVector <reco::CaloCluster> clusters = sc->clusters();
         edm::Ptr <reco::CaloCluster> maxDRclus;
@@ -1361,7 +1363,7 @@ namespace Common
             const edm::Ptr <reco::CaloCluster> &clus = *clusIter;
             
             // Skip the seed
-            if(clus == sc->seed())
+            if(clus == theseed)
             {
                 continue;
             }

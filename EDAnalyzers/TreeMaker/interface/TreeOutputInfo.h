@@ -322,9 +322,16 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_dr03TkSumPt;
         
         std::vector <double> v_gsfEleFromTICL_superClus_E;
+        std::vector <double> v_gsfEleFromTICL_superClus_ET;
         std::vector <double> v_gsfEleFromTICL_superClus_rawE;
+        std::vector <double> v_gsfEleFromTICL_superClus_rawET;
+        std::vector <double> v_gsfEleFromTICL_superClus_theta;
         std::vector <double> v_gsfEleFromTICL_superClus_eta;
         std::vector <double> v_gsfEleFromTICL_superClus_phi;
+        std::vector <double> v_gsfEleFromTICL_superClus_x;
+        std::vector <double> v_gsfEleFromTICL_superClus_y;
+        std::vector <double> v_gsfEleFromTICL_superClus_z;
+        std::vector <double> v_gsfEleFromTICL_superClus_r;
         std::vector <double> v_gsfEleFromTICL_superClus_etaWidth;
         std::vector <double> v_gsfEleFromTICL_superClus_phiWidth;
         std::vector <double> v_gsfEleFromTICL_superClus_nClus;
@@ -448,9 +455,16 @@ namespace TreeOutputInfo
         std::vector <double> v_phoFromTICL_matchedGenPh_phi;
         
         std::vector <double> v_phoFromTICL_superClus_E;
+        std::vector <double> v_phoFromTICL_superClus_ET;
         std::vector <double> v_phoFromTICL_superClus_rawE;
+        std::vector <double> v_phoFromTICL_superClus_rawET;
+        std::vector <double> v_phoFromTICL_superClus_theta;
         std::vector <double> v_phoFromTICL_superClus_eta;
         std::vector <double> v_phoFromTICL_superClus_phi;
+        std::vector <double> v_phoFromTICL_superClus_x;
+        std::vector <double> v_phoFromTICL_superClus_y;
+        std::vector <double> v_phoFromTICL_superClus_z;
+        std::vector <double> v_phoFromTICL_superClus_r;
         std::vector <double> v_phoFromTICL_superClus_etaWidth;
         std::vector <double> v_phoFromTICL_superClus_phiWidth;
         std::vector <double> v_phoFromTICL_superClus_nClus;
@@ -1259,14 +1273,35 @@ namespace TreeOutputInfo
             sprintf(name, "gsfEleFromTICL_superClus_E");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_E);
             
+            sprintf(name, "gsfEleFromTICL_superClus_ET");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_ET);
+            
             sprintf(name, "gsfEleFromTICL_superClus_rawE");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_rawE);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_rawET");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_rawET);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_theta");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_theta);
             
             sprintf(name, "gsfEleFromTICL_superClus_eta");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_eta);
             
             sprintf(name, "gsfEleFromTICL_superClus_phi");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_phi);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_x");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_x);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_y");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_y);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_z");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_z);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_r");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_r);
             
             sprintf(name, "gsfEleFromTICL_superClus_etaWidth");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_etaWidth);
@@ -1474,18 +1509,18 @@ namespace TreeOutputInfo
                 
                 
                 //
-                sprintf(name, "gsfEleFromTICL_E2p4_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_E2p4_layer.at(iLayer));
-                
-                sprintf(name, "gsfEleFromTICL_R2p4_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_R2p4_layer.at(iLayer));
-                
+                //sprintf(name, "gsfEleFromTICL_E2p4_layer%d", iLayer+1);
+                //tree->Branch(name, &vv_gsfEleFromTICL_E2p4_layer.at(iLayer));
                 //
-                sprintf(name, "gsfEleFromTICL_E2p6_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_E2p6_layer.at(iLayer));
-                
-                sprintf(name, "gsfEleFromTICL_R2p6_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_R2p6_layer.at(iLayer));
+                //sprintf(name, "gsfEleFromTICL_R2p4_layer%d", iLayer+1);
+                //tree->Branch(name, &vv_gsfEleFromTICL_R2p4_layer.at(iLayer));
+                //
+                ////
+                //sprintf(name, "gsfEleFromTICL_E2p6_layer%d", iLayer+1);
+                //tree->Branch(name, &vv_gsfEleFromTICL_E2p6_layer.at(iLayer));
+                //
+                //sprintf(name, "gsfEleFromTICL_R2p6_layer%d", iLayer+1);
+                //tree->Branch(name, &vv_gsfEleFromTICL_R2p6_layer.at(iLayer));
                 
                 //
                 sprintf(name, "gsfEleFromTICL_E2p8_layer%d", iLayer+1);
@@ -1495,18 +1530,18 @@ namespace TreeOutputInfo
                 tree->Branch(name, &vv_gsfEleFromTICL_R2p8_layer.at(iLayer));
                 
                 //
-                sprintf(name, "gsfEleFromTICL_E3p0_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_E3p0_layer.at(iLayer));
-                
-                sprintf(name, "gsfEleFromTICL_R3p0_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_R3p0_layer.at(iLayer));
-                
+                //sprintf(name, "gsfEleFromTICL_E3p0_layer%d", iLayer+1);
+                //tree->Branch(name, &vv_gsfEleFromTICL_E3p0_layer.at(iLayer));
                 //
-                sprintf(name, "gsfEleFromTICL_E3p5_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_E3p5_layer.at(iLayer));
-                
-                sprintf(name, "gsfEleFromTICL_R3p5_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_R3p5_layer.at(iLayer));
+                //sprintf(name, "gsfEleFromTICL_R3p0_layer%d", iLayer+1);
+                //tree->Branch(name, &vv_gsfEleFromTICL_R3p0_layer.at(iLayer));
+                //
+                ////
+                //sprintf(name, "gsfEleFromTICL_E3p5_layer%d", iLayer+1);
+                //tree->Branch(name, &vv_gsfEleFromTICL_E3p5_layer.at(iLayer));
+                //
+                //sprintf(name, "gsfEleFromTICL_R3p5_layer%d", iLayer+1);
+                //tree->Branch(name, &vv_gsfEleFromTICL_R3p5_layer.at(iLayer));
             }
             
             
@@ -1592,14 +1627,35 @@ namespace TreeOutputInfo
             sprintf(name, "phoFromTICL_superClus_E");
             tree->Branch(name, &v_phoFromTICL_superClus_E);
             
+            sprintf(name, "phoFromTICL_superClus_ET");
+            tree->Branch(name, &v_phoFromTICL_superClus_ET);
+            
             sprintf(name, "phoFromTICL_superClus_rawE");
             tree->Branch(name, &v_phoFromTICL_superClus_rawE);
+            
+            sprintf(name, "phoFromTICL_superClus_rawET");
+            tree->Branch(name, &v_phoFromTICL_superClus_rawET);
+            
+            sprintf(name, "phoFromTICL_superClus_theta");
+            tree->Branch(name, &v_phoFromTICL_superClus_theta);
             
             sprintf(name, "phoFromTICL_superClus_eta");
             tree->Branch(name, &v_phoFromTICL_superClus_eta);
             
             sprintf(name, "phoFromTICL_superClus_phi");
             tree->Branch(name, &v_phoFromTICL_superClus_phi);
+            
+            sprintf(name, "phoFromTICL_superClus_x");
+            tree->Branch(name, &v_phoFromTICL_superClus_x);
+            
+            sprintf(name, "phoFromTICL_superClus_y");
+            tree->Branch(name, &v_phoFromTICL_superClus_y);
+            
+            sprintf(name, "phoFromTICL_superClus_z");
+            tree->Branch(name, &v_phoFromTICL_superClus_z);
+            
+            sprintf(name, "phoFromTICL_superClus_r");
+            tree->Branch(name, &v_phoFromTICL_superClus_r);
             
             sprintf(name, "phoFromTICL_superClus_etaWidth");
             tree->Branch(name, &v_phoFromTICL_superClus_etaWidth);
@@ -2136,9 +2192,16 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_dr03TkSumPt.clear();
             
             v_gsfEleFromTICL_superClus_E.clear();
+            v_gsfEleFromTICL_superClus_ET.clear();
             v_gsfEleFromTICL_superClus_rawE.clear();
+            v_gsfEleFromTICL_superClus_rawET.clear();
+            v_gsfEleFromTICL_superClus_theta.clear();
             v_gsfEleFromTICL_superClus_eta.clear();
             v_gsfEleFromTICL_superClus_phi.clear();
+            v_gsfEleFromTICL_superClus_x.clear();
+            v_gsfEleFromTICL_superClus_y.clear();
+            v_gsfEleFromTICL_superClus_z.clear();
+            v_gsfEleFromTICL_superClus_r.clear();
             v_gsfEleFromTICL_superClus_etaWidth.clear();
             v_gsfEleFromTICL_superClus_phiWidth.clear();
             v_gsfEleFromTICL_superClus_nClus.clear();
@@ -2286,9 +2349,16 @@ namespace TreeOutputInfo
             v_phoFromTICL_matchedGenPh_phi.clear();
             
             v_phoFromTICL_superClus_E.clear();
+            v_phoFromTICL_superClus_ET.clear();
             v_phoFromTICL_superClus_rawE.clear();
+            v_phoFromTICL_superClus_rawET.clear();
+            v_phoFromTICL_superClus_theta.clear();
             v_phoFromTICL_superClus_eta.clear();
             v_phoFromTICL_superClus_phi.clear();
+            v_phoFromTICL_superClus_x.clear();
+            v_phoFromTICL_superClus_y.clear();
+            v_phoFromTICL_superClus_z.clear();
+            v_phoFromTICL_superClus_r.clear();
             v_phoFromTICL_superClus_etaWidth.clear();
             v_phoFromTICL_superClus_phiWidth.clear();
             v_phoFromTICL_superClus_nClus.clear();
