@@ -504,12 +504,17 @@ l_var_TICLpho = []
 l_mapProdVars_TICLpho = []
 TICLphoVar_task = cms.Task()
 
-l_rad = [1.8, 2.0, 2.8, 3.5]
-#l_rad = [2.8]
-l_hitEnCut = [0.0, 0.02, 0.05, 0.07, 0.1, 0.5, 1.0, 1.5, 2.0, 3.0]
+#l_rad = [1.8, 2.0, 2.8, 3.5]
+l_rad = [2.8]
 
-l_isoCone = [0.12, 0.15, 0.2, 0.25]
-l_clusEnCut = [0.0, 0.02, 0.05, 0.07, 0.1, 0.5, 1.0, 1.5, 2.0, 3.0]
+#l_hitEnCut = [0.0, 0.02, 0.05, 0.07, 0.1, 0.5, 1.0, 1.5, 2.0, 3.0]
+l_hitEnCut = [0.0]
+
+#l_isoCone = [0.12, 0.15, 0.2, 0.25]
+l_isoCone = [0.15]
+
+#l_clusEnCut = [0.0, 0.02, 0.05, 0.07, 0.1, 0.5, 1.0, 1.5, 2.0, 3.0]
+l_clusEnCut = [0.0]
 
 
 for iCone, cone in enumerate(l_isoCone) :
