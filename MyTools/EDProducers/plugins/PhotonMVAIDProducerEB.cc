@@ -263,12 +263,14 @@ void PhotonMVAIDProducerEB::produce(edm::Event& iEvent, const edm::EventSetup& i
             continue;
         }
         
+        std::vector <float> covariances = lazyToolnoZS.localCovariances(*(pho.superCluster()->seed()));                                                                                                          
+        
         inputs["scRawE"] = pho.superCluster()->rawEnergy();
-        inputs["r9"] = pho.r9();
+        inputs["r9"] = pho.full5x5_r9();
         inputs["sigmaIetaIeta"] = pho.full5x5_sigmaIetaIeta();
         inputs["etaWidth"] = pho.superCluster()->etaWidth();
         inputs["phiWidth"] = pho.superCluster()->phiWidth();
-        inputs["covIEtaIPhi"] = pho.full5x5_showerShapeVariables().sigmaIetaIphi;
+        inputs["covIEtaIPhi"] = covariances[1];
         inputs["s4"] = lazyToolnoZS.e2x2(*(pho.superCluster()->seed())) / pho.full5x5_e5x5();
         inputs["phoIso03"] = pho.photonIso();
         inputs["chgIsoWrtChosenVtx"] = pho.chargedHadronIso();
