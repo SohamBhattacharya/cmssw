@@ -1,0 +1,4 @@
+<lcgdict>
+    <class name="edm::MapOfVectors <std::string, double>"/>
+    <class name="edm::Wrapper <edm::MapOfVectors <std::string, double> >"/>
+</lcgdict>
