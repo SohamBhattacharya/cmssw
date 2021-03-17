@@ -289,3 +289,11 @@ const HGCalShowerShapeHelper::ShowerWidths HGCalShowerShapeHelper::getPCAWidths(
 
   return returnWidths;
 }
+
+
+const std::vector<double> HGCalShowerShapeHelper::getEnergyHighestHits(unsigned int nrHits,bool useFractions) {
+  std::vector<double> sortedEnergies(nrHits,0.);
+  const auto& hits = useFractions ? hitEnergiesWithFracs_ : hitEnergies_;
+  std::partial_sort_copy(hits.begin(),hits.end(),sortedEnergies.begin(),sortedEnergies.end(),std::greater<double>());
+  return sortedEnergies;
+}

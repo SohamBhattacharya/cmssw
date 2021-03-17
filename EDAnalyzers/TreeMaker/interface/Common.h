@@ -177,7 +177,8 @@ namespace Common
     // Returns the vector of pairs (energy sorted): < <idx1, energy1>, ...., <<idxN, energyN>> >
     std::vector <std::pair <int, double> > getSortedHitIndex(
         std::vector <std::pair <DetId, float> > v_HandF,
-        std::map <DetId, const HGCRecHit*> m_hit
+        std::map <DetId, const HGCRecHit*> m_hit,
+        std::vector <DetId::Detector> subDets = {DetId::HGCalEE}
     )
     {
         int nHit = v_HandF.size();
@@ -188,9 +189,16 @@ namespace Common
         {
             double energy = 0;
             
-            if(m_hit.find(v_HandF.at(iHit).first) != m_hit.end())
+            DetId hitId = v_HandF.at(iHit).first;
+            
+            if(!subDets.empty() && std::find(subDets.begin(), subDets.end(), hitId.det()) == subDets.end())
             {
-                energy = m_hit[v_HandF.at(iHit).first]->energy() * v_HandF.at(iHit).second;
+                continue;
+            }
+            
+            if(m_hit.find(hitId) != m_hit.end())
+            {
+                energy = m_hit[hitId]->energy() * v_HandF.at(iHit).second;
             }
             
             vp_index_energy.push_back(std::make_pair(iHit, energy));

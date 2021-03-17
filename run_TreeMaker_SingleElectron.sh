@@ -70,8 +70,8 @@ sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRSummer20ReRECOMiniAOD-PU200_111X
     rerunTICL=0 \
     onRaw=1 \
     debugFile=0 \
-    maxEvents=1 \
-    eventRange="1:296586-1:296586" \
+    maxEvents=20 \
+#    eventRange="1:296586-1:296586" \
 
 
 #cmsRun EDAnalyzers/TreeMaker/python/ConfFile_cfg.py \

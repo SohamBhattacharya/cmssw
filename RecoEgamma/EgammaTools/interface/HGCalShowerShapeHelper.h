@@ -124,6 +124,8 @@ public:
 
   // Compute PCA widths around the layer centroids
   const ShowerWidths getPCAWidths(double cylinderR, bool useFractions = false);
+  
+  const std::vector<double> getEnergyHighestHits(unsigned int nrHits,bool useFractions = true);
 };
 
 #endif
