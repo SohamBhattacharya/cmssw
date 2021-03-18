@@ -447,6 +447,7 @@ namespace TreeOutputInfo
         std::vector <double> v_phoFromTICL_phi;
         std::vector <double> v_phoFromTICL_ET;
         
+        std::vector <double> v_phoFromTICL_genEl_minDeltaR;
         std::vector <double> v_phoFromTICL_genPh_minDeltaR;
         std::vector <double> v_phoFromTICL_nearestGenPh_idx;
         std::vector <double> v_phoFromTICL_matchedGenPh_E;
@@ -1605,6 +1606,9 @@ namespace TreeOutputInfo
             sprintf(name, "phoFromTICL_ET");
             tree->Branch(name, &v_phoFromTICL_ET);
             
+            sprintf(name, "phoFromTICL_genEl_minDeltaR");
+            tree->Branch(name, &v_phoFromTICL_genEl_minDeltaR);
+            
             sprintf(name, "phoFromTICL_genPh_minDeltaR");
             tree->Branch(name, &v_phoFromTICL_genPh_minDeltaR);
             
@@ -2341,6 +2345,7 @@ namespace TreeOutputInfo
             v_phoFromTICL_phi.clear();
             v_phoFromTICL_ET.clear();
             
+            v_phoFromTICL_genEl_minDeltaR.clear();
             v_phoFromTICL_genPh_minDeltaR.clear();
             v_phoFromTICL_nearestGenPh_idx.clear();
             v_phoFromTICL_matchedGenPh_E.clear();

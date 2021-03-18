@@ -571,6 +571,7 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     iEvent.getByToken(tok_genParticle, v_genParticle);
     
     std::vector <CLHEP::HepLorentzVector> v_genEl_4mom;
+    std::vector <CLHEP::HepLorentzVector> v_genEl_4mom_all;
     
     std::vector <CLHEP::HepLorentzVector> v_genPh_4mom;
     
@@ -602,15 +603,17 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 part.energy(), part.pt(), part.eta(), part.pz()
             );
             
+            CLHEP::HepLorentzVector genEl_4mom;
+            
+            genEl_4mom.setT(part.energy());
+            genEl_4mom.setX(part.px());
+            genEl_4mom.setY(part.py());
+            genEl_4mom.setZ(part.pz());
+            
+            v_genEl_4mom_all.push_back(genEl_4mom);
+            
             if(fabs(part.eta()) > HGCal_minEta && fabs(part.eta()) < HGCal_maxEta && part.pt() > el_minPt && part.pt() < el_maxPt)
             {
-                CLHEP::HepLorentzVector genEl_4mom;
-                
-                genEl_4mom.setT(part.energy());
-                genEl_4mom.setX(part.px());
-                genEl_4mom.setY(part.py());
-                genEl_4mom.setZ(part.pz());
-                
                 v_genEl_4mom.push_back(genEl_4mom);
                 
                 treeOutput->v_genEl_E.push_back(genEl_4mom.e());
@@ -635,6 +638,20 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 
                 treeOutput->genEl_n++;
             }
+        }
+        
+        // Electrons from tau
+        //else if(abs(pdgId) == 11 && part.numberOfMothers() && abs(part.motherRef(0).get()->pdgId()) == 17)
+        else if(abs(pdgId) == 11 && part.pt() > 10)
+        {
+            CLHEP::HepLorentzVector genEl_4mom;
+            
+            genEl_4mom.setT(part.energy());
+            genEl_4mom.setX(part.px());
+            genEl_4mom.setY(part.py());
+            genEl_4mom.setZ(part.pz());
+            
+            v_genEl_4mom_all.push_back(genEl_4mom);
         }
         
         else if(
@@ -3350,9 +3367,8 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     
     
-    // TICL-ele gen-matching
+    // TICL-pho gen-matching
     TMatrixD mat_phoFromTICL_genPh_deltaR;
-    
     std::vector <int> v_phoFromTICL_matchedGenPh_idx;
     
     std::vector <double> v_phoFromTICL_genPh_minDeltaR = Common::getMinDeltaR(
@@ -3360,6 +3376,16 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         v_genPh_4mom,
         mat_phoFromTICL_genPh_deltaR,
         v_phoFromTICL_matchedGenPh_idx
+    );
+    
+    TMatrixD mat_phoFromTICL_genEl_deltaR;
+    std::vector <int> v_phoFromTICL_matchedGenEl_idx;
+    
+    std::vector <double> v_phoFromTICL_genEl_minDeltaR = Common::getMinDeltaR(
+        v_phoFromTICL_4mom,
+        v_genEl_4mom_all,
+        mat_phoFromTICL_genEl_deltaR,
+        v_phoFromTICL_matchedGenEl_idx
     );
     
     
@@ -3404,6 +3430,9 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->v_phoFromTICL_matchedGenPh_pT.push_back(matchedGenPh_pT);
         treeOutput->v_phoFromTICL_matchedGenPh_eta.push_back(matchedGenPh_eta);
         treeOutput->v_phoFromTICL_matchedGenPh_phi.push_back(matchedGenPh_phi);
+        
+        
+        treeOutput->v_phoFromTICL_genEl_minDeltaR.push_back(v_phoFromTICL_genEl_minDeltaR.at(iPho));
         
         
         treeOutput->v_phoFromTICL_E.push_back(pho.energy());
